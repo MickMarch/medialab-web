@@ -25,6 +25,7 @@ uv run pytest
 | `/login` | none | shared password (`WEB_PASSWORD`); signed cookie for `SESSION_MAX_AGE_SECONDS` |
 | `/` | `GET /jobs`, `GET /storage`, `GET /health` | status filter; Retry (FAILED, NEEDS_ATTENTION); Delete (plan, then confirm); Stop seeding |
 | `/jobs/{id}/plan` | `GET /jobs/{id}/deletion-plan` | the plan and the red Delete button; nothing is touched before it |
+| `/search` | `GET /search/tmdb`, `GET /search/tmdb/show/{id}`, `GET /search/torrents`, `POST /download` | title cards; season/episode scope for shows; torrent table by resolution with languages; Download per row (confirmed) |
 | `/health` | none | liveness for the doctor and compose |
 
 Every control is an HTMX request that swaps the affected row or panel. The

@@ -1,0 +1,31 @@
+<h3>Torrents for {{ title }} ({{ year }}){% if scope %} <span class="muted">{{ scope }}</span>{% endif %}</h3>
+{% if not groups %}
+<p class="muted">No torrents found for that scope. Try a different search.</p>
+{% else %}
+<table class="torrents">
+  <thead><tr><th>Res</th><th>Name</th><th>Seeders</th><th>Size</th><th>Audio</th><th></th></tr></thead>
+  <tbody>
+  {% for resolution, results in groups %}
+    {% for t in results %}
+    <tr>
+      <td><span class="badge">{{ resolution }}</span></td>
+      <td class="release"><code>{{ t.file_name }}</code></td>
+      <td>{{ t.seeders }}</td>
+      <td>{{ t.file_size | format_size }}</td>
+      <td>{% for l in t.languages %}<span class="badge">{{ l | upper }}</span> {% endfor %}{% if t.multi_audio %}<span class="badge">MULTi</span>{% endif %}</td>
+      <td>
+        <form hx-post="/downloads" hx-target="#download-notice" hx-swap="innerHTML"
+              hx-confirm="Download {{ t.file_name }}?">
+          <input type="hidden" name="source_url" value="{{ t.file_url }}">
+          <input type="hidden" name="media_type" value="{{ media_type.value }}">
+          <input type="hidden" name="tmdb_id" value="{{ tmdb_id }}">
+          <input type="hidden" name="file_name" value="{{ t.file_name }}">
+          <button class="primary">Download</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  {% endfor %}
+  </tbody>
+</table>
+{% endif %}

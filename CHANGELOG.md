@@ -6,6 +6,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Search page: TMDB title cards, season/episode scope for shows, torrent
+  table grouped by resolution with seeders, size and audio languages, and a
+  confirmed Download button per row.
+
 ## [0.1.0] - 2026-09-26
 
 ### Added
