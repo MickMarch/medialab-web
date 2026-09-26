@@ -1,9 +1,12 @@
-<form class="card scope" hx-get="/partials/search/torrents" hx-target="#torrents" hx-swap="innerHTML" hx-indicator="#busy">
-  <h3>{{ title }} <span class="muted">({{ year }})</span></h3>
+{% with step = 3 %}{% include "partials/steps.html" %}{% endwith %}
+<p class="muted">Step 3 of 4: what to download for <strong>{{ title }} ({{ year }})</strong>.
+  <a href="#" hx-get="/partials/search/tmdb" hx-vals='{"query": {{ query | tojson }}}' hx-target="#stage" hx-swap="innerHTML show:#stage:top" hx-indicator="#busy">Back to titles</a></p>
+<form class="card scope" hx-get="/partials/search/torrents" hx-target="#stage" hx-swap="innerHTML show:#stage:top" hx-indicator="#busy">
   <input type="hidden" name="tmdb_id" value="{{ tmdb_id }}">
   <input type="hidden" name="title" value="{{ title }}">
   <input type="hidden" name="year" value="{{ year }}">
   <input type="hidden" name="media_type" value="show">
+  <input type="hidden" name="query" value="{{ query }}">
   <label>Scope
     <select name="season">
       <option value="{{ whole_series }}">Whole series</option>

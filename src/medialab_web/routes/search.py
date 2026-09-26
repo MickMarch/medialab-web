@@ -66,6 +66,7 @@ async def show_scope(
     tmdb_id: int,
     title: str,
     year: str,
+    query: str = "",
     client: OrchestratorClient = _CLIENT,
 ) -> HTMLResponse:
     detail = await client.search_tmdb_show(tmdb_id)
@@ -82,7 +83,7 @@ async def show_scope(
     return render(
         request,
         "partials/scope.html",
-        {"tmdb_id": tmdb_id, "title": title, "year": year, "seasons": seasons},
+        {"tmdb_id": tmdb_id, "title": title, "year": year, "seasons": seasons, "query": query},
     )
 
 
@@ -105,14 +106,15 @@ async def torrents(
     media_type: MediaType,
     season: str | None = None,
     episode: str | None = None,
+    query: str = "",
     client: OrchestratorClient = _CLIENT,
 ) -> HTMLResponse:
     # Movie release names carry the year; show release names do not.
-    query = title if media_type is MediaType.SHOW else f"{title} {year}"
+    search_query = title if media_type is MediaType.SHOW else f"{title} {year}"
     season_number = int(season) if season and season != WHOLE_SERIES else None
     episode_number = int(episode) if episode and season_number is not None else None
     response = await client.search_torrents(
-        query, media_type, season=season_number, episode=episode_number
+        search_query, media_type, season=season_number, episode=episode_number
     )
     if response is None:
         return _error(request, "Torrent search failed at the gateway.")
@@ -128,6 +130,7 @@ async def torrents(
             "tmdb_id": tmdb_id,
             "media_type": media_type,
             "scope": _scope_label(season_number, episode_number),
+            "query": query,
         },
     )
 

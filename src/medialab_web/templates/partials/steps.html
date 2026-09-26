@@ -1,0 +1,6 @@
+<ol class="steps">
+  <li class="{{ 'done' if step > 1 else 'now' }}">Search</li>
+  <li class="{{ 'done' if step > 2 else ('now' if step == 2 else '') }}">Title</li>
+  <li class="{{ 'done' if step > 3 else ('now' if step == 3 else '') }}">Scope</li>
+  <li class="{{ 'now' if step == 4 else '' }}">Torrent</li>
+</ol>

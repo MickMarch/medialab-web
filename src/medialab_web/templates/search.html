@@ -7,13 +7,12 @@
 </nav>
 {% endblock %}
 {% block content %}
-<form class="searchbar" hx-get="/partials/search/tmdb" hx-target="#results" hx-indicator="#busy">
+<form class="searchbar" hx-get="/partials/search/tmdb" hx-target="#stage" hx-swap="innerHTML show:#stage:top" hx-indicator="#busy">
   <input type="search" name="query" placeholder="Movie or show title" value="{{ query }}" autofocus required>
   <button type="submit" class="primary">Search</button>
-  <span id="busy" class="htmx-indicator muted">Searching...</span>
+  <span id="busy" class="htmx-indicator muted">Working...</span>
 </form>
-<section id="results"{% if query %} hx-get="/partials/search/tmdb?query={{ query | urlencode }}" hx-trigger="load"{% endif %}></section>
-<section id="scope"></section>
-<section id="torrents"></section>
-<div id="download-notice" aria-live="polite"></div>
+<section id="stage"{% if query %} hx-get="/partials/search/tmdb?query={{ query | urlencode }}" hx-trigger="load" hx-swap="innerHTML"{% endif %}>
+  <p class="muted">Step 1 of 4: type a title and press Search.</p>
+</section>
 {% endblock %}
