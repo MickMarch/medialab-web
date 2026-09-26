@@ -14,8 +14,11 @@ class _TorrentsMixin(_BaseClient):
         media_type: MediaType,
         season: int | None = None,
         episode: int | None = None,
+        alt_query: str | None = None,
     ) -> TorrentSearchResponse | None:
         params: dict[str, str | int] = {"query": query, "media_type": media_type.value}
+        if alt_query:
+            params["alt_query"] = alt_query
         if season is not None:
             params["season"] = season
         if episode is not None:

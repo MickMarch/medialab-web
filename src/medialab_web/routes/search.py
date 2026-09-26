@@ -109,12 +109,19 @@ async def torrents(
     query: str = "",
     client: OrchestratorClient = _CLIENT,
 ) -> HTMLResponse:
-    # Movie release names carry the year; show release names do not.
-    search_query = title if media_type is MediaType.SHOW else f"{title} {year}"
+    # TMDB's canonical title and release names can differ ("Lee Cronin's The
+    # Mummy" vs "The Mummy 2026"); the typed query is searched as well.
+    search_query = _torrent_query(title, year, media_type)
+    typed = query.strip()
+    alt_query = _torrent_query(typed, year, media_type) if typed else None
     season_number = int(season) if season and season != WHOLE_SERIES else None
     episode_number = int(episode) if episode and season_number is not None else None
     response = await client.search_torrents(
-        search_query, media_type, season=season_number, episode=episode_number
+        search_query,
+        media_type,
+        season=season_number,
+        episode=episode_number,
+        alt_query=alt_query,
     )
     if response is None:
         return _error(request, "Torrent search failed at the gateway.")
@@ -133,6 +140,11 @@ async def torrents(
             "query": query,
         },
     )
+
+
+def _torrent_query(title: str, year: str, media_type: MediaType) -> str:
+    # Movie release names carry the year; show release names do not.
+    return title if media_type is MediaType.SHOW else f"{title} {year}"
 
 
 def _scope_label(season: int | None, episode: int | None) -> str:

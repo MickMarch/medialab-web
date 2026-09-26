@@ -6,6 +6,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- The torrent search also searches what you typed plus the picked year, for
+  titles TMDB spells differently from release names.
+
 ## [0.4.0] - 2026-09-26
 
 ### Added
