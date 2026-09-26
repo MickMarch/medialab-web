@@ -171,3 +171,15 @@ async def start_download(
     return render(
         request, "partials/download_started.html", {"job": response.job, "file_name": file_name}
     )
+
+
+@router.delete("/search/cache", response_class=HTMLResponse)
+async def clear_cache(request: Request, client: OrchestratorClient = _CLIENT) -> HTMLResponse:
+    result = await client.clear_search_cache()
+    if result is None or not result.cleared:
+        return _error(request, "Could not clear the search cache.")
+    return render(
+        request,
+        "partials/notice.html",
+        {"message": "Search cache cleared; the next search runs fresh."},
+    )
