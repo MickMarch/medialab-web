@@ -6,6 +6,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-09-26
+
 ### Changed
 
 - Search is a single stage that each step replaces, with a step indicator,
