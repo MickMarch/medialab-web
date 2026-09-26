@@ -108,7 +108,7 @@ async def test_movie_torrents_query_carries_year_and_sorts_by_seeders(logged_in,
         )
     ).text
     mock_client.search_torrents.assert_awaited_once_with(
-        "Dune 2021", MediaType.MOVIE, season=None, episode=None
+        "Dune 2021", MediaType.MOVIE, season=None, episode=None, alt_query=None
     )
     assert text.index("high") < text.index("low")
     assert "EN" in text and "MULTi" in text
@@ -133,7 +133,7 @@ async def test_show_torrents_scope_is_forwarded(logged_in, mock_client):
         )
     ).text
     mock_client.search_torrents.assert_awaited_once_with(
-        "Lost", MediaType.SHOW, season=2, episode=5
+        "Lost", MediaType.SHOW, season=2, episode=5, alt_query=None
     )
     assert "S02E05" in text
     assert "No torrents found" in text
@@ -155,7 +155,7 @@ async def test_whole_series_drops_season_and_episode(logged_in, mock_client):
         },
     )
     mock_client.search_torrents.assert_awaited_once_with(
-        "Lost", MediaType.SHOW, season=None, episode=None
+        "Lost", MediaType.SHOW, season=None, episode=None, alt_query=None
     )
 
 
@@ -255,3 +255,26 @@ async def test_clear_cache_button_and_action(logged_in, mock_client):
 async def test_clear_cache_failure(logged_in, mock_client):
     mock_client.clear_search_cache = AsyncMock(return_value=None)
     assert (await logged_in.delete("/search/cache")).status_code == 502
+
+
+async def test_typed_query_becomes_alt_query(logged_in, mock_client):
+    mock_client.search_torrents = AsyncMock(
+        return_value=TorrentSearchResponse(status="success", message="", data={})
+    )
+    await logged_in.get(
+        "/partials/search/torrents",
+        params={
+            "tmdb_id": 1,
+            "title": "Lee Cronin's The Mummy",
+            "year": "2026",
+            "media_type": "movie",
+            "query": "the mummy",
+        },
+    )
+    mock_client.search_torrents.assert_awaited_once_with(
+        "Lee Cronin's The Mummy 2026",
+        MediaType.MOVIE,
+        season=None,
+        episode=None,
+        alt_query="the mummy 2026",
+    )

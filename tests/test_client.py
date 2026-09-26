@@ -353,3 +353,13 @@ async def test_clear_search_cache_deletes_and_parses(client):
     assert mock_delete.call_args.args[0].endswith("/search/cache")
     assert isinstance(result, CacheClearResponse)
     assert result.cleared is True
+
+
+@pytest.mark.asyncio
+async def test_search_torrents_passes_alt_query(client):
+    payload = {"status": "success", "message": "", "data": {}}
+    with patch.object(
+        client._http, "get", new=AsyncMock(return_value=_mock_response(200, payload))
+    ) as mock_get:
+        await client.search_torrents("Dune 2021", MediaType.MOVIE, alt_query="dune 2021")
+    assert mock_get.call_args.kwargs["params"]["alt_query"] == "dune 2021"
