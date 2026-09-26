@@ -17,6 +17,7 @@ class AppConfig(BaseSettings):
     api_host: str = "0.0.0.0"
     api_port: int = 8080
     gateway_timeout_seconds: float = 30.0
+    torrent_results_per_resolution: int = 10
     log_level: str = "INFO"
 
 

@@ -1,0 +1,19 @@
+<form class="card scope" hx-get="/partials/search/torrents" hx-target="#torrents" hx-swap="innerHTML" hx-indicator="#busy">
+  <h3>{{ title }} <span class="muted">({{ year }})</span></h3>
+  <input type="hidden" name="tmdb_id" value="{{ tmdb_id }}">
+  <input type="hidden" name="title" value="{{ title }}">
+  <input type="hidden" name="year" value="{{ year }}">
+  <input type="hidden" name="media_type" value="show">
+  <label>Scope
+    <select name="season">
+      <option value="{{ whole_series }}">Whole series</option>
+      {% for s in seasons %}
+      <option value="{{ s.number }}">Season {{ s.number }} ({{ s.episodes }} episodes)</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Episode (optional, with a season)
+    <input type="number" name="episode" min="1" placeholder="whole season">
+  </label>
+  <button type="submit" class="primary">Find torrents</button>
+</form>

@@ -1,0 +1,22 @@
+{% if not results %}
+<p class="muted">No results for "{{ query }}".</p>
+{% else %}
+<div class="cards tmdb">
+  {% for r in results %}
+  {% set mt = media_type_of(r.media_type) %}
+  <article class="card">
+    <h3>{{ r.title }} <span class="muted">({{ r.year }})</span></h3>
+    <p class="muted"><span class="badge">{{ mt.value }}</span> rating {{ "%.1f" | format(r.vote_average) }}</p>
+    {% if r.overview %}<p class="overview">{{ r.overview }}</p>{% endif %}
+    {% if mt.value == "show" %}
+    <button hx-get="/partials/search/scope" hx-vals='{"tmdb_id": {{ r.tmdb_id }}, "title": {{ r.title | tojson }}, "year": {{ r.year | tojson }}}'
+            hx-target="#scope" hx-swap="innerHTML" hx-indicator="#busy">Choose season</button>
+    {% else %}
+    <button class="primary" hx-get="/partials/search/torrents"
+            hx-vals='{"tmdb_id": {{ r.tmdb_id }}, "title": {{ r.title | tojson }}, "year": {{ r.year | tojson }}, "media_type": "movie"}'
+            hx-target="#torrents" hx-swap="innerHTML" hx-indicator="#busy">Find torrents</button>
+    {% endif %}
+  </article>
+  {% endfor %}
+</div>
+{% endif %}

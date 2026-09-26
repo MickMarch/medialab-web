@@ -40,6 +40,18 @@ tr.status-deleted { opacity: .55; }
 form.login { max-width: 360px; margin: 3rem auto; display: flex; flex-direction: column; gap: 1rem; }
 form.login h1 { margin: 0; font-size: 1.3rem; }
 ul.plain { list-style: none; padding: 0; margin: 0; }
+nav { display: flex; gap: 1rem; align-items: center; }
+nav a { color: var(--fg); }
+.searchbar { display: flex; gap: .5rem; align-items: center; margin-bottom: 1rem; }
+.searchbar input { flex: 1; }
+.htmx-indicator { display: none; }
+.htmx-request .htmx-indicator, .htmx-request.htmx-indicator { display: inline; }
+.tmdb .card h3 { margin: 0 0 .25rem; font-size: 1.05rem; }
+.overview { font-size: .85rem; color: var(--muted); max-height: 4.5em; overflow: hidden; }
+.scope { max-width: 520px; margin-bottom: 1rem; display: flex; flex-direction: column; gap: .75rem; }
+table.torrents { width: 100%; border-collapse: collapse; }
+table.torrents th, table.torrents td { text-align: left; padding: .5rem .4rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.torrents th { color: var(--muted); font-size: .8rem; text-transform: uppercase; }
 @media (max-width: 700px) {
   table.jobs thead { display: none; }
   table.jobs tr { display: block; padding: .5rem 0; }

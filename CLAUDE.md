@@ -34,7 +34,9 @@ src/medialab_web/
 ├── format.py       presentation helpers
 ├── client/         OrchestratorClient mixins (copied from medialab-bot)
 ├── schemas/        gateway response models
-├── routes/         pages (/, /login, /logout), jobs (partials + actions), system (/health)
+├── routes/         pages (/, /login, /logout), jobs (partials + actions),
+│                   search (/search, tmdb/scope/torrents partials, /downloads), system (/health)
+├── media.py        TMDB media type -> contracts MediaType
 ├── templates/      base, login, index, partials/
 └── static/         stylesheet
 ```
