@@ -1,6 +1,14 @@
-<h3>Torrents for {{ title }} ({{ year }}){% if scope %} <span class="muted">{{ scope }}</span>{% endif %}</h3>
+{% with step = 4 %}{% include "partials/steps.html" %}{% endwith %}
+<div id="download-notice" aria-live="polite"></div>
+<p class="muted">Step 4 of 4: torrents for <strong>{{ title }} ({{ year }})</strong>{% if scope %} {{ scope }}{% endif %}.
+  {% if media_type.value == "show" %}
+  <a href="#" hx-get="/partials/search/scope" hx-vals='{"tmdb_id": {{ tmdb_id }}, "title": {{ title | tojson }}, "year": {{ year | tojson }}, "query": {{ query | tojson }}}' hx-target="#stage" hx-swap="innerHTML show:#stage:top" hx-indicator="#busy">Change scope</a>
+  {% else %}
+  <a href="#" hx-get="/partials/search/tmdb" hx-vals='{"query": {{ query | tojson }}}' hx-target="#stage" hx-swap="innerHTML show:#stage:top" hx-indicator="#busy">Back to titles</a>
+  {% endif %}
+</p>
 {% if not groups %}
-<p class="muted">No torrents found for that scope. Try a different search.</p>
+<p class="muted">No torrents found for that scope. Try a wider scope or another title.</p>
 {% else %}
 <table class="torrents">
   <thead><tr><th>Res</th><th>Name</th><th>Seeders</th><th>Size</th><th>Audio</th><th></th></tr></thead>
@@ -14,7 +22,7 @@
       <td>{{ t.file_size | format_size }}</td>
       <td>{% for l in t.languages %}<span class="badge">{{ l | upper }}</span> {% endfor %}{% if t.multi_audio %}<span class="badge">MULTi</span>{% endif %}</td>
       <td>
-        <form hx-post="/downloads" hx-target="#download-notice" hx-swap="innerHTML"
+        <form hx-post="/downloads" hx-target="#download-notice" hx-swap="innerHTML show:#stage:top"
               hx-confirm="Download {{ t.file_name }}?">
           <input type="hidden" name="source_url" value="{{ t.file_url }}">
           <input type="hidden" name="media_type" value="{{ media_type.value }}">

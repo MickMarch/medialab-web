@@ -210,3 +210,29 @@ async def test_download_failure_is_reported(logged_in, mock_client):
 async def test_search_requires_login(client):
     assert (await client.get("/search")).status_code == 303
     assert (await client.post("/downloads", data={})).status_code == 303
+
+
+async def test_every_step_targets_the_single_stage(logged_in, mock_client):
+    mock_client.search_tmdb = AsyncMock(return_value=_tmdb(_result()))
+    mock_client.search_torrents = AsyncMock(
+        return_value=TorrentSearchResponse(status="success", message="", data={})
+    )
+    page = (await logged_in.get("/search")).text
+    assert 'id="stage"' in page and page.count('hx-target="#stage"') == 1
+    cards = (await logged_in.get("/partials/search/tmdb", params={"query": "dune"})).text
+    assert 'hx-target="#stage"' in cards and "show:#stage:top" in cards
+    assert '<li class="now">Title</li>' in cards
+    torrents = (
+        await logged_in.get(
+            "/partials/search/torrents",
+            params={
+                "tmdb_id": 1,
+                "title": "Dune",
+                "year": "2021",
+                "media_type": "movie",
+                "query": "dune",
+            },
+        )
+    ).text
+    assert '<li class="now">Torrent</li>' in torrents
+    assert "Back to titles" in torrents and '"query": "dune"' in torrents

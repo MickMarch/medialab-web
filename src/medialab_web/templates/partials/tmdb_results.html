@@ -1,6 +1,8 @@
+{% with step = 2 %}{% include "partials/steps.html" %}{% endwith %}
 {% if not results %}
-<p class="muted">No results for "{{ query }}".</p>
+<p class="muted">No results for "{{ query }}". Try another spelling.</p>
 {% else %}
+<p class="muted">Step 2 of 4: pick the title.</p>
 <div class="cards tmdb">
   {% for r in results %}
   {% set mt = media_type_of(r.media_type) %}
@@ -9,12 +11,12 @@
     <p class="muted"><span class="badge">{{ mt.value }}</span> rating {{ "%.1f" | format(r.vote_average) }}</p>
     {% if r.overview %}<p class="overview">{{ r.overview }}</p>{% endif %}
     {% if mt.value == "show" %}
-    <button hx-get="/partials/search/scope" hx-vals='{"tmdb_id": {{ r.tmdb_id }}, "title": {{ r.title | tojson }}, "year": {{ r.year | tojson }}}'
-            hx-target="#scope" hx-swap="innerHTML" hx-indicator="#busy">Choose season</button>
+    <button class="primary" hx-get="/partials/search/scope" hx-vals='{"tmdb_id": {{ r.tmdb_id }}, "title": {{ r.title | tojson }}, "year": {{ r.year | tojson }}, "query": {{ query | tojson }}}'
+            hx-target="#stage" hx-swap="innerHTML show:#stage:top" hx-indicator="#busy">Choose season</button>
     {% else %}
     <button class="primary" hx-get="/partials/search/torrents"
-            hx-vals='{"tmdb_id": {{ r.tmdb_id }}, "title": {{ r.title | tojson }}, "year": {{ r.year | tojson }}, "media_type": "movie"}'
-            hx-target="#torrents" hx-swap="innerHTML" hx-indicator="#busy">Find torrents</button>
+            hx-vals='{"tmdb_id": {{ r.tmdb_id }}, "title": {{ r.title | tojson }}, "year": {{ r.year | tojson }}, "media_type": "movie", "query": {{ query | tojson }}}'
+            hx-target="#stage" hx-swap="innerHTML show:#stage:top" hx-indicator="#busy">Find torrents</button>
     {% endif %}
   </article>
   {% endfor %}

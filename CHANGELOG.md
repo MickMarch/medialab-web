@@ -6,6 +6,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- Search is a single stage that each step replaces, with a step indicator,
+  back links, and a scroll to the top on every swap, so a phone always shows
+  the current step.
+
 ## [0.2.0] - 2026-09-26
 
 ### Added
