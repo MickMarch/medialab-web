@@ -7,3 +7,8 @@ class ActionResponse(BaseModel):
 
     status: str
     message: str
+
+
+class CacheClearResponse(BaseModel):
+    status: str
+    cleared: bool

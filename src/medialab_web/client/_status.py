@@ -1,7 +1,7 @@
 from medialab_contracts import API_PREFIX
 
 from medialab_web.client._base import _BaseClient
-from medialab_web.schemas.actions import ActionResponse
+from medialab_web.schemas.actions import ActionResponse, CacheClearResponse
 from medialab_web.schemas.system import DiskUsageResponse, HealthResponse
 from medialab_web.schemas.transfers import MergedTransfersResponse
 
@@ -27,3 +27,7 @@ class _StatusMixin(_BaseClient):
         # download. The gateway answers 202 with the downloader's envelope.
         data = await self._post(f"{API_PREFIX}/transfers/stop-seeding", expected_status=_ACCEPTED)
         return self._parse(ActionResponse, data)
+
+    async def clear_search_cache(self) -> CacheClearResponse | None:
+        data = await self._delete(f"{API_PREFIX}/search/cache")
+        return self._parse(CacheClearResponse, data)

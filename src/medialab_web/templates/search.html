@@ -12,6 +12,9 @@
   <button type="submit" class="primary">Search</button>
   <span id="busy" class="htmx-indicator muted">Working...</span>
 </form>
+<p class="tools"><button class="link" hx-delete="/search/cache" hx-target="#cache-notice" hx-swap="innerHTML"
+   title="Results are cached for a while; clear them to search fresh">Clear search cache</button>
+   <span id="cache-notice" aria-live="polite"></span></p>
 <section id="stage"{% if query %} hx-get="/partials/search/tmdb?query={{ query | urlencode }}" hx-trigger="load" hx-swap="innerHTML"{% endif %}>
   <p class="muted">Step 1 of 4: type a title and press Search.</p>
 </section>

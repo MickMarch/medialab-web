@@ -339,3 +339,17 @@ async def test_delete_job_deletes_and_parses(client):
 async def test_delete_job_returns_none_on_409(client):
     with patch.object(client._http, "delete", new=AsyncMock(return_value=_mock_response(409))):
         assert await client.delete_job("job-abc") is None
+
+
+@pytest.mark.asyncio
+async def test_clear_search_cache_deletes_and_parses(client):
+    from medialab_web.schemas.actions import CacheClearResponse
+
+    payload = {"status": "success", "cleared": True}
+    with patch.object(
+        client._http, "delete", new=AsyncMock(return_value=_mock_response(200, payload))
+    ) as mock_delete:
+        result = await client.clear_search_cache()
+    assert mock_delete.call_args.args[0].endswith("/search/cache")
+    assert isinstance(result, CacheClearResponse)
+    assert result.cleared is True

@@ -236,3 +236,22 @@ async def test_every_step_targets_the_single_stage(logged_in, mock_client):
     ).text
     assert '<li class="now">Torrent</li>' in torrents
     assert "Back to titles" in torrents and '"query": "dune"' in torrents
+
+
+async def test_clear_cache_button_and_action(logged_in, mock_client):
+    from medialab_web.schemas.actions import CacheClearResponse
+
+    page = (await logged_in.get("/search")).text
+    assert 'hx-delete="/search/cache"' in page
+    mock_client.clear_search_cache = AsyncMock(
+        return_value=CacheClearResponse(status="success", cleared=True)
+    )
+    response = await logged_in.delete("/search/cache")
+    assert response.status_code == 200
+    assert "cleared" in response.text
+    mock_client.clear_search_cache.assert_awaited_once()
+
+
+async def test_clear_cache_failure(logged_in, mock_client):
+    mock_client.clear_search_cache = AsyncMock(return_value=None)
+    assert (await logged_in.delete("/search/cache")).status_code == 502

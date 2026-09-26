@@ -46,6 +46,7 @@ nav { display: flex; gap: 1rem; align-items: center; }
 .steps li.done { background: var(--ok); color: #062; }
 .steps li.now { background: var(--accent); color: #fff; }
 .notice.card { margin-bottom: .75rem; }
+.tools { margin: -.5rem 0 1rem; font-size: .85rem; }
 p.muted a { color: var(--accent); margin-left: .5rem; }
 nav a { color: var(--fg); }
 .searchbar { display: flex; gap: .5rem; align-items: center; margin-bottom: 1rem; }
