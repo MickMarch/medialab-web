@@ -1,0 +1,14 @@
+{% if not jobs %}
+<p class="muted">No jobs{% if status_filter %} with status {{ status_filter }}{% endif %}.</p>
+{% else %}
+<table class="jobs">
+  <thead>
+    <tr><th>Title</th><th>Release</th><th>Status</th><th>Updated</th><th>Actions</th></tr>
+  </thead>
+  <tbody>
+    {% for job in jobs %}
+    {% include "partials/job_row.html" %}
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}

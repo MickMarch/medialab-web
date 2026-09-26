@@ -1,0 +1,17 @@
+<tr id="job-{{ job.id }}" class="status-{{ job.status | lower }}">
+  <td class="title">{{ job | job_title }}</td>
+  <td class="release"><code>{{ job.release_name }}</code></td>
+  <td><span class="badge">{{ job.status }}</span>
+      {% if job.last_error %}<span class="muted error-text" title="{{ job.last_error }}">!</span>{% endif %}
+      {% if notice %}<span class="notice">{{ notice }}</span>{% endif %}</td>
+  <td>{{ job.updated_at | short_date }}</td>
+  <td class="actions">
+    {% if job.status in ["FAILED", "NEEDS_ATTENTION"] %}
+    <button hx-post="/jobs/{{ job.id }}/retry" hx-target="#job-{{ job.id }}" hx-swap="outerHTML">Retry</button>
+    {% endif %}
+    {% if job.status != "DELETED" %}
+    <button class="danger-outline" hx-get="/jobs/{{ job.id }}/plan" hx-target="#plan-{{ job.id }}" hx-swap="innerHTML">Delete...</button>
+    {% endif %}
+    <div id="plan-{{ job.id }}" class="plan-slot"></div>
+  </td>
+</tr>

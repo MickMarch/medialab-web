@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block nav %}
+<nav>
+  <form method="post" action="/logout"><button class="link">Sign out</button></form>
+</nav>
+{% endblock %}
+{% block content %}
+<section id="storage" hx-get="/partials/storage" hx-trigger="load, every {{ jobs_refresh_seconds }}s" hx-swap="innerHTML">
+  <p class="muted">Loading storage...</p>
+</section>
+
+<section class="toolbar">
+  <form hx-get="/partials/jobs" hx-target="#jobs" hx-trigger="change">
+    <label>Status
+      <select name="status_filter">
+        <option value="" {% if not status_filter %}selected{% endif %}>All active</option>
+        {% for s in ["DOWNLOAD_SUBMITTED", "DOWNLOADING", "STOP_SEEDING", "RESOLVE_META", "RENAME", "SCAN", "DONE", "FAILED", "NEEDS_ATTENTION", "DELETED"] %}
+        <option value="{{ s }}" {% if status_filter == s %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </label>
+  </form>
+  <button hx-post="/transfers/stop-seeding" hx-target="#notice" hx-swap="innerHTML"
+          hx-confirm="Pause every completed (seeding) torrent? Downloads are untouched.">
+    Stop seeding
+  </button>
+  <div id="notice" aria-live="polite"></div>
+</section>
+
+<section id="jobs" hx-get="/partials/jobs{% if status_filter %}?status_filter={{ status_filter }}{% endif %}"
+         hx-trigger="load, every {{ jobs_refresh_seconds }}s" hx-swap="innerHTML">
+  <p class="muted">Loading jobs...</p>
+</section>
+{% endblock %}

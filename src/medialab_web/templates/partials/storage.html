@@ -1,0 +1,25 @@
+<div class="cards">
+  <div class="card">
+    <h2>Storage</h2>
+    {% if usage %}
+    <p class="big">{{ "%.0f" | format(usage.free_gb) }} GB free</p>
+    <p class="muted">{{ "%.0f" | format(usage.used_gb) }} of {{ "%.0f" | format(usage.total_gb) }} GB used ({{ "%.0f" | format(usage.used_percent) }}%) on <code>{{ usage.path }}</code></p>
+    <progress max="100" value="{{ usage.used_percent }}"></progress>
+    {% else %}
+    <p class="error">Storage unavailable.</p>
+    {% endif %}
+  </div>
+  <div class="card">
+    <h2>Services</h2>
+    {% if health %}
+    <ul class="plain">
+      <li>gateway: <span class="badge ok">online</span></li>
+      <li>torrent-downloader: <span class="badge {{ 'ok' if health.downstream.torrent_downloader else 'bad' }}">{{ 'up' if health.downstream.torrent_downloader else 'down' }}</span></li>
+      <li>medialab-jellyfin: <span class="badge {{ 'ok' if health.downstream.medialab_jellyfin else 'bad' }}">{{ 'up' if health.downstream.medialab_jellyfin else 'down' }}</span></li>
+      {% if health.needs_attention %}<li class="error">{{ health.needs_attention }} job(s) need attention</li>{% endif %}
+    </ul>
+    {% else %}
+    <p class="error">Gateway unreachable.</p>
+    {% endif %}
+  </div>
+</div>
