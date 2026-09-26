@@ -6,6 +6,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-09-26
+
 ### Changed
 
 - The torrent search also searches what you typed plus the picked year, for
