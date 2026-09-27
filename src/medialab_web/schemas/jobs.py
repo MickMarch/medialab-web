@@ -12,6 +12,8 @@ class JobView(BaseModel):
     release_name: str
     media_type: MediaType
     tmdb_id: int
+    season: int | None = None
+    episode: int | None = None
     resolved_title: str | None = None
     resolved_year: int | None = None
     source_path: str | None = None

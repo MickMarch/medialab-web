@@ -3,7 +3,7 @@
 <p class="notice-muted grid-wide">TMDB is not reachable right now, so there is nothing to discover. Try again in a minute.</p>
 {% else %}
 {% for item in discover.items %}
-{{ poster_card(item, open_vals=item | card_vals) }}
+{{ poster_card(item, open_vals=item | card_vals, browse_href=item | browse_url) }}
 {% endfor %}
 {% if not discover.items %}<p class="muted grid-wide">Nothing here for that genre.</p>{% endif %}
 {% if discover.page < discover.total_pages %}

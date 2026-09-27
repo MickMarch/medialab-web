@@ -2,7 +2,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
 import pytest
-from medialab_contracts import MediaType
+from medialab_contracts import MediaType, ShowBrowseResponse
 
 from medialab_web.client import OrchestratorClient
 from medialab_web.schemas.actions import ActionResponse
@@ -374,6 +374,46 @@ async def test_download_sends_release_name(client):
     ) as mock_post:
         await client.download("magnet:?xt=urn:btih:abc", MediaType.MOVIE, 1, "Dune.2021-GRP")
     assert mock_post.call_args.kwargs["json"]["release_name"] == "Dune.2021-GRP"
+
+
+@pytest.mark.asyncio
+async def test_download_sends_season_and_episode_only_when_given(client):
+    payload = {"status": "success", "job": _JOB}
+    mock_post = AsyncMock(return_value=_mock_response(202, payload))
+    with patch.object(client._http, "post", new=mock_post):
+        await client.download("magnet:?xt=urn:btih:abc", MediaType.SHOW, 1396, season=2, episode=5)
+    body = mock_post.call_args.kwargs["json"]
+    assert body["season"] == 2 and body["episode"] == 5
+    with patch.object(client._http, "post", new=mock_post):
+        await client.download("magnet:?xt=urn:btih:abc", MediaType.SHOW, 1396, season=2)
+    body = mock_post.call_args.kwargs["json"]
+    assert body["season"] == 2 and "episode" not in body
+
+
+# --- browse show ---
+
+
+@pytest.mark.asyncio
+async def test_browse_show_parses_response(client):
+    payload = {
+        "tmdb_id": 1396,
+        "title": "Breaking Bad",
+        "year": "2008",
+        "seasons": [{"season": 1, "name": "Season 1", "episode_count": 1}],
+        "episodes": [{"season": 1, "episode": 1, "title": "Pilot", "aired": True}],
+    }
+    mock_get = AsyncMock(return_value=_mock_response(200, payload))
+    with patch.object(client._http, "get", new=mock_get):
+        result = await client.browse_show(1396)
+    assert isinstance(result, ShowBrowseResponse)
+    assert result.episodes[0].title == "Pilot"
+    assert mock_get.call_args.args[0].endswith("/shows/1396")
+
+
+@pytest.mark.asyncio
+async def test_browse_show_returns_none_on_failure(client):
+    with patch.object(client._http, "get", new=AsyncMock(return_value=_mock_response(503))):
+        assert await client.browse_show(1396) is None
 
 
 @pytest.mark.asyncio

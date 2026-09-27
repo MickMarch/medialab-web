@@ -6,6 +6,27 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Show page (`/shows/{tmdb_id}`): poster, title, year, status, overview and
+  badges, then every season as a collapsible row with its episodes (still,
+  `S02E05 Title`, air date, clamped overview, and "In Jellyfin", "Queued"
+  linking to the job, or "Unaired"). The latest season opens on load. Find
+  torrents at the series, season and episode level enters the existing
+  torrent step with that scope preset. A gateway failure renders a friendly
+  message with a link back to Discover (MickMarch/medialab#91).
+- Show poster cards in Discover, title search results and the wishlist carry
+  a Browse link to the show page; a show's title in the jobs table links
+  there too (MickMarch/medialab#91).
+- Download forwards the searched season and episode to the gateway so the
+  job records its scope; a whole-series download sends neither
+  (MickMarch/medialab#91).
+
+### Changed
+
+- medialab-contracts pin bumped to v0.11.0 for `ShowBrowseResponse` and
+  `still_url`.
+
 ## [0.10.0] - 2026-09-27
 
 ### Added
