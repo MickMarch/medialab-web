@@ -14,7 +14,7 @@ from medialab_web.client import OrchestratorClient
 from medialab_web.config import AppConfig, config
 from medialab_web.limiter import limiter
 from medialab_web.rendering import STATIC_DIR, render
-from medialab_web.routes import jobs, pages, search, system
+from medialab_web.routes import jobs, pages, search, settings, system
 
 logger = logging.getLogger(__name__)
 
@@ -56,6 +56,7 @@ def create_app(cfg: AppConfig | None = None) -> FastAPI:
     app.include_router(pages.router)
     app.include_router(jobs.router)
     app.include_router(search.router)
+    app.include_router(settings.router)
     return app
 
 

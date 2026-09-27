@@ -374,3 +374,40 @@ async def test_download_sends_release_name(client):
     ) as mock_post:
         await client.download("magnet:?xt=urn:btih:abc", MediaType.MOVIE, 1, "Dune.2021-GRP")
     assert mock_post.call_args.kwargs["json"]["release_name"] == "Dune.2021-GRP"
+
+
+@pytest.mark.asyncio
+async def test_settings_client_round_trip(client):
+    from medialab_contracts import SettingView, SuiteSettingsResponse
+
+    view = {
+        "key": "minimum_seeders",
+        "value": 3,
+        "default": 10,
+        "source": "override",
+        "type": "int",
+        "description": "d",
+        "applies": "next search",
+        "min": 0,
+        "max": 1000,
+    }
+    with patch.object(
+        client._http,
+        "get",
+        new=AsyncMock(
+            return_value=_mock_response(
+                200, {"status": "success", "services": {"torrent-downloader": [view]}}
+            )
+        ),
+    ):
+        suite = await client.get_settings()
+    assert isinstance(suite, SuiteSettingsResponse)
+    with patch.object(
+        client._http, "put", new=AsyncMock(return_value=_mock_response(200, view))
+    ) as mock_put:
+        result = await client.set_setting("torrent-downloader", "minimum_seeders", "3")
+    assert isinstance(result, SettingView)
+    assert mock_put.call_args.args[0].endswith("/settings/torrent-downloader/minimum_seeders")
+    assert mock_put.call_args.kwargs["json"] == {"value": "3"}
+    with patch.object(client._http, "put", new=AsyncMock(return_value=_mock_response(422))):
+        assert await client.set_setting("torrent-downloader", "minimum_seeders", "x") is None

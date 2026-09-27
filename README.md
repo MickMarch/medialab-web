@@ -27,6 +27,7 @@ uv run pytest
 | `/jobs/{id}/plan` | `GET /jobs/{id}/deletion-plan` | the plan and the red Delete button; nothing is touched before it |
 | `/search` | `GET /search/tmdb`, `GET /search/tmdb/show/{id}`, `GET /search/torrents`, `POST /download` | title cards; season/episode scope for shows; torrent table by resolution with languages; Download per row (confirmed) |
 | `/search/cache` (button on `/search`) | `DELETE /search/cache` | drops the downloader's cached search result sets so the next search runs fresh |
+| `/settings` | `GET /settings`, `PUT` and `DELETE /settings/{service}/{key}` | one row per runtime setting per service: value, source, when it applies; Save and Reset per row |
 | `/health` | none | liveness for the doctor and compose |
 
 Every control is an HTMX request that swaps the affected row or panel. The

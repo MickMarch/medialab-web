@@ -1,0 +1,25 @@
+<tr id="setting-{{ service }}-{{ s.key }}">
+  <td class="setting-name">
+    <strong>{{ s.key }}</strong>
+    <span class="badge {{ 'ok' if s.source == 'override' else '' }}">{{ s.source }}</span>
+    <p class="muted">{{ s.description }} Applies: {{ s.applies }}. Default {{ s.default }}.</p>
+  </td>
+  <td class="setting-control">
+    <form hx-put="/settings/{{ service }}/{{ s.key }}" hx-target="#setting-{{ service }}-{{ s.key }}" hx-swap="outerHTML">
+      {% if s.type == "choice" %}
+      <select name="value">
+        {% for c in s.choices %}<option value="{{ c }}" {% if c == s.value %}selected{% endif %}>{{ c }}</option>{% endfor %}
+      </select>
+      {% elif s.type == "int" %}
+      <input type="number" name="value" value="{{ s.value }}"{% if s.min is not none %} min="{{ s.min }}"{% endif %}{% if s.max is not none %} max="{{ s.max }}"{% endif %} required>
+      {% else %}
+      <input type="text" name="value" value="{{ s.value }}" required>
+      {% endif %}
+      <button class="primary">Save</button>
+      {% if s.source == "override" %}
+      <button type="button" class="link" hx-delete="/settings/{{ service }}/{{ s.key }}" hx-target="#setting-{{ service }}-{{ s.key }}" hx-swap="outerHTML">Reset</button>
+      {% endif %}
+      {% if notice %}<span class="notice">{{ notice }}</span>{% endif %}
+    </form>
+  </td>
+</tr>

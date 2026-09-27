@@ -65,6 +65,23 @@ class _BaseClient:
             logger.error("POST %s returned non-JSON response", path)
             return None
 
+    async def _put(self, path: str, json: dict | None = None) -> dict | None:
+        try:
+            response = await self._http.put(path, json=json or {})
+            if response.status_code != httpx.codes.OK:
+                logger.warning("PUT %s returned %d", path, response.status_code)
+                return None
+            return response.json()
+        except httpx.TimeoutException:
+            logger.warning("PUT %s timed out", path)
+            return None
+        except (httpx.ConnectError, httpx.HTTPError):
+            logger.warning("PUT %s failed with network error", path)
+            return None
+        except ValueError:
+            logger.error("PUT %s returned non-JSON response", path)
+            return None
+
     async def _delete(self, path: str, timeout: float | None = None) -> dict | None:
         try:
             response = await self._http.delete(path, timeout=timeout)

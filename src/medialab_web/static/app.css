@@ -47,6 +47,16 @@ nav { display: flex; gap: 1rem; align-items: center; }
 .steps li.now { background: var(--accent); color: #fff; }
 .notice.card { margin-bottom: .75rem; }
 .tools { margin: -.5rem 0 1rem; font-size: .85rem; }
+section.settings { margin-bottom: 1rem; }
+table.settings { width: 100%; border-collapse: collapse; }
+table.settings td { padding: .6rem .4rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+.setting-name p { margin: .25rem 0 0; font-size: .85rem; }
+.setting-control form { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; }
+.setting-control input, .setting-control select { width: 9rem; }
+@media (max-width: 700px) {
+  table.settings tr { display: block; padding: .5rem 0; }
+  table.settings td { display: block; border: none; padding: .15rem .25rem; }
+}
 p.muted a { color: var(--accent); margin-left: .5rem; }
 nav a { color: var(--fg); }
 .searchbar { display: flex; gap: .5rem; align-items: center; margin-bottom: 1rem; }

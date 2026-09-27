@@ -6,6 +6,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Settings page: every service's runtime settings with save and reset per
+  row and when each change applies.
+
 ## [0.6.0] - 2026-09-26
 
 ### Changed
