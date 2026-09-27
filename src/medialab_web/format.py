@@ -1,6 +1,7 @@
 """Presentation helpers used by the templates."""
 
 from markupsafe import Markup, escape
+from medialab_contracts import DiscoverItem, PosterSize, poster_url
 
 from medialab_web.constants import DATE_LENGTH, RELEASE_NAME_SEPARATORS
 from medialab_web.schemas.jobs import JobView
@@ -36,3 +37,13 @@ def breakable(name: str) -> Markup:
         escape(char) + Markup("<wbr>") if char in RELEASE_NAME_SEPARATORS else escape(char)
         for char in name
     )
+
+
+def poster_src(poster_path: str | None, size: PosterSize = PosterSize.GRID) -> str | None:
+    return poster_url(poster_path, size)
+
+
+def card_vals(item: DiscoverItem) -> dict[str, object]:
+    """``item`` as hx-vals: a missing value is sent as an empty string, since
+    htmx would otherwise send the literal text ``null``."""
+    return {k: "" if v is None else v for k, v in item.model_dump(mode="json").items()}

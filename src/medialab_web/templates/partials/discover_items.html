@@ -1,0 +1,14 @@
+{% from "partials/poster_card.html" import poster_card %}
+{% if discover is none %}
+<p class="notice-muted grid-wide">TMDB is not reachable right now, so there is nothing to discover. Try again in a minute.</p>
+{% else %}
+{% for item in discover.items %}
+{{ poster_card(item, open_vals=item | card_vals) }}
+{% endfor %}
+{% if not discover.items %}<p class="muted grid-wide">Nothing here for that genre.</p>{% endif %}
+{% if discover.page < discover.total_pages %}
+{%- set next_page = {"media_type": media_type.value, "genre": "" if genre is none else genre, "page": discover.page + 1} -%}
+<button class="more grid-wide" hx-get="/partials/discover" hx-vals='{{ next_page | tojson }}'
+        hx-swap="outerHTML" hx-indicator="#busy">More</button>
+{% endif %}
+{% endif %}

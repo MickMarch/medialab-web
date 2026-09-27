@@ -1,0 +1,11 @@
+<article class="card detail">
+  <button class="link close" type="button" onclick="this.closest('#detail').replaceChildren()" aria-label="Close">Close</button>
+  <h3>{{ item.title }}{% if item.year %} <span class="muted">({{ item.year }})</span>{% endif %}</h3>
+  <p class="muted"><span class="badge">{{ item.media_type.value }}</span> rating {{ "%.1f" | format(item.vote_average) }}
+    {% if item.in_library %}<span class="badge ok">In Jellyfin</span>{% endif %}</p>
+  {% if item.overview %}<p class="overview full">{{ item.overview }}</p>{% endif %}
+  <div class="detail-actions">
+    {% include "partials/download_button.html" %}
+    {% include "partials/wishlist_button.html" %}
+  </div>
+</article>

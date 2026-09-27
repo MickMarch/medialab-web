@@ -33,12 +33,14 @@ src/medialab_web/
 ├── deps.py         request-scoped gateway client
 ├── format.py       presentation helpers
 ├── client/         OrchestratorClient mixins (copied from medialab-bot)
-├── schemas/        gateway response models
+├── schemas/        gateway response models; CardItem (a poster card's hx-vals)
 ├── routes/         pages (/, /login, /logout), jobs (partials + actions),
 │                   search (/search, tmdb/scope/torrents partials, /downloads),
-│                   settings (/settings page, save and reset rows), system (/health)
+│                   settings (/settings page, save and reset rows), system (/health),
+│                   discover (/discover, /wishlist, detail and wishlist toggle partials)
 ├── media.py        TMDB media type -> contracts MediaType
-├── templates/      base, login, index, partials/
+├── templates/      base, login, index, search, discover, wishlist, settings, partials/
+│                   (poster_card macro shared by discover, wishlist and search results)
 └── static/         stylesheet
 ```
 

@@ -41,7 +41,7 @@ def _error(request: Request, message: str) -> HTMLResponse:
     )
 
 
-async def _search_timeout_seconds(client: OrchestratorClient) -> int:
+async def search_timeout_seconds(client: OrchestratorClient) -> int:
     """The downloader's configured search timeout, so the searching bar runs
     for the real ceiling; the default when the gateway is unreachable."""
     suite = await client.get_settings()
@@ -60,7 +60,7 @@ async def search_page(
     return render(
         request,
         "search.html",
-        {"query": query or "", "search_timeout": await _search_timeout_seconds(client)},
+        {"query": query or "", "search_timeout": await search_timeout_seconds(client)},
     )
 
 

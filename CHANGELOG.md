@@ -6,6 +6,24 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Discover page: trending movies or shows as a poster grid, narrowed by
+  genre, with More for the next page. A poster opens a detail card with
+  Download (into the existing torrent or season step) and Add to / Remove
+  from wishlist. Titles already in Jellyfin carry an "In Jellyfin" badge.
+  The page carries the TMDB attribution notice (MickMarch/medialab#81).
+- Wishlist page: the shared wishlist as a poster grid with Download and
+  Remove per title (MickMarch/medialab#81).
+- Discover and Wishlist links in the navigation of every page.
+- Title search results show each title's poster, with a text card when
+  there is none or it fails to load (MickMarch/medialab#84).
+
+### Changed
+
+- medialab-contracts pin bumped to v0.9.0 for the discover and wishlist
+  models and the TMDB poster URL helper.
+
 ## [0.8.1] - 2026-09-27
 
 ### Fixed

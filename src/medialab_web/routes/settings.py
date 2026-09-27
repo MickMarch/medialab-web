@@ -5,6 +5,7 @@ from fastapi.responses import HTMLResponse
 
 from medialab_web.auth import require_session
 from medialab_web.client import OrchestratorClient
+from medialab_web.constants import SETTINGS_PATH
 from medialab_web.deps import get_client
 from medialab_web.rendering import render
 
@@ -16,7 +17,7 @@ _ERROR_FRAGMENT = "partials/error.html"
 _ROW_FRAGMENT = "partials/setting_row.html"
 
 
-@router.get("/settings", response_class=HTMLResponse)
+@router.get(SETTINGS_PATH, response_class=HTMLResponse)
 async def settings_page(request: Request, client: OrchestratorClient = _CLIENT) -> HTMLResponse:
     suite = await client.get_settings()
     return render(request, "settings.html", {"services": suite.services if suite else None})

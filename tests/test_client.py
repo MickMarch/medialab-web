@@ -411,3 +411,92 @@ async def test_settings_client_round_trip(client):
     assert mock_put.call_args.kwargs["json"] == {"value": "3"}
     with patch.object(client._http, "put", new=AsyncMock(return_value=_mock_response(422))):
         assert await client.set_setting("torrent-downloader", "minimum_seeders", "x") is None
+
+
+# --- discover and wishlist ---
+
+_DISCOVER = {
+    "items": [{"tmdb_id": 1, "media_type": "movie", "title": "Dune", "poster_path": "/d.jpg"}],
+    "page": 2,
+    "total_pages": 5,
+    "cached_at": "2026-09-27T00:00:00+00:00",
+}
+_WISH = {
+    "tmdb_id": 1,
+    "media_type": "movie",
+    "title": "Dune",
+    "added_at": "2026-09-27T00:00:00+00:00",
+}
+
+
+@pytest.mark.asyncio
+async def test_discover_passes_genre_and_page(client):
+    from medialab_contracts import DiscoverResponse
+
+    mock_get = AsyncMock(return_value=_mock_response(200, _DISCOVER))
+    with patch.object(client._http, "get", new=mock_get):
+        result = await client.discover(MediaType.SHOW, genre=18, page=2)
+    assert isinstance(result, DiscoverResponse)
+    assert mock_get.call_args.args[0].endswith("/api/v1/discover/show")
+    assert mock_get.call_args.kwargs["params"] == {"page": 2, "genre": 18}
+
+
+@pytest.mark.asyncio
+async def test_discover_omits_genre_and_returns_none_on_503(client):
+    mock_get = AsyncMock(return_value=_mock_response(503, {"code": "TMDB_UNAVAILABLE"}))
+    with patch.object(client._http, "get", new=mock_get):
+        assert await client.discover(MediaType.MOVIE) is None
+    assert mock_get.call_args.kwargs["params"] == {"page": 1}
+
+
+@pytest.mark.asyncio
+async def test_discover_genres_calls_path(client):
+    from medialab_contracts import GenresResponse
+
+    payload = {"genres": [{"id": 28, "name": "Action"}]}
+    mock_get = AsyncMock(return_value=_mock_response(200, payload))
+    with patch.object(client._http, "get", new=mock_get):
+        result = await client.discover_genres(MediaType.MOVIE)
+    assert isinstance(result, GenresResponse)
+    assert mock_get.call_args.args[0].endswith("/api/v1/discover/movie/genres")
+
+
+@pytest.mark.asyncio
+async def test_list_wishlist_filters_by_media_type(client):
+    from medialab_contracts import WishlistResponse
+
+    mock_get = AsyncMock(return_value=_mock_response(200, {"items": [_WISH]}))
+    with patch.object(client._http, "get", new=mock_get):
+        result = await client.list_wishlist(MediaType.MOVIE)
+        await client.list_wishlist()
+    assert isinstance(result, WishlistResponse)
+    assert mock_get.call_args_list[0].args[0].endswith("/api/v1/wishlist")
+    assert mock_get.call_args_list[0].kwargs["params"] == {"media_type": "movie"}
+    assert mock_get.call_args_list[1].kwargs["params"] == {}
+
+
+@pytest.mark.asyncio
+async def test_add_to_wishlist_puts_body(client):
+    from medialab_contracts import WishlistAddRequest, WishlistItem
+
+    body = WishlistAddRequest(title="Dune", year="2021", poster_path="/d.jpg", overview="o")
+    mock_put = AsyncMock(return_value=_mock_response(200, _WISH))
+    with patch.object(client._http, "put", new=mock_put):
+        result = await client.add_to_wishlist(MediaType.MOVIE, 1, body)
+    assert isinstance(result, WishlistItem)
+    assert mock_put.call_args.args[0].endswith("/api/v1/wishlist/movie/1")
+    assert mock_put.call_args.kwargs["json"] == body.model_dump(mode="json")
+
+
+@pytest.mark.asyncio
+async def test_remove_from_wishlist_true_on_204(client):
+    mock_delete = AsyncMock(return_value=_mock_response(204))
+    with patch.object(client._http, "delete", new=mock_delete):
+        assert await client.remove_from_wishlist(MediaType.SHOW, 7) is True
+    assert mock_delete.call_args.args[0].endswith("/api/v1/wishlist/show/7")
+    with patch.object(client._http, "delete", new=AsyncMock(return_value=_mock_response(500))):
+        assert await client.remove_from_wishlist(MediaType.SHOW, 7) is False
+    with patch.object(
+        client._http, "delete", new=AsyncMock(side_effect=httpx.ConnectError("refused"))
+    ):
+        assert await client.remove_from_wishlist(MediaType.SHOW, 7) is False

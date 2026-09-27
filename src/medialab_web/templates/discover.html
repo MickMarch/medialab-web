@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Discover - medialab{% endblock %}
+{% block nav %}{% include "partials/nav.html" %}{% endblock %}
+{% block content %}
+<section class="toolbar">
+  <div class="toggle" role="group" aria-label="Media type">
+    {% for mt in media_types %}
+    <a href="/discover?media_type={{ mt.value }}" class="{{ 'active' if mt == media_type else '' }}"{% if mt == media_type %} aria-current="page"{% endif %}>{{ media_type_labels[mt] }}</a>
+    {% endfor %}
+  </div>
+  <form hx-get="/partials/discover" hx-target="#grid" hx-trigger="change" hx-indicator="#busy">
+    <input type="hidden" name="media_type" value="{{ media_type.value }}">
+    <label>Genre
+      <select name="genre">
+        <option value="">Trending this week</option>
+        {% for g in genres %}
+        <option value="{{ g.id }}"{% if genre == g.id %} selected{% endif %}>{{ g.name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+  </form>
+  <span id="busy" class="htmx-indicator muted">Working...</span>
+</section>
+{% include "partials/searching.html" %}
+<section id="detail" aria-live="polite"></section>
+<section id="stage"></section>
+<div id="grid" class="posters">
+  {% include "partials/discover_items.html" %}
+</div>
+{% endblock %}
+{% block footer %}{% include "partials/tmdb_footer.html" %}{% endblock %}

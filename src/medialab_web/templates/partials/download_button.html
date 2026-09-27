@@ -1,0 +1,8 @@
+{%- set dl = {"tmdb_id": item.tmdb_id, "title": item.title, "year": item.year or "", "query": item.title} -%}
+{% if item.media_type.value == "show" %}
+<button class="primary" hx-get="/partials/search/scope" hx-vals='{{ dl | tojson }}'
+        hx-target="#stage" hx-swap="innerHTML show:#stage:top" hx-indicator="#busy">Download</button>
+{% else %}
+<button class="primary" hx-get="/partials/search/torrents" hx-vals='{{ dict(dl, media_type="movie") | tojson }}'
+        hx-target="#stage" hx-swap="innerHTML show:#stage:top" hx-indicator="#searching">Download</button>
+{% endif %}
