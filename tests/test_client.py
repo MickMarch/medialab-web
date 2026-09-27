@@ -202,6 +202,42 @@ async def test_download_returns_none_on_non_202(client):
         assert await client.download("magnet:?xt=urn:btih:abc", MediaType.MOVIE, 1) is None
 
 
+# --- redo (same body as download, posted to the finished job) ---
+
+
+@pytest.mark.asyncio
+async def test_redo_posts_the_download_body_to_the_job_and_returns_the_new_job(client):
+    payload = {"status": "success", "job": _JOB}
+    mock_post = AsyncMock(return_value=_mock_response(202, payload))
+    with patch.object(client._http, "post", new=mock_post):
+        result = await client.redo(
+            "old",
+            "magnet:?xt=urn:btih:abc",
+            MediaType.SHOW,
+            1396,
+            "Lost.S02E05",
+            season=2,
+            episode=5,
+        )
+    assert isinstance(result, DownloadResponse)
+    assert result.job.id == "job-abc"
+    assert mock_post.call_args.args[0].endswith("/jobs/old/redo")
+    assert mock_post.call_args.kwargs["json"] == {
+        "source_url": "magnet:?xt=urn:btih:abc",
+        "media_type": "show",
+        "tmdb_id": 1396,
+        "release_name": "Lost.S02E05",
+        "season": 2,
+        "episode": 5,
+    }
+
+
+@pytest.mark.asyncio
+async def test_redo_returns_none_on_refusal(client):
+    with patch.object(client._http, "post", new=AsyncMock(return_value=_mock_response(409))):
+        assert await client.redo("old", "magnet:?xt=urn:btih:abc", MediaType.MOVIE, 1, "x") is None
+
+
 # --- transfers (merged) ---
 
 

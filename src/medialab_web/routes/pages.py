@@ -4,13 +4,17 @@ from fastapi import APIRouter, Depends, Form, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 
 from medialab_web.auth import issue_session, password_matches, require_session
+from medialab_web.client import OrchestratorClient
 from medialab_web.constants import HOME_PATH, LOGIN_PATH, SESSION_COOKIE_NAME
+from medialab_web.deps import get_client
 from medialab_web.limiter import LOGIN_RATE_LIMIT, limiter
 from medialab_web.rendering import render
+from medialab_web.routes.search import search_timeout_seconds
 
 router = APIRouter()
 
 _PASSWORD_FORM = Form(...)
+_CLIENT = Depends(get_client)
 
 
 @router.get(LOGIN_PATH, response_class=HTMLResponse)
@@ -50,7 +54,17 @@ async def logout() -> RedirectResponse:
 
 
 @router.get(HOME_PATH, response_class=HTMLResponse, dependencies=[Depends(require_session)])
-async def index(request: Request, status_filter: str | None = None) -> HTMLResponse:
+async def index(
+    request: Request, status_filter: str | None = None, client: OrchestratorClient = _CLIENT
+) -> HTMLResponse:
     # The shell only; the table and storage panel load themselves via HTMX so
-    # a slow gateway never blocks the page.
-    return render(request, "index.html", {"status_filter": status_filter or ""})
+    # a slow gateway never blocks the page. The search timeout sizes the
+    # searching bar that Redo shows.
+    return render(
+        request,
+        "index.html",
+        {
+            "status_filter": status_filter or "",
+            "search_timeout": await search_timeout_seconds(client),
+        },
+    )

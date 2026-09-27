@@ -4,6 +4,8 @@
   <td><span class="badge">{{ job.status }}</span>
       {% if job.last_error %}<span class="muted error-text" title="{{ job.last_error }}">!</span>{% endif %}
       {% if notice %}<span class="notice">{{ notice }}</span>{% endif %}
+      {% if job.redone_by %}<a class="muted redo-link" href="{{ job.redone_by | job_url }}">Replaced by {{ job.redone_by | short_id }}</a>{% endif %}
+      {% if job.redo_of %}<a class="muted redo-link" href="{{ job.redo_of | job_url }}">Redo of {{ job.redo_of | short_id }}</a>{% endif %}
       {% if job.progress %}{% set p = job.progress %}
       <div class="job-progress">
         <progress max="1" value="{{ p.progress }}">{{ p.progress | percent }}</progress>
@@ -14,6 +16,9 @@
   <td class="actions">
     {% if job.status in ["FAILED", "NEEDS_ATTENTION"] %}
     <button hx-post="/jobs/{{ job.id }}/retry" hx-target="#job-{{ job.id }}" hx-swap="outerHTML">Retry</button>
+    {% endif %}
+    {% if job.status == status_done %}
+    <button hx-get="/partials/jobs/{{ job.id }}/redo" hx-vals='{{ job | redo_vals | tojson }}' hx-target="#stage" hx-swap="innerHTML show:#stage:top" hx-indicator="#searching">{{ redo_label }}</button>
     {% endif %}
     {% if job.status != "DELETED" %}
     <button class="danger-outline" hx-get="/jobs/{{ job.id }}/plan" hx-target="#plan-{{ job.id }}" hx-swap="innerHTML">Delete...</button>

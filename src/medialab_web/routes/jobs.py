@@ -1,8 +1,9 @@
 """HTMX fragments and actions for the jobs page. Every handler is one gateway
 call and one re-rendered fragment."""
 
-from fastapi import APIRouter, Depends, Request, status
+from fastapi import APIRouter, Depends, Form, Request, status
 from fastapi.responses import HTMLResponse
+from medialab_contracts import MediaType
 
 from medialab_web.auth import require_session
 from medialab_web.client import OrchestratorClient
@@ -14,6 +15,12 @@ from medialab_web.constants import (
 )
 from medialab_web.deps import get_client
 from medialab_web.rendering import render
+from medialab_web.routes.search import (
+    invalid_link,
+    is_torrent_link,
+    render_torrents,
+    scope_numbers,
+)
 from medialab_web.schemas.jobs import JobView
 
 router = APIRouter(dependencies=[Depends(require_session)])
@@ -21,6 +28,15 @@ router = APIRouter(dependencies=[Depends(require_session)])
 _CLIENT = Depends(get_client)
 
 _ERROR_FRAGMENT = "partials/error.html"
+_JOBS_TABLE = "partials/jobs_table.html"
+
+_SOURCE_URL = Form(...)
+_MEDIA_TYPE = Form(...)
+_TMDB_ID = Form(...)
+_FILE_NAME = Form(...)
+_SEASON = Form(None)
+_EPISODE = Form(None)
+_STATUS_FILTER = Form(None)
 
 
 def _row(request: Request, job: JobView, notice: str | None = None) -> HTMLResponse:
@@ -40,26 +56,32 @@ def _error(request: Request, message: str) -> HTMLResponse:
     )
 
 
+async def _table_context(
+    client: OrchestratorClient, status_filter: str | None
+) -> dict[str, object] | None:
+    """The jobs table's context, or None when the gateway is unreachable."""
+    response = await client.list_jobs(status_filter or None)
+    if response is None:
+        return None
+    jobs = [j for j in response.jobs if j.status != TERMINAL_STATUS_DELETED or status_filter]
+    return {
+        "jobs": jobs,
+        "status_filter": status_filter or "",
+        "retryable": RETRYABLE_STATUSES,
+        "refresh_seconds": _refresh_seconds(jobs),
+    }
+
+
 @router.get("/partials/jobs", response_class=HTMLResponse)
 async def jobs_table(
     request: Request,
     status_filter: str | None = None,
     client: OrchestratorClient = _CLIENT,
 ) -> HTMLResponse:
-    response = await client.list_jobs(status_filter or None)
-    if response is None:
+    context = await _table_context(client, status_filter)
+    if context is None:
         return _error(request, "Could not reach the gateway for jobs.")
-    jobs = [j for j in response.jobs if j.status != TERMINAL_STATUS_DELETED or status_filter]
-    return render(
-        request,
-        "partials/jobs_table.html",
-        {
-            "jobs": jobs,
-            "status_filter": status_filter or "",
-            "retryable": RETRYABLE_STATUSES,
-            "refresh_seconds": _refresh_seconds(jobs),
-        },
-    )
+    return render(request, _JOBS_TABLE, context)
 
 
 @router.get("/partials/storage", response_class=HTMLResponse)
@@ -97,6 +119,75 @@ async def delete(
     if job is None:
         return _error(request, "Delete failed; nothing was changed.")
     return _row(request, job, notice="Deleted.")
+
+
+@router.get("/partials/jobs/{job_id}/redo", response_class=HTMLResponse)
+async def redo_torrents(
+    request: Request,
+    job_id: str,
+    tmdb_id: int,
+    title: str,
+    year: str,
+    media_type: MediaType,
+    season: str | None = None,
+    episode: str | None = None,
+    client: OrchestratorClient = _CLIENT,
+) -> HTMLResponse:
+    # The row sends the job's own scope (see ``redo_vals``); a job with neither
+    # season nor episode searches the whole series.
+    return await render_torrents(
+        request,
+        client,
+        tmdb_id,
+        title,
+        year,
+        media_type,
+        season,
+        episode,
+        redo_job_id=job_id,
+    )
+
+
+@router.post("/partials/jobs/{job_id}/redo", response_class=HTMLResponse)
+async def redo(
+    request: Request,
+    job_id: str,
+    source_url: str = _SOURCE_URL,
+    media_type: MediaType = _MEDIA_TYPE,
+    tmdb_id: int = _TMDB_ID,
+    file_name: str = _FILE_NAME,
+    season: str | None = _SEASON,
+    episode: str | None = _EPISODE,
+    status_filter: str | None = _STATUS_FILTER,
+    client: OrchestratorClient = _CLIENT,
+) -> HTMLResponse:
+    """Replace ``job_id`` with the picked torrent: one gateway call, then the
+    whole table again so the replaced and the replacement rows both update."""
+    if not is_torrent_link(source_url):
+        return invalid_link(request)
+    season_number, episode_number = scope_numbers(season, episode)
+    response = await client.redo(
+        job_id,
+        source_url,
+        media_type,
+        tmdb_id,
+        file_name,
+        season=season_number,
+        episode=episode_number,
+    )
+    if response is None:
+        return _error(request, "Redo failed; the original download is untouched.")
+    context = await _table_context(client, status_filter)
+    return render(
+        request,
+        "partials/redo_started.html",
+        {
+            "job": response.job,
+            "replaced_id": job_id,
+            "file_name": file_name,
+            "table": context,
+        },
+    )
 
 
 @router.post("/transfers/stop-seeding", response_class=HTMLResponse)

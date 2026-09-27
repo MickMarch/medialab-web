@@ -1,8 +1,9 @@
 {#- The poll wrapper carries its own interval, chosen per response: short while
     any job has live progress, long otherwise. It swaps itself, so the next
-    response picks the next interval. Polling pauses while a deletion plan is open. -#}
+    response picks the next interval. Polling pauses while a deletion plan is open.
+    With oob set the wrapper replaces itself from a response aimed elsewhere. -#}
 <div id="{{ jobs_poll_id }}" hx-get="/partials/jobs{% if status_filter %}?status_filter={{ status_filter | urlencode }}{% endif %}"
-     hx-trigger="every {{ refresh_seconds }}s [!document.querySelector('.plan-slot:not(:empty)')]" hx-swap="outerHTML">
+     hx-trigger="every {{ refresh_seconds }}s [!document.querySelector('.plan-slot:not(:empty)')]" hx-swap="outerHTML"{% if oob %} hx-swap-oob="true"{% endif %}>
 {% if not jobs %}
 <p class="muted">No jobs{% if status_filter %} with status {{ status_filter }}{% endif %}.</p>
 {% else %}

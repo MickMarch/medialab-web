@@ -28,6 +28,9 @@ class JobView(BaseModel):
     created_at: str
     updated_at: str
     progress: JobProgress | None = None
+    # A redo links the replacement to the job it replaced, in both directions.
+    redo_of: str | None = None
+    redone_by: str | None = None
 
 
 class JobsResponse(BaseModel):

@@ -6,6 +6,20 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Redo on a finished job: the jobs page opens the torrent step above the
+  table with the job's title, year, media type and scope (episode, season or
+  whole series) preset, under the notice "Picking a torrent replaces the
+  original download". Replace on a row confirms, posts to the gateway's redo
+  route (one action: delete the original, submit the replacement as a job
+  linked to it) and re-renders the whole table. A refused or failed redo
+  leaves the original untouched. The replaced row shows `Replaced by <id>`
+  and the replacement `Redo of <id>`, each linking the other row
+  (MickMarch/medialab#92).
+- `JobView.redo_of` and `JobView.redone_by`; client `redo` beside `download`
+  (MickMarch/medialab#92).
+
 ## [0.11.0] - 2026-09-27
 
 ### Added

@@ -43,17 +43,50 @@ class _TorrentsMixin(_BaseClient):
         # .torrent URL. The gateway resolves placement and fans out; it requires
         # media_type + tmdb_id (no title guessing). season and episode record
         # the scope the torrent was searched with; a whole-series job sends neither.
-        body: dict[str, str | int] = {
-            "source_url": source_url,
-            "media_type": media_type.value,
-            "tmdb_id": tmdb_id,
-            "release_name": release_name,
-        }
-        if season is not None:
-            body["season"] = season
-        if episode is not None:
-            body["episode"] = episode
+        body = _download_body(source_url, media_type, tmdb_id, release_name, season, episode)
         data = await self._post(
             f"{API_PREFIX}/download", json=body, expected_status=_DOWNLOAD_ACCEPTED
         )
         return self._parse(DownloadResponse, data)
+
+    async def redo(
+        self,
+        job_id: str,
+        source_url: str,
+        media_type: MediaType,
+        tmdb_id: int,
+        release_name: str,
+        *,
+        season: int | None = None,
+        episode: int | None = None,
+    ) -> DownloadResponse | None:
+        # Same body as download, posted to the finished job: the gateway deletes
+        # the original and submits the replacement as one action. It refuses a
+        # job that is not DONE or whose deletion plan is refused (409), so None
+        # means nothing was changed.
+        body = _download_body(source_url, media_type, tmdb_id, release_name, season, episode)
+        data = await self._post(
+            f"{API_PREFIX}/jobs/{job_id}/redo", json=body, expected_status=_DOWNLOAD_ACCEPTED
+        )
+        return self._parse(DownloadResponse, data)
+
+
+def _download_body(
+    source_url: str,
+    media_type: MediaType,
+    tmdb_id: int,
+    release_name: str,
+    season: int | None,
+    episode: int | None,
+) -> dict[str, str | int]:
+    body: dict[str, str | int] = {
+        "source_url": source_url,
+        "media_type": media_type.value,
+        "tmdb_id": tmdb_id,
+        "release_name": release_name,
+    }
+    if season is not None:
+        body["season"] = season
+    if episode is not None:
+        body["episode"] = episode
+    return body

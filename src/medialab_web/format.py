@@ -15,6 +15,7 @@ from medialab_web.constants import (
     SECONDS_PER_DAY,
     SECONDS_PER_HOUR,
     SECONDS_PER_MINUTE,
+    SHORT_ID_LENGTH,
     SHOWS_PATH,
 )
 from medialab_web.media import from_tmdb_media_type
@@ -107,6 +108,27 @@ def browse_url(item: _Titled) -> str | None:
 def job_url(job_id: str) -> str:
     """The jobs page, anchored at the row the jobs table renders for ``job_id``."""
     return f"{HOME_PATH}#{JOB_ROW_ID_PREFIX}{job_id}"
+
+
+def short_id(job_id: str) -> str:
+    """The leading characters of a job id, enough to tell rows apart in a link."""
+    return job_id[:SHORT_ID_LENGTH]
+
+
+def redo_vals(job: JobView) -> dict[str, object]:
+    """``job`` as the hx-vals of its Redo button: the torrent step's query
+    fields, with season and episode present only when the job has them."""
+    vals: dict[str, object] = {
+        "tmdb_id": job.tmdb_id,
+        "title": job.resolved_title or job.release_name,
+        "year": str(job.resolved_year) if job.resolved_year else "",
+        "media_type": job.media_type.value,
+    }
+    if job.season is not None:
+        vals["season"] = job.season
+    if job.episode is not None:
+        vals["episode"] = job.episode
+    return vals
 
 
 def episode_code(episode: Episode) -> str:
