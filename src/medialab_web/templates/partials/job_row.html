@@ -1,6 +1,6 @@
 <tr id="job-{{ job.id }}" class="status-{{ job.status | lower }}">
   <td class="title">{{ job | job_title }}</td>
-  <td class="release"><code>{{ job.release_name }}</code></td>
+  <td class="release"><code>{{ job.release_name | breakable }}</code></td>
   <td><span class="badge">{{ job.status }}</span>
       {% if job.last_error %}<span class="muted error-text" title="{{ job.last_error }}">!</span>{% endif %}
       {% if notice %}<span class="notice">{{ notice }}</span>{% endif %}</td>

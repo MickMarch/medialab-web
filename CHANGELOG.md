@@ -6,6 +6,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- Torrent results give the release name the remaining width instead of a
+  narrow column, and release names in both tables wrap at their separators
+  rather than mid-word. Torrent results stack on narrow screens.
+
 ## [0.8.0] - 2026-09-26
 
 ### Added
