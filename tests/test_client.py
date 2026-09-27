@@ -181,6 +181,7 @@ async def test_download_sends_media_type_and_tmdb_id(client):
         "source_url": "magnet:?xt=urn:btih:abc",
         "media_type": "show",
         "tmdb_id": 1396,
+        "release_name": "",
     }
     assert "save_path" not in body
 
@@ -363,3 +364,13 @@ async def test_search_torrents_passes_alt_query(client):
     ) as mock_get:
         await client.search_torrents("Dune 2021", MediaType.MOVIE, alt_query="dune 2021")
     assert mock_get.call_args.kwargs["params"]["alt_query"] == "dune 2021"
+
+
+@pytest.mark.asyncio
+async def test_download_sends_release_name(client):
+    payload = {"status": "success", "job": _JOB}
+    with patch.object(
+        client._http, "post", new=AsyncMock(return_value=_mock_response(202, payload))
+    ) as mock_post:
+        await client.download("magnet:?xt=urn:btih:abc", MediaType.MOVIE, 1, "Dune.2021-GRP")
+    assert mock_post.call_args.kwargs["json"]["release_name"] == "Dune.2021-GRP"
