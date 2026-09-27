@@ -99,6 +99,18 @@ class _BaseClient:
             logger.error("DELETE %s returned non-JSON response", path)
             return None
 
+    async def _delete_no_content(self, path: str) -> bool:
+        """DELETE that answers 204; True on success."""
+        try:
+            response = await self._http.delete(path)
+        except httpx.HTTPError:
+            logger.warning("DELETE %s failed with network error", path)
+            return False
+        if response.status_code != httpx.codes.NO_CONTENT:
+            logger.warning("DELETE %s returned %d", path, response.status_code)
+            return False
+        return True
+
     @staticmethod
     def _parse(model: type[ModelT], data: dict | None) -> ModelT | None:
         if data is None:

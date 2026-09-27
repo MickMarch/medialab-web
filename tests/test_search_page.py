@@ -1,6 +1,6 @@
 from unittest.mock import AsyncMock
 
-from medialab_contracts import MediaType
+from medialab_contracts import MediaType, PosterSize, poster_url
 
 from medialab_web.schemas.downloads import DownloadResponse
 from medialab_web.schemas.tmdb import TmdbMediaDetailResponse, TmdbSearchResponse, TmdbSearchResult
@@ -346,3 +346,18 @@ async def test_torrent_searches_use_the_searching_indicator(logged_in, mock_clie
         )
     ).text
     assert 'hx-indicator="#searching"' in scope
+
+
+async def test_tmdb_results_render_poster_and_text_card(logged_in, mock_client):
+    mock_client.search_tmdb = AsyncMock(
+        return_value=_tmdb(
+            _result(poster_path="/dune.jpg"),
+            _result(tmdb_id=2, title="Lost", media_type="tv", poster_path=None),
+        )
+    )
+    text = (await logged_in.get("/partials/search/tmdb", params={"query": "x"})).text
+    assert f'src="{poster_url("/dune.jpg", PosterSize.GRID)}"' in text
+    assert 'loading="lazy"' in text
+    assert text.count("<img") == 1
+    assert text.count('poster-card no-poster"') == 1
+    assert "Find torrents" in text and "Choose season" in text

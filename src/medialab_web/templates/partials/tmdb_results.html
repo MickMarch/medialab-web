@@ -1,12 +1,13 @@
+{% from "partials/poster_card.html" import poster_card %}
 {% with step = 2 %}{% include "partials/steps.html" %}{% endwith %}
 {% if not results %}
 <p class="muted">No results for "{{ query }}". Try another spelling.</p>
 {% else %}
 <p class="muted">Step 2 of 4: pick the title.</p>
-<div class="cards tmdb">
+<div class="posters wide tmdb">
   {% for r in results %}
   {% set mt = media_type_of(r.media_type) %}
-  <article class="card">
+  {% call poster_card(r) %}
     <h3>{{ r.title }} <span class="muted">({{ r.year }})</span></h3>
     <p class="muted"><span class="badge">{{ mt.value }}</span> rating {{ "%.1f" | format(r.vote_average) }}</p>
     {% if r.overview %}<p class="overview">{{ r.overview }}</p>{% endif %}
@@ -18,7 +19,7 @@
             hx-vals='{"tmdb_id": {{ r.tmdb_id }}, "title": {{ r.title | tojson }}, "year": {{ r.year | tojson }}, "media_type": "movie", "query": {{ query | tojson }}}'
             hx-target="#stage" hx-swap="innerHTML show:#stage:top" hx-indicator="#searching">Find torrents</button>
     {% endif %}
-  </article>
+  {% endcall %}
   {% endfor %}
 </div>
 {% endif %}

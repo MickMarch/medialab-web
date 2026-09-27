@@ -1,0 +1,14 @@
+{#- poster_card(item, open_vals=none): a poster with a text fallback. With
+    open_vals the poster is a button that loads the detail card. Body via call. -#}
+{% macro poster_card(item, open_vals=none) -%}
+{% set src = item.poster_path | poster_url %}
+<article class="card poster-card{% if not src %} no-poster{% endif %}">
+  {% if open_vals %}<button class="poster" type="button" title="{{ item.title }}" hx-get="/partials/discover/detail" hx-vals='{{ open_vals | tojson }}'
+          hx-target="#detail" hx-swap="innerHTML show:#detail:top">{% else %}<div class="poster">{% endif %}
+    {% if src %}<img src="{{ src }}" alt="{{ item.title }} poster" loading="lazy" onerror="this.closest('.poster-card').classList.add('no-poster')">{% endif %}
+    <span class="poster-text">{{ item.title }}{% if item.year %} ({{ item.year }}){% endif %}</span>
+    {% if item.in_library %}<span class="badge ok in-library">In Jellyfin</span>{% endif %}
+  {% if open_vals %}</button>{% else %}</div>{% endif %}
+  {% if caller %}<div class="poster-body">{{ caller() }}</div>{% endif %}
+</article>
+{%- endmacro %}

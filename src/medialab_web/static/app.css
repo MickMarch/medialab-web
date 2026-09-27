@@ -85,3 +85,35 @@ table.torrents td:not(.release) { width: 1%; white-space: nowrap; }
   table.torrents td.release { display: block; }
   .actions { white-space: normal; }
 }
+:root { --poster-width: 150px; --poster-width-wide: 220px; --poster-ratio: 2 / 3; --phone-columns: 2; }
+nav a[aria-current="page"] { color: var(--accent); }
+.toggle { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.toggle a { padding: .45rem .8rem; color: var(--fg); text-decoration: none; }
+.toggle a.active { background: var(--accent); color: #fff; }
+.posters { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--poster-width), 1fr)); gap: .75rem; margin-bottom: 1rem; }
+.posters.wide { grid-template-columns: repeat(auto-fill, minmax(var(--poster-width-wide), 1fr)); }
+.grid-wide { grid-column: 1 / -1; }
+.poster-card { padding: 0; overflow: hidden; display: flex; flex-direction: column; }
+.poster { position: relative; display: block; width: 100%; aspect-ratio: var(--poster-ratio); padding: 0; border: none; border-radius: 0; background: var(--line); color: var(--fg); text-align: left; }
+button.poster:hover { border: none; outline: 2px solid var(--accent); }
+.poster img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.poster-text { display: none; position: absolute; inset: 0; padding: .75rem; font-weight: 600; align-items: center; justify-content: center; text-align: center; }
+.no-poster .poster img { display: none; }
+.no-poster .poster-text { display: flex; }
+.in-library { position: absolute; top: .4rem; left: .4rem; }
+.poster-body { padding: .6rem; display: flex; flex-direction: column; gap: .4rem; }
+.poster-body h3 { margin: 0; font-size: 1rem; }
+.poster-body p { margin: 0; }
+.posters.tmdb .poster-card .poster { max-height: 330px; }
+.detail { position: relative; margin-bottom: 1rem; }
+.detail h3 { margin: 0 0 .25rem; }
+.detail .close { position: absolute; top: .5rem; right: .5rem; }
+.overview.full { max-height: none; }
+.detail-actions { display: flex; gap: .5rem; flex-wrap: wrap; }
+#stage:not(:empty) { margin-bottom: 1rem; }
+.more { justify-self: center; }
+.notice-muted { color: var(--warn); }
+footer.attribution { max-width: 1100px; margin: 0 auto; padding: 1rem; font-size: .8rem; border-top: 1px solid var(--line); }
+@media (max-width: 700px) {
+  .posters, .posters.wide { grid-template-columns: repeat(var(--phone-columns), 1fr); }
+}

@@ -1,0 +1,6 @@
+<nav>
+  {% for path, label in nav_links %}
+  <a href="{{ path }}"{% if request.url.path == path %} aria-current="page"{% endif %}>{{ label }}</a>
+  {% endfor %}
+  <form method="post" action="/logout"><button class="link">Sign out</button></form>
+</nav>

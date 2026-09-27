@@ -1,11 +1,5 @@
 {% extends "base.html" %}
-{% block nav %}
-<nav>
-  <a href="/search">Search</a>
-  <a href="/settings">Settings</a>
-  <form method="post" action="/logout"><button class="link">Sign out</button></form>
-</nav>
-{% endblock %}
+{% block nav %}{% include "partials/nav.html" %}{% endblock %}
 {% block content %}
 <section id="storage" hx-get="/partials/storage" hx-trigger="load, every {{ jobs_refresh_seconds }}s" hx-swap="innerHTML">
   <p class="muted">Loading storage...</p>

@@ -1,22 +1,13 @@
 {% extends "base.html" %}
 {% block title %}Search - medialab{% endblock %}
-{% block nav %}
-<nav>
-  <a href="/">Jobs</a>
-  <a href="/settings">Settings</a>
-  <form method="post" action="/logout"><button class="link">Sign out</button></form>
-</nav>
-{% endblock %}
+{% block nav %}{% include "partials/nav.html" %}{% endblock %}
 {% block content %}
 <form class="searchbar" hx-get="/partials/search/tmdb" hx-target="#stage" hx-swap="innerHTML show:#stage:top" hx-indicator="#busy">
   <input type="search" name="query" placeholder="Movie or show title" value="{{ query }}" autofocus required>
   <button type="submit" class="primary">Search</button>
   <span id="busy" class="htmx-indicator muted">Working...</span>
 </form>
-<div id="searching" class="htmx-indicator card searching" style="--search-seconds: {{ search_timeout }}s">
-  <p><strong>Searching torrents</strong> across every tracker plugin. Up to {{ search_timeout }} s; results appear as soon as the slowest pattern finishes.</p>
-  <div class="bar"><div class="fill"></div></div>
-</div>
+{% include "partials/searching.html" %}
 <p class="tools"><button class="link" hx-delete="/search/cache" hx-target="#cache-notice" hx-swap="innerHTML"
    title="Results are cached for a while; clear them to search fresh">Clear search cache</button>
    <span id="cache-notice" aria-live="polite"></span></p>

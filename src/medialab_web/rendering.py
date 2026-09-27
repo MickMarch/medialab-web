@@ -8,7 +8,13 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
 from medialab_web import format as fmt
-from medialab_web.constants import JOBS_REFRESH_SECONDS, WHOLE_SERIES
+from medialab_web.constants import (
+    JOBS_REFRESH_SECONDS,
+    MEDIA_TYPE_LABELS,
+    NAV_LINKS,
+    TMDB_ATTRIBUTION,
+    WHOLE_SERIES,
+)
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 STATIC_DIR = Path(__file__).parent / "static"
@@ -18,8 +24,13 @@ templates.env.filters["job_title"] = fmt.job_title
 templates.env.filters["short_date"] = fmt.short_date
 templates.env.filters["format_size"] = fmt.format_size
 templates.env.filters["breakable"] = fmt.breakable
+templates.env.filters["poster_url"] = fmt.poster_src
+templates.env.filters["card_vals"] = fmt.card_vals
 templates.env.globals["jobs_refresh_seconds"] = JOBS_REFRESH_SECONDS
 templates.env.globals["whole_series"] = WHOLE_SERIES
+templates.env.globals["nav_links"] = NAV_LINKS
+templates.env.globals["media_type_labels"] = MEDIA_TYPE_LABELS
+templates.env.globals["tmdb_attribution"] = TMDB_ATTRIBUTION
 
 
 def render(
