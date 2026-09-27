@@ -57,6 +57,7 @@ def mock_client():
             jobs=[make_job("DONE", "a"), make_job("FAILED", "b"), make_job("DELETED", "c")],
         )
     )
+    client.get_settings = AsyncMock(return_value=None)
     client.close = AsyncMock()
     return client
 

@@ -11,10 +11,13 @@ from medialab_contracts import MediaType
 from medialab_web.auth import require_session
 from medialab_web.client import OrchestratorClient
 from medialab_web.constants import (
+    DEFAULT_SEARCH_TIMEOUT_SECONDS,
+    DOWNLOADER_SERVICE_NAME,
     HTTP_PREFIX,
     MAGNET_PREFIX,
     MIN_TARGETABLE_SEASON,
     SEARCH_PATH,
+    SEARCH_TIMEOUT_SETTING,
     TMDB_RESULTS_MAX,
     WHOLE_SERIES,
 )
@@ -38,9 +41,27 @@ def _error(request: Request, message: str) -> HTMLResponse:
     )
 
 
+async def _search_timeout_seconds(client: OrchestratorClient) -> int:
+    """The downloader's configured search timeout, so the searching bar runs
+    for the real ceiling; the default when the gateway is unreachable."""
+    suite = await client.get_settings()
+    if suite is None:
+        return DEFAULT_SEARCH_TIMEOUT_SECONDS
+    for setting in suite.services.get(DOWNLOADER_SERVICE_NAME, []):
+        if setting.key == SEARCH_TIMEOUT_SETTING and isinstance(setting.value, int):
+            return setting.value
+    return DEFAULT_SEARCH_TIMEOUT_SECONDS
+
+
 @router.get(SEARCH_PATH, response_class=HTMLResponse)
-async def search_page(request: Request, query: str | None = None) -> HTMLResponse:
-    return render(request, "search.html", {"query": query or ""})
+async def search_page(
+    request: Request, query: str | None = None, client: OrchestratorClient = _CLIENT
+) -> HTMLResponse:
+    return render(
+        request,
+        "search.html",
+        {"query": query or "", "search_timeout": await _search_timeout_seconds(client)},
+    )
 
 
 @router.get("/partials/search/tmdb", response_class=HTMLResponse)
