@@ -31,18 +31,26 @@ src/medialab_web/
 ├── constants.py    named limits and cookie/session values
 ├── auth.py         password check, cookie sign/verify, require_session
 ├── deps.py         request-scoped gateway client
-├── format.py       presentation helpers (also show, browse and job URLs, episode codes)
-├── client/         OrchestratorClient mixins (copied from medialab-bot); _shows.py is web-only
-├── schemas/        gateway response models; CardItem (a poster card's hx-vals)
+├── format.py       presentation helpers (show, browse and job URLs, episode codes, follow start text)
+├── client/         OrchestratorClient mixins (copied from medialab-bot); _shows.py and
+│                   _watchlist.py (save, follow, pause, check, episodes, retry) are web-only
+├── schemas/        gateway response models; CardItem (a poster card's hx-vals);
+│                   watchlist.py (FollowCard / FollowForm: the picker's fields, FollowView)
 ├── routes/         pages (/, /login, /logout), jobs (partials + actions),
 │                   search (/search, tmdb/scope/torrents partials, /downloads),
 │                   settings (/settings page, save and reset rows), system (/health),
-│                   discover (/discover, /wishlist, detail and wishlist toggle partials),
-│                   shows (/shows/{tmdb_id}: seasons and episodes, Find torrents per level),
+│                   discover (/discover grid and detail partial),
+│                   watchlist (/watchlist tabs, /wishlist redirect, save and unsave, the
+│                   follow picker and follow, pause/resume/check/unfollow, episodes and retry),
+│                   shows (/shows/{tmdb_id}: seasons and episodes, Find torrents per level;
+│                   episode_list_context and picker_seasons shared with watchlist),
 │                   trailers (/partials/trailers: player, list or notice; /play; nothing on render)
 ├── media.py        TMDB media type -> contracts MediaType
-├── templates/      base, login, index, search, discover, wishlist, show, settings, partials/
-│                   (poster_card macro shared by discover, wishlist and search results)
+├── templates/      base, login, index, search, discover, watchlist, show, settings, partials/
+│                   (poster_card macro shared by discover, watchlist and search results;
+│                   watchlist_actions is wrapped in a .watchlist-actions element that its
+│                   buttons re-render; episode_list is shared by the show page and the
+│                   Following card; follow_picker, follow_card)
 └── static/         stylesheet
 ```
 

@@ -6,6 +6,40 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- Breaking: the wishlist is the watchlist. `/wishlist` redirects permanently
+  to `/watchlist`, the nav reads "Watchlist", the "Wishlisted" badge is now
+  "Saved" or "Following", and the detail card's Add to / Remove from wishlist
+  is Save / Unsave. Client methods, card fields and the search result fields
+  follow the medialab-contracts rename (`on_watchlist`, `watchlist_kind`)
+  (MickMarch/medialab#24).
+- medialab-contracts pinned to v1.0.0 for the watchlist and follow models.
+- Search result cards carry Save and, for shows, Follow beside the download
+  step.
+
+### Added
+
+- Watchlist page with Saved and Following tabs (`?kind=`). A Following card
+  shows the start point ("New episodes", "From S02E03", "From the
+  beginning"), resolution, last check and last submitted episode, with
+  Pause / Resume, Check now (reports what was submitted), Unfollow and an
+  Episodes panel that loads the show's seasons on first open with the extra
+  Submitted, Ignored and Wanted badges and Retry on submitted or ignored
+  episodes (MickMarch/medialab#24).
+- Follow on show cards (discover detail, search results, the Saved tab) and
+  in the show page header. It opens a picker: "New episodes only", "From
+  season and episode" (season and episode selects, seeded from the page data
+  on the show page and from the show browser elsewhere) or "From the
+  beginning", plus a resolution select defaulting to 1080p. A show not yet
+  saved is saved first, then followed; from the Saved tab the page moves to
+  the Following tab (MickMarch/medialab#24).
+- The show page of a followed show reads its episodes from the watchlist
+  view, so the follow badges and Retry appear there too.
+- Client `list_watchlist(kind=)`, `follow_show`, `unfollow_show`,
+  `pause_follow`, `resume_follow`, `check_follow`, `watchlist_episodes` and
+  `retry_episode` for the gateway's follow routes.
+
 ## [0.13.0] - 2026-09-27
 
 ### Added

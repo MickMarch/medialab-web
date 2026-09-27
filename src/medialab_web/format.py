@@ -1,16 +1,29 @@
 """Presentation helpers used by the templates."""
 
+from datetime import datetime
 from typing import Protocol
 
 from markupsafe import Markup, escape
-from medialab_contracts import DiscoverItem, Episode, MediaType, PosterSize, poster_url
+from medialab_contracts import (
+    DiscoverItem,
+    Episode,
+    FollowStart,
+    FollowStartMode,
+    MediaType,
+    PosterSize,
+    poster_url,
+)
 
 from medialab_web.constants import (
     DATE_LENGTH,
+    DATETIME_FORMAT,
     ETA_UNDER_A_MINUTE_TEXT,
     ETA_UNKNOWN_TEXT,
+    FROM_BEGINNING_TEXT,
     HOME_PATH,
     JOB_ROW_ID_PREFIX,
+    NEVER_TEXT,
+    NEW_EPISODES_TEXT,
     RELEASE_NAME_SEPARATORS,
     SECONDS_PER_DAY,
     SECONDS_PER_HOUR,
@@ -132,7 +145,30 @@ def redo_vals(job: JobView) -> dict[str, object]:
 
 
 def episode_code(episode: Episode) -> str:
-    return f"S{episode.season:02d}E{episode.episode:02d}"
+    return scope_code(episode.season, episode.episode)
+
+
+def scope_code(season: int, episode: int) -> str:
+    return f"S{season:02d}E{episode:02d}"
+
+
+def follow_start_text(start: FollowStart) -> str:
+    """The start point of a follow as a card reads it: ``New episodes``,
+    ``From S02E03`` or ``From the beginning``."""
+    if (
+        start.mode is FollowStartMode.FROM
+        and start.season is not None
+        and start.episode is not None
+    ):
+        return f"From {scope_code(start.season, start.episode)}"
+    if start.mode is FollowStartMode.BEGINNING:
+        return FROM_BEGINNING_TEXT
+    return NEW_EPISODES_TEXT
+
+
+def when(moment: datetime | None) -> str:
+    """A timestamp to the minute, or ``never``."""
+    return moment.strftime(DATETIME_FORMAT) if moment else NEVER_TEXT
 
 
 def card_vals(item: DiscoverItem) -> dict[str, object]:

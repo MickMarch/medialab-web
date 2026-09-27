@@ -1,0 +1,41 @@
+{#- A Following card. Expects ``item`` (WatchlistItem with a follow). -#}
+{%- set card = item | watchlist_card -%}
+{%- set src = item.poster_path | poster_url -%}
+{%- set follow_path = watchlist_partial_path ~ "/" ~ item.tmdb_id ~ "/follow" -%}
+<article class="card follow-card">
+  <div class="follow-poster">{% if src %}<img src="{{ src }}" alt="{{ item.title }} poster" loading="lazy">{% endif %}</div>
+  <div class="follow-body">
+    <h3>{{ item.title }}{% if item.year %} <span class="muted">({{ item.year }})</span>{% endif %}</h3>
+    <p class="muted">
+      <span class="badge following">{{ following_label }}</span>
+      {% if item.follow and item.follow.paused %}<span class="badge paused">{{ paused_label }}</span>{% endif %}
+      {% if item.in_library %}<span class="badge ok">{{ in_library_label }}</span>{% endif %}
+    </p>
+    {% if item.follow %}
+    <dl class="follow-details">
+      <dt>Start</dt><dd>{{ item.follow.start | follow_start }}</dd>
+      <dt>Resolution</dt><dd>{{ item.follow.resolution }}</dd>
+      <dt>Last check</dt><dd>{{ item.follow.last_checked_at | when }}</dd>
+      <dt>Last submitted</dt><dd>{{ item.follow.last_submitted or never_text }}</dd>
+    </dl>
+    <div class="follow-actions">
+      {% if item.follow.paused %}
+      <button hx-post="{{ follow_path }}/resume" hx-target="closest .follow-card" hx-swap="outerHTML">{{ resume_label }}</button>
+      {% else %}
+      <button hx-post="{{ follow_path }}/pause" hx-target="closest .follow-card" hx-swap="outerHTML">{{ pause_label }}</button>
+      {% endif %}
+      <button hx-post="{{ follow_path }}/check" hx-target="next .{{ follow_notice_class }}" hx-swap="innerHTML"
+              hx-indicator="#busy" hx-disabled-elt="this">{{ check_now_label }}</button>
+      <button class="danger-outline" hx-delete="{{ follow_partial_path }}" hx-vals='{{ card | card_vals | tojson }}'
+              hx-target="closest .follow-card" hx-swap="delete">{{ unfollow_label }}</button>
+      <a class="browse" href="{{ item.tmdb_id | show_url }}">{{ browse_label }}</a>
+    </div>
+    <div class="{{ follow_notice_class }}"></div>
+    {% endif %}
+  </div>
+  <details class="episodes-panel">
+    <summary>{{ episodes_label }}</summary>
+    <div class="{{ episodes_slot_class }}" hx-get="{{ watchlist_partial_path }}/{{ item.tmdb_id }}/episodes"
+         hx-trigger="toggle once from:closest details" hx-swap="innerHTML"><p class="muted">Loading...</p></div>
+  </details>
+</article>

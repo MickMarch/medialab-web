@@ -1,6 +1,6 @@
 """Named values shared across the web UI."""
 
-from medialab_contracts import MediaType
+from medialab_contracts import DEFAULT_FOLLOW_RESOLUTION, FollowStartMode, MediaType, WatchlistKind
 
 SESSION_COOKIE_NAME = "medialab_session"
 SESSION_VALUE = "ok"
@@ -16,7 +16,36 @@ SECONDS_PER_DAY = 24 * SECONDS_PER_HOUR
 ETA_UNKNOWN_TEXT = "-"
 ETA_UNDER_A_MINUTE_TEXT = "<1m"
 IN_LIBRARY_LABEL = "In Jellyfin"
-WISHLISTED_LABEL = "Wishlisted"
+SAVED_LABEL = "Saved"
+FOLLOWING_LABEL = "Following"
+WATCHLIST_KIND_LABELS = {WatchlistKind.SAVED: SAVED_LABEL, WatchlistKind.FOLLOWING: FOLLOWING_LABEL}
+SAVE_LABEL = "Save"
+UNSAVE_LABEL = "Unsave"
+FOLLOW_LABEL = "Follow"
+UNFOLLOW_LABEL = "Unfollow"
+PAUSE_LABEL = "Pause"
+RESUME_LABEL = "Resume"
+PAUSED_LABEL = "Paused"
+CHECK_NOW_LABEL = "Check now"
+EPISODES_LABEL = "Episodes"
+RETRY_LABEL = "Retry"
+CANCEL_LABEL = "Cancel"
+SUBMITTED_LABEL = "Submitted"
+IGNORED_LABEL = "Ignored"
+WANTED_LABEL = "Wanted"
+NEVER_TEXT = "never"
+FOLLOW_RESOLUTIONS = ("4K", "1080p", "720p")
+DEFAULT_RESOLUTION = DEFAULT_FOLLOW_RESOLUTION
+FOLLOW_START_LABELS = {
+    FollowStartMode.NEW_ONLY: "New episodes only",
+    FollowStartMode.FROM: "From season and episode",
+    FollowStartMode.BEGINNING: "From the beginning",
+}
+NEW_EPISODES_TEXT = "New episodes"
+FROM_BEGINNING_TEXT = "From the beginning"
+NOTHING_SUBMITTED_NOTICE = "Nothing new to submit."
+CHECK_TIMEOUT_SECONDS = 120.0
+DATETIME_FORMAT = "%Y-%m-%d %H:%M"
 QUEUED_LABEL = "Queued"
 UNAIRED_LABEL = "Unaired"
 BROWSE_LABEL = "Browse"
@@ -42,14 +71,22 @@ DEFAULT_SEARCH_TIMEOUT_SECONDS = 15
 RELEASE_NAME_SEPARATORS = "._- "
 SETTINGS_PATH = "/settings"
 DISCOVER_PATH = "/discover"
-WISHLIST_PATH = "/wishlist"
+WATCHLIST_PATH = "/watchlist"
+LEGACY_WISHLIST_PATH = "/wishlist"
+WATCHLIST_PARTIAL_PATH = "/partials/watchlist"
+FOLLOW_PARTIAL_PATH = WATCHLIST_PARTIAL_PATH + "/follow"
+FOLLOW_BUTTON_PARTIAL_PATH = FOLLOW_PARTIAL_PATH + "/button"
+WATCHLIST_SHOW_PARTIAL_PATH = WATCHLIST_PARTIAL_PATH + "/{tmdb_id}"
+EPISODES_SLOT_CLASS = "episodes-slot"
+WATCHLIST_ACTIONS_CLASS = "watchlist-actions"
+FOLLOW_NOTICE_CLASS = "follow-notice"
 SHOWS_PATH = "/shows"
 SHOW_PATH = SHOWS_PATH + "/{tmdb_id}"
 NAV_LINKS = (
     (HOME_PATH, "Jobs"),
     (SEARCH_PATH, "Search"),
     (DISCOVER_PATH, "Discover"),
-    (WISHLIST_PATH, "Wishlist"),
+    (WATCHLIST_PATH, "Watchlist"),
     (SETTINGS_PATH, "Settings"),
 )
 TRAILERS_PARTIAL_PATH = "/partials/trailers"

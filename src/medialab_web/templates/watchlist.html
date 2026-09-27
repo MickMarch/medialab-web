@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% from "partials/poster_card.html" import poster_card %}
+{% block title %}Watchlist - medialab{% endblock %}
+{% block nav %}{% include "partials/nav.html" %}{% endblock %}
+{% block content %}
+<section class="toolbar">
+  <div class="toggle tabs" role="tablist" aria-label="Watchlist">
+    {% for k in watchlist_kinds %}
+    <a role="tab" href="{{ watchlist_path }}?kind={{ k.value }}" class="{{ 'active' if k == kind else '' }}"{% if k == kind %} aria-selected="true" aria-current="page"{% endif %}>{{ watchlist_kind_labels[k] }}</a>
+    {% endfor %}
+  </div>
+  <span id="busy" class="htmx-indicator muted">Working...</span>
+</section>
+{% include "partials/searching.html" %}
+<section id="stage"></section>
+{% if items is none %}
+<p class="error">Could not load the watchlist from the gateway.</p>
+{% elif not items %}
+{% if kind == kind_following %}
+<p class="muted">You follow no shows yet. Follow one from a show card or its page.</p>
+{% else %}
+<p class="muted">Nothing saved yet. Save titles from <a href="{{ discover_path }}">Discover</a>.</p>
+{% endif %}
+{% elif kind == kind_following %}
+<div class="follows">
+  {% for item in items %}
+  {% include "partials/follow_card.html" %}
+  {% endfor %}
+</div>
+{% else %}
+<div class="posters">
+  {% for item in cards %}
+  {% call poster_card(item, show_kind=false, browse_href=item | browse_url) %}
+  {% include "partials/download_button.html" %}
+  {% if item.media_type == media_type_show %}
+  <button hx-get="{{ follow_partial_path }}" hx-vals='{{ dict(item | card_vals, view=view_page) | tojson }}'
+          hx-target="#stage" hx-swap="innerHTML show:#stage:top" hx-indicator="#busy">{{ follow_label }}</button>
+  {% endif %}
+  <button class="danger-outline" hx-delete="{{ watchlist_partial_path }}" hx-vals='{{ item | card_vals | tojson }}'
+          hx-target="closest .poster-card" hx-swap="delete">Remove</button>
+  {% endcall %}
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
+{% block footer %}{% include "partials/tmdb_footer.html" %}{% endblock %}
