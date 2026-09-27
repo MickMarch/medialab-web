@@ -1,18 +1,32 @@
 """Presentation helpers used by the templates."""
 
+from typing import Protocol
+
 from markupsafe import Markup, escape
-from medialab_contracts import DiscoverItem, PosterSize, poster_url
+from medialab_contracts import DiscoverItem, Episode, MediaType, PosterSize, poster_url
 
 from medialab_web.constants import (
     DATE_LENGTH,
     ETA_UNDER_A_MINUTE_TEXT,
     ETA_UNKNOWN_TEXT,
+    HOME_PATH,
+    JOB_ROW_ID_PREFIX,
     RELEASE_NAME_SEPARATORS,
     SECONDS_PER_DAY,
     SECONDS_PER_HOUR,
     SECONDS_PER_MINUTE,
+    SHOWS_PATH,
 )
+from medialab_web.media import from_tmdb_media_type
 from medialab_web.schemas.jobs import JobView
+
+
+class _Titled(Protocol):
+    """Anything with a TMDB id and a media type: a card, a search result, a job."""
+
+    tmdb_id: int
+    media_type: str | MediaType
+
 
 _GB = 1024**3
 _MB = 1024**2
@@ -76,6 +90,27 @@ def breakable(name: str) -> Markup:
 
 def poster_src(poster_path: str | None, size: PosterSize = PosterSize.GRID) -> str | None:
     return poster_url(poster_path, size)
+
+
+def show_url(tmdb_id: int) -> str:
+    return f"{SHOWS_PATH}/{tmdb_id}"
+
+
+def browse_url(item: _Titled) -> str | None:
+    """The show page for a show; None for a movie, so cards render no Browse link."""
+    raw = item.media_type.value if isinstance(item.media_type, MediaType) else item.media_type
+    if from_tmdb_media_type(raw) is MediaType.SHOW:
+        return show_url(item.tmdb_id)
+    return None
+
+
+def job_url(job_id: str) -> str:
+    """The jobs page, anchored at the row the jobs table renders for ``job_id``."""
+    return f"{HOME_PATH}#{JOB_ROW_ID_PREFIX}{job_id}"
+
+
+def episode_code(episode: Episode) -> str:
+    return f"S{episode.season:02d}E{episode.episode:02d}"
 
 
 def card_vals(item: DiscoverItem) -> dict[str, object]:

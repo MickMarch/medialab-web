@@ -25,10 +25,11 @@ uv run pytest
 | `/login` | none | shared password (`WEB_PASSWORD`); signed cookie for `SESSION_MAX_AGE_SECONDS` |
 | `/` | `GET /jobs`, `GET /storage`, `GET /health` | status filter; Retry (FAILED, NEEDS_ATTENTION); Delete (plan, then confirm); Stop seeding |
 | `/jobs/{id}/plan` | `GET /jobs/{id}/deletion-plan` | the plan and the red Delete button; nothing is touched before it |
-| `/search` | `GET /search/tmdb`, `GET /search/tmdb/show/{id}`, `GET /search/torrents`, `POST /download` | title cards; season/episode scope for shows; torrent table by resolution with languages; Download per row (confirmed) |
+| `/search` | `GET /search/tmdb`, `GET /search/tmdb/show/{id}`, `GET /search/torrents`, `POST /download` | title cards; season/episode scope for shows; torrent table by resolution with languages; Download per row (confirmed), carrying the searched season and episode |
 | `/search/cache` (button on `/search`) | `DELETE /search/cache` | drops the downloader's cached search result sets so the next search runs fresh |
 | `/discover` | `GET /discover/{type}`, `GET /discover/{type}/genres`, `PUT` and `DELETE /wishlist/{type}/{id}` | Movies/Shows toggle; genre select; poster grid with More; detail card with Download (the `/search` torrent or season step) and Add to / Remove from wishlist; "In Jellyfin" badge |
 | `/wishlist` | `GET /wishlist`, `DELETE /wishlist/{type}/{id}` | the shared wishlist as a poster grid; Download and Remove per title |
+| `/shows/{tmdb_id}` | `GET /shows/{tmdb_id}` | show header with badges; seasons as collapsible rows (latest open) listing episodes with still, air date, overview and "In Jellyfin" / "Queued" / "Unaired"; Find torrents per series, season and episode into the `/search` torrent step; reached by Browse on show cards and from a show's job row |
 | `/settings` | `GET /settings`, `PUT` and `DELETE /settings/{service}/{key}` | one row per runtime setting per service: value, source, when it applies; Save and Reset per row |
 | `/health` | none | liveness for the doctor and compose |
 

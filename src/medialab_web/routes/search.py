@@ -135,8 +135,7 @@ async def torrents(
     search_query = _torrent_query(title, year, media_type)
     typed = query.strip()
     alt_query = _torrent_query(typed, year, media_type) if typed else None
-    season_number = int(season) if season and season != WHOLE_SERIES else None
-    episode_number = int(episode) if episode and season_number is not None else None
+    season_number, episode_number = _scope_numbers(season, episode)
     response = await client.search_torrents(
         search_query,
         media_type,
@@ -157,6 +156,8 @@ async def torrents(
             "year": year,
             "tmdb_id": tmdb_id,
             "media_type": media_type,
+            "season": season_number,
+            "episode": episode_number,
             "scope": _scope_label(season_number, episode_number),
             "query": query,
         },
@@ -166,6 +167,14 @@ async def torrents(
 def _torrent_query(title: str, year: str, media_type: MediaType) -> str:
     # Movie release names carry the year; show release names do not.
     return title if media_type is MediaType.SHOW else f"{title} {year}"
+
+
+def _scope_numbers(season: str | None, episode: str | None) -> tuple[int | None, int | None]:
+    """Form values to a scope: the whole series and a blank are no season, and
+    an episode only counts with a season."""
+    season_number = int(season) if season and season != WHOLE_SERIES else None
+    episode_number = int(episode) if episode and season_number is not None else None
+    return season_number, episode_number
 
 
 def _scope_label(season: int | None, episode: int | None) -> str:
@@ -180,6 +189,8 @@ _SOURCE_URL = Form(...)
 _MEDIA_TYPE = Form(...)
 _TMDB_ID = Form(...)
 _FILE_NAME = Form(...)
+_SEASON = Form(None)
+_EPISODE = Form(None)
 
 
 @router.post("/downloads", response_class=HTMLResponse)
@@ -189,6 +200,8 @@ async def start_download(
     media_type: MediaType = _MEDIA_TYPE,
     tmdb_id: int = _TMDB_ID,
     file_name: str = _FILE_NAME,
+    season: str | None = _SEASON,
+    episode: str | None = _EPISODE,
     client: OrchestratorClient = _CLIENT,
 ) -> HTMLResponse:
     if not (source_url.startswith(MAGNET_PREFIX) or source_url.startswith(HTTP_PREFIX)):
@@ -198,7 +211,10 @@ async def start_download(
             {"message": "Invalid torrent link."},
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
         )
-    response = await client.download(source_url, media_type, tmdb_id, file_name)
+    season_number, episode_number = _scope_numbers(season, episode)
+    response = await client.download(
+        source_url, media_type, tmdb_id, file_name, season=season_number, episode=episode_number
+    )
     if response is None:
         return _error(request, "Download request failed; nothing was submitted.")
     return render(

@@ -12,7 +12,7 @@
     <li>nothing on disk; the job is just marked deleted</li>
     {% endif %}
   </ul>
-  <button class="danger" hx-delete="/jobs/{{ job_id }}" hx-target="#job-{{ job_id }}" hx-swap="outerHTML">Delete</button>
+  <button class="danger" hx-delete="/jobs/{{ job_id }}" hx-target="#{{ job_row_id_prefix }}{{ job_id }}" hx-swap="outerHTML">Delete</button>
   {% endif %}
   <button class="link" onclick="this.closest('.plan-slot').innerHTML=''">Cancel</button>
 </div>

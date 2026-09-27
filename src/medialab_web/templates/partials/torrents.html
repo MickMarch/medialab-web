@@ -28,6 +28,8 @@
           <input type="hidden" name="media_type" value="{{ media_type.value }}">
           <input type="hidden" name="tmdb_id" value="{{ tmdb_id }}">
           <input type="hidden" name="file_name" value="{{ t.file_name }}">
+          {% if season is not none %}<input type="hidden" name="season" value="{{ season }}">{% endif %}
+          {% if episode is not none %}<input type="hidden" name="episode" value="{{ episode }}">{% endif %}
           <button class="primary">Download</button>
         </form>
       </td>

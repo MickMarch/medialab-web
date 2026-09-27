@@ -1,8 +1,10 @@
-{#- poster_card(item, open_vals=none, show_wishlisted=true): a poster with a
-    text fallback. With open_vals the poster is a button that loads the detail
-    card. show_wishlisted=false hides the Wishlisted badge where every card is
-    on the wishlist. Body via call. -#}
-{% macro poster_card(item, open_vals=none, show_wishlisted=true) -%}
+{#- poster_card(item, open_vals=none, show_wishlisted=true, browse_href=none): a
+    poster with a text fallback. With open_vals the poster is a button that
+    loads the detail card. show_wishlisted=false hides the Wishlisted badge
+    where every card is on the wishlist. browse_href adds a Browse link to the
+    show page (callers pass item | browse_url, which is none for a movie).
+    Body via call. -#}
+{% macro poster_card(item, open_vals=none, show_wishlisted=true, browse_href=none) -%}
 {% set src = item.poster_path | poster_url %}
 <article class="card poster-card{% if not src %} no-poster{% endif %}">
   {% if open_vals %}<button class="poster" type="button" title="{{ item.title }}" hx-get="/partials/discover/detail" hx-vals='{{ open_vals | tojson }}'
@@ -15,6 +17,9 @@
       {%- if wishlisted %}<span class="badge wishlisted">{{ wishlisted_label }}</span>{% endif -%}
     </span>{% endif %}
   {% if open_vals %}</button>{% else %}</div>{% endif %}
-  {% if caller %}<div class="poster-body">{{ caller() }}</div>{% endif %}
+  {% if caller or browse_href %}<div class="poster-body">
+    {% if caller %}{{ caller() }}{% endif %}
+    {% if browse_href %}<a class="browse" href="{{ browse_href }}">{{ browse_label }}</a>{% endif %}
+  </div>{% endif %}
 </article>
 {%- endmacro %}

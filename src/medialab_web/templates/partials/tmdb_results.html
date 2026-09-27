@@ -7,7 +7,7 @@
 <div class="posters wide tmdb">
   {% for r in results %}
   {% set mt = media_type_of(r.media_type) %}
-  {% call poster_card(r) %}
+  {% call poster_card(r, browse_href=r | browse_url) %}
     <h3>{{ r.title }} <span class="muted">({{ r.year }})</span></h3>
     <p class="muted"><span class="badge">{{ mt.value }}</span> rating {{ "%.1f" | format(r.vote_average) }}</p>
     {% if r.overview %}<p class="overview">{{ r.overview }}</p>{% endif %}

@@ -17,6 +17,11 @@ ETA_UNKNOWN_TEXT = "-"
 ETA_UNDER_A_MINUTE_TEXT = "<1m"
 IN_LIBRARY_LABEL = "In Jellyfin"
 WISHLISTED_LABEL = "Wishlisted"
+QUEUED_LABEL = "Queued"
+UNAIRED_LABEL = "Unaired"
+BROWSE_LABEL = "Browse"
+FIND_TORRENTS_LABEL = "Find torrents"
+JOB_ROW_ID_PREFIX = "job-"
 LOGIN_RATE_LIMIT = "10/minute"
 RETRYABLE_STATUSES = frozenset({"FAILED", "NEEDS_ATTENTION"})
 TERMINAL_STATUS_DELETED = "DELETED"
@@ -34,6 +39,8 @@ RELEASE_NAME_SEPARATORS = "._- "
 SETTINGS_PATH = "/settings"
 DISCOVER_PATH = "/discover"
 WISHLIST_PATH = "/wishlist"
+SHOWS_PATH = "/shows"
+SHOW_PATH = SHOWS_PATH + "/{tmdb_id}"
 NAV_LINKS = (
     (HOME_PATH, "Jobs"),
     (SEARCH_PATH, "Search"),
