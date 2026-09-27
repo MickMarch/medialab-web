@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Settings - medialab{% endblock %}
+{% block nav %}
+<nav>
+  <a href="/">Jobs</a>
+  <a href="/search">Search</a>
+  <form method="post" action="/logout"><button class="link">Sign out</button></form>
+</nav>
+{% endblock %}
+{% block content %}
+<h1>Settings</h1>
+<p class="muted">Each row applies on its own, without a restart, at the moment named under it. Reset returns a row to its <code>.env</code> value.</p>
+{% if services is none %}
+<p class="error">Could not load settings from the gateway.</p>
+{% else %}
+{% for service, rows in services.items() %}
+<section class="card settings">
+  <h2>{{ service }}</h2>
+  <table class="settings">
+    <tbody>
+    {% for s in rows %}
+    {% include "partials/setting_row.html" %}
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endfor %}
+{% endif %}
+{% endblock %}
