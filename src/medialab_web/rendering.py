@@ -17,6 +17,7 @@ templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 templates.env.filters["job_title"] = fmt.job_title
 templates.env.filters["short_date"] = fmt.short_date
 templates.env.filters["format_size"] = fmt.format_size
+templates.env.filters["breakable"] = fmt.breakable
 templates.env.globals["jobs_refresh_seconds"] = JOBS_REFRESH_SECONDS
 templates.env.globals["whole_series"] = WHOLE_SERIES
 

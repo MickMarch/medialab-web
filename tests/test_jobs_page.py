@@ -35,7 +35,7 @@ async def test_jobs_table_hides_deleted_by_default(logged_in, mock_client):
 async def test_jobs_table_shows_title_year_release_and_status(logged_in):
     text = (await logged_in.get("/partials/jobs")).text
     assert "Dune (2021)" in text
-    assert "Dune.2021.1080p.PORTUGUESE.DUAL-GRP" in text
+    assert "Dune.<wbr>2021.<wbr>1080p.<wbr>PORTUGUESE.<wbr>DUAL-<wbr>GRP" in text
     assert "FAILED" in text
 
 

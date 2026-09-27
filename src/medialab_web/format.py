@@ -1,6 +1,8 @@
 """Presentation helpers used by the templates."""
 
-from medialab_web.constants import DATE_LENGTH
+from markupsafe import Markup, escape
+
+from medialab_web.constants import DATE_LENGTH, RELEASE_NAME_SEPARATORS
 from medialab_web.schemas.jobs import JobView
 
 _GB = 1024**3
@@ -26,3 +28,11 @@ def format_size(num_bytes: int) -> str:
     if num_bytes >= _GB:
         return f"{num_bytes / _GB:.2f} GB"
     return f"{num_bytes / _MB:.0f} MB"
+
+
+def breakable(name: str) -> Markup:
+    """Escaped ``name`` with a ``<wbr>`` after each separator so it wraps between tokens."""
+    return Markup("").join(
+        escape(char) + Markup("<wbr>") if char in RELEASE_NAME_SEPARATORS else escape(char)
+        for char in name
+    )

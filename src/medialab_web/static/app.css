@@ -25,7 +25,7 @@ button.link { background: none; border: none; color: var(--muted); text-decorati
 table.jobs { width: 100%; border-collapse: collapse; }
 table.jobs th, table.jobs td { text-align: left; padding: .55rem .5rem; border-bottom: 1px solid var(--line); vertical-align: top; }
 table.jobs th { color: var(--muted); font-weight: 600; font-size: .8rem; text-transform: uppercase; }
-td.release code { font-size: .8rem; color: var(--muted); word-break: break-all; }
+td.release code { font-size: .8rem; color: var(--muted); overflow-wrap: anywhere; }
 .badge { display: inline-block; padding: .1rem .5rem; border-radius: 999px; font-size: .75rem; background: var(--line); }
 .badge.ok { background: var(--ok); color: #062; }
 .badge.bad { background: var(--bad); color: #fff; }
@@ -76,9 +76,12 @@ nav a { color: var(--fg); }
 table.torrents { width: 100%; border-collapse: collapse; }
 table.torrents th, table.torrents td { text-align: left; padding: .5rem .4rem; border-bottom: 1px solid var(--line); vertical-align: top; }
 table.torrents th { color: var(--muted); font-size: .8rem; text-transform: uppercase; }
+table.torrents td:not(.release) { width: 1%; white-space: nowrap; }
 @media (max-width: 700px) {
-  table.jobs thead { display: none; }
-  table.jobs tr { display: block; padding: .5rem 0; }
+  table.jobs thead, table.torrents thead { display: none; }
+  table.jobs tr, table.torrents tr { display: block; padding: .5rem 0; border-bottom: 1px solid var(--line); }
   table.jobs td { display: block; border: none; padding: .15rem .25rem; }
+  table.torrents td, table.torrents td:not(.release) { display: inline-block; width: auto; border: none; padding: .15rem .25rem; vertical-align: middle; }
+  table.torrents td.release { display: block; }
   .actions { white-space: normal; }
 }

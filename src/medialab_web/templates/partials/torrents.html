@@ -17,7 +17,7 @@
     {% for t in results %}
     <tr>
       <td><span class="badge">{{ resolution }}</span></td>
-      <td class="release"><code>{{ t.file_name }}</code></td>
+      <td class="release"><code>{{ t.file_name | breakable }}</code></td>
       <td>{{ t.seeders }}</td>
       <td>{{ t.file_size | format_size }}</td>
       <td>{% for l in t.languages %}<span class="badge">{{ l | upper }}</span> {% endfor %}{% if t.multi_audio %}<span class="badge">MULTi</span>{% endif %}</td>

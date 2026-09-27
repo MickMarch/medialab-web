@@ -115,6 +115,21 @@ async def test_movie_torrents_query_carries_year_and_sorts_by_seeders(logged_in,
     assert text.count('hx-post="/downloads"') == 2
 
 
+async def test_torrent_names_break_at_separators(logged_in, mock_client):
+    mock_client.search_torrents = AsyncMock(
+        return_value=TorrentSearchResponse(
+            status="success", message="", data={"1080p": [_torrent()]}
+        )
+    )
+    text = (
+        await logged_in.get(
+            "/partials/search/torrents",
+            params={"tmdb_id": 1, "title": "Dune", "year": "2021", "media_type": "movie"},
+        )
+    ).text
+    assert '<td class="release"><code>Dune.<wbr>2021.<wbr>1080p-<wbr>GRP</code></td>' in text
+
+
 async def test_show_torrents_scope_is_forwarded(logged_in, mock_client):
     mock_client.search_torrents = AsyncMock(
         return_value=TorrentSearchResponse(status="success", message="", data={})
