@@ -6,6 +6,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-09-27
+
 ### Added
 
 - Jobs table: downloading jobs show a progress bar under the status badge
