@@ -7,5 +7,9 @@
   <div class="detail-actions">
     {% include "partials/download_button.html" %}
     {% include "partials/wishlist_button.html" %}
+    {% with trailer_vals = {"media_type": item.media_type.value, "tmdb_id": item.tmdb_id} %}
+    {% include "partials/trailer_button.html" %}
+    {% endwith %}
   </div>
+  <div class="{{ trailer_slot_class }}"></div>
 </article>

@@ -1,0 +1,10 @@
+<ul class="trailers plain">
+  {% for video in videos %}
+  <li class="trailer-item">
+    <button type="button" class="link" hx-get="{{ trailer_play_path }}" hx-vals='{{ {"key": video.key, "name": video.name} | tojson }}'
+            hx-target="closest .{{ trailer_slot_class }}" hx-swap="innerHTML">{{ video.name or video.type.value }}</button>
+    <span class="badge">{{ video.type.value }}</span>
+    {% if video.official %}<span class="badge ok">{{ official_label }}</span>{% endif %}
+  </li>
+  {% endfor %}
+</ul>

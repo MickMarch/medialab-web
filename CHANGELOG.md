@@ -6,6 +6,24 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Watch trailer on the discover and search detail card and on every season
+  row of the show page. Nothing is fetched until the button is pressed; then
+  the title's (or season's) YouTube trailers and teasers are listed, official
+  first, and picking one plays it in an embedded privacy-enhanced YouTube
+  player that fills the card width. A single video plays at once; no video
+  shows "No trailer on TMDB"; a gateway failure shows the error fragment.
+  Close empties the player and only one player is open per page
+  (MickMarch/medialab#96).
+- Client `videos(media_type, tmdb_id, season=None)` for the gateway's
+  `/search/tmdb/{media_type}/{id}/videos` route (MickMarch/medialab#96).
+
+### Changed
+
+- medialab-contracts pinned to v0.12.0 for `Video`, `VideosResponse` and
+  `youtube_embed_url`.
+
 ## [0.12.0] - 2026-09-27
 
 ### Fixed

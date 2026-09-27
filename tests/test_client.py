@@ -2,7 +2,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
 import pytest
-from medialab_contracts import MediaType, ShowBrowseResponse
+from medialab_contracts import MediaType, ShowBrowseResponse, VideosResponse
 
 from medialab_web.client import OrchestratorClient
 from medialab_web.schemas.actions import ActionResponse
@@ -576,3 +576,33 @@ async def test_remove_from_wishlist_true_on_204(client):
         client._http, "delete", new=AsyncMock(side_effect=httpx.ConnectError("refused"))
     ):
         assert await client.remove_from_wishlist(MediaType.SHOW, 7) is False
+
+
+# --- videos ---
+
+
+@pytest.mark.asyncio
+async def test_videos_calls_the_title_path_without_season(client):
+    payload = {"videos": [{"key": "abc", "name": "Trailer", "type": "trailer", "official": True}]}
+    mock_get = AsyncMock(return_value=_mock_response(200, payload))
+    with patch.object(client._http, "get", new=mock_get):
+        result = await client.videos(MediaType.MOVIE, 438631)
+    assert isinstance(result, VideosResponse)
+    assert result.videos[0].key == "abc"
+    assert mock_get.call_args.args[0].endswith("/search/tmdb/movie/438631/videos")
+    assert mock_get.call_args.kwargs["params"] == {}
+
+
+@pytest.mark.asyncio
+async def test_videos_sends_season_for_a_show(client):
+    mock_get = AsyncMock(return_value=_mock_response(200, {"videos": []}))
+    with patch.object(client._http, "get", new=mock_get):
+        await client.videos(MediaType.SHOW, 1396, season=2)
+    assert mock_get.call_args.args[0].endswith("/search/tmdb/show/1396/videos")
+    assert mock_get.call_args.kwargs["params"] == {"season": 2}
+
+
+@pytest.mark.asyncio
+async def test_videos_returns_none_when_tmdb_is_unavailable(client):
+    with patch.object(client._http, "get", new=AsyncMock(return_value=_mock_response(503))):
+        assert await client.videos(MediaType.MOVIE, 1) is None

@@ -39,6 +39,12 @@
     <button class="find" hx-get="/partials/search/torrents" hx-vals='{{ dict(find, season=season.season) | tojson }}'
             hx-target="#stage" hx-swap="innerHTML show:#stage:top" hx-indicator="#searching">{{ find_torrents_label }}</button>
   </summary>
+  <div class="season-extras">
+    {% with trailer_vals = {"media_type": media_type_show.value, "tmdb_id": show.tmdb_id, "season": season.season} %}
+    {% include "partials/trailer_button.html" %}
+    {% endwith %}
+    <div class="{{ trailer_slot_class }}"></div>
+  </div>
   <ul class="episodes plain">
     {% for ep in episodes %}
     {% set still = ep.still_path | still_url %}

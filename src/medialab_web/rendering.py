@@ -6,7 +6,7 @@ from typing import Any
 from fastapi import Request, status
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from medialab_contracts import MediaType, still_url
+from medialab_contracts import MediaType, still_url, youtube_embed_url
 
 from medialab_web import format as fmt
 from medialab_web.constants import (
@@ -19,12 +19,18 @@ from medialab_web.constants import (
     JOBS_REFRESH_SECONDS,
     MEDIA_TYPE_LABELS,
     NAV_LINKS,
+    OFFICIAL_LABEL,
     QUEUED_LABEL,
     REDO_LABEL,
     REDO_NOTICE,
     STATUS_DONE,
     TMDB_ATTRIBUTION,
+    TRAILER_CLOSE_LABEL,
+    TRAILER_PLAY_PATH,
+    TRAILER_SLOT_CLASS,
+    TRAILERS_PARTIAL_PATH,
     UNAIRED_LABEL,
+    WATCH_TRAILER_LABEL,
     WHOLE_SERIES,
     WISHLISTED_LABEL,
 )
@@ -67,6 +73,13 @@ templates.env.globals["whole_series"] = WHOLE_SERIES
 templates.env.globals["nav_links"] = NAV_LINKS
 templates.env.globals["media_type_labels"] = MEDIA_TYPE_LABELS
 templates.env.globals["tmdb_attribution"] = TMDB_ATTRIBUTION
+templates.env.globals["youtube_embed_url"] = youtube_embed_url
+templates.env.globals["trailers_path"] = TRAILERS_PARTIAL_PATH
+templates.env.globals["trailer_play_path"] = TRAILER_PLAY_PATH
+templates.env.globals["trailer_slot_class"] = TRAILER_SLOT_CLASS
+templates.env.globals["watch_trailer_label"] = WATCH_TRAILER_LABEL
+templates.env.globals["trailer_close_label"] = TRAILER_CLOSE_LABEL
+templates.env.globals["official_label"] = OFFICIAL_LABEL
 
 
 def render(
