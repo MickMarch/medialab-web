@@ -16,7 +16,7 @@
     {% else %}
     <button class="primary" hx-get="/partials/search/torrents"
             hx-vals='{"tmdb_id": {{ r.tmdb_id }}, "title": {{ r.title | tojson }}, "year": {{ r.year | tojson }}, "media_type": "movie", "query": {{ query | tojson }}}'
-            hx-target="#stage" hx-swap="innerHTML show:#stage:top" hx-indicator="#busy">Find torrents</button>
+            hx-target="#stage" hx-swap="innerHTML show:#stage:top" hx-indicator="#searching">Find torrents</button>
     {% endif %}
   </article>
   {% endfor %}

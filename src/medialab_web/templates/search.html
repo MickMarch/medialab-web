@@ -13,6 +13,10 @@
   <button type="submit" class="primary">Search</button>
   <span id="busy" class="htmx-indicator muted">Working...</span>
 </form>
+<div id="searching" class="htmx-indicator card searching" style="--search-seconds: {{ search_timeout }}s">
+  <p><strong>Searching torrents</strong> across every tracker plugin. Up to {{ search_timeout }} s; results appear as soon as the slowest pattern finishes.</p>
+  <div class="bar"><div class="fill"></div></div>
+</div>
 <p class="tools"><button class="link" hx-delete="/search/cache" hx-target="#cache-notice" hx-swap="innerHTML"
    title="Results are cached for a while; clear them to search fresh">Clear search cache</button>
    <span id="cache-notice" aria-live="polite"></span></p>

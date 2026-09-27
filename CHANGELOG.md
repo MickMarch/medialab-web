@@ -6,6 +6,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- A searching panel with a progress bar bounded by the downloader's
+  configured search timeout while torrents are being searched.
+
 ## [0.7.0] - 2026-09-26
 
 ### Added

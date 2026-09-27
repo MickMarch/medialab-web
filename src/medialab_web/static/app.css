@@ -62,7 +62,14 @@ nav a { color: var(--fg); }
 .searchbar { display: flex; gap: .5rem; align-items: center; margin-bottom: 1rem; }
 .searchbar input { flex: 1; }
 .htmx-indicator { display: none; }
+.searching { margin-bottom: 1rem; }
+.searching p { margin: 0 0 .5rem; }
+.searching .bar { height: 8px; background: var(--line); border-radius: 999px; overflow: hidden; }
+.searching .fill { height: 100%; width: 0; background: var(--accent); animation: search-fill var(--search-seconds, 15s) linear forwards; }
+.htmx-request .searching .fill, .htmx-request.searching .fill { animation-name: search-fill; }
+@keyframes search-fill { from { width: 0; } to { width: 100%; } }
 .htmx-request .htmx-indicator, .htmx-request.htmx-indicator { display: inline; }
+.htmx-request .searching, .htmx-request.searching { display: block; }
 .tmdb .card h3 { margin: 0 0 .25rem; font-size: 1.05rem; }
 .overview { font-size: .85rem; color: var(--muted); max-height: 4.5em; overflow: hidden; }
 .scope { max-width: 520px; margin-bottom: 1rem; display: flex; flex-direction: column; gap: .75rem; }

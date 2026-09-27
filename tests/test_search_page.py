@@ -280,3 +280,54 @@ async def test_typed_query_becomes_alt_query(logged_in, mock_client):
         episode=None,
         alt_query="the mummy 2026",
     )
+
+
+async def test_search_page_carries_the_downloader_timeout_into_the_bar(logged_in, mock_client):
+    from medialab_contracts import SettingView, SuiteSettingsResponse
+
+    mock_client.get_settings = AsyncMock(
+        return_value=SuiteSettingsResponse(
+            status="success",
+            services={
+                "torrent-downloader": [
+                    SettingView(
+                        key="search_timeout_seconds",
+                        value=42,
+                        default=15,
+                        source="override",
+                        type="int",
+                        description="d",
+                        applies="next search",
+                        min=5,
+                        max=120,
+                    )
+                ]
+            },
+        )
+    )
+    page = (await logged_in.get("/search")).text
+    assert 'id="searching"' in page
+    assert "--search-seconds: 42s" in page and "Up to 42 s" in page
+
+
+async def test_search_page_falls_back_to_the_default_timeout(logged_in, mock_client):
+    mock_client.get_settings = AsyncMock(return_value=None)
+    page = (await logged_in.get("/search")).text
+    assert "--search-seconds: 15s" in page
+
+
+async def test_torrent_searches_use_the_searching_indicator(logged_in, mock_client):
+    mock_client.search_tmdb = AsyncMock(
+        return_value=_tmdb(_result(), _result(tmdb_id=2, title="Lost", media_type="tv"))
+    )
+    mock_client.search_tmdb_show = AsyncMock(
+        return_value=TmdbMediaDetailResponse(status="success", message="", data={"seasons": []})
+    )
+    cards = (await logged_in.get("/partials/search/tmdb", params={"query": "x"})).text
+    assert 'hx-indicator="#searching">Find torrents' in cards
+    scope = (
+        await logged_in.get(
+            "/partials/search/scope", params={"tmdb_id": 2, "title": "Lost", "year": "2004"}
+        )
+    ).text
+    assert 'hx-indicator="#searching"' in scope
