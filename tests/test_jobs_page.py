@@ -370,3 +370,10 @@ async def test_rows_link_the_replaced_and_replacement_jobs(logged_in, mock_clien
 async def test_rows_without_redo_links_render_none(logged_in):
     text = (await logged_in.get("/partials/jobs")).text
     assert "Replaced by" not in text and "Redo of" not in text
+
+
+async def test_pages_tell_htmx_to_swap_error_responses(logged_in, mock_client):
+    mock_client.list_jobs = AsyncMock(return_value=JobsResponse(status="success", jobs=[]))
+    text = (await logged_in.get("/")).text
+    assert 'name="htmx-config"' in text
+    assert '"code": "[45]..", "swap": true' in text
