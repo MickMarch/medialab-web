@@ -3,7 +3,15 @@
 from markupsafe import Markup, escape
 from medialab_contracts import DiscoverItem, PosterSize, poster_url
 
-from medialab_web.constants import DATE_LENGTH, RELEASE_NAME_SEPARATORS
+from medialab_web.constants import (
+    DATE_LENGTH,
+    ETA_UNDER_A_MINUTE_TEXT,
+    ETA_UNKNOWN_TEXT,
+    RELEASE_NAME_SEPARATORS,
+    SECONDS_PER_DAY,
+    SECONDS_PER_HOUR,
+    SECONDS_PER_MINUTE,
+)
 from medialab_web.schemas.jobs import JobView
 
 _GB = 1024**3
@@ -29,6 +37,25 @@ def format_size(num_bytes: int) -> str:
     if num_bytes >= _GB:
         return f"{num_bytes / _GB:.2f} GB"
     return f"{num_bytes / _MB:.0f} MB"
+
+
+def format_eta(seconds: int | None) -> str:
+    """``12m`` under an hour, ``3h 05m`` under a day, else ``2d 4h``; ``-`` when unknown."""
+    if seconds is None:
+        return ETA_UNKNOWN_TEXT
+    if seconds < SECONDS_PER_MINUTE:
+        return ETA_UNDER_A_MINUTE_TEXT
+    if seconds < SECONDS_PER_HOUR:
+        return f"{seconds // SECONDS_PER_MINUTE}m"
+    if seconds < SECONDS_PER_DAY:
+        hours, rest = divmod(seconds, SECONDS_PER_HOUR)
+        return f"{hours}h {rest // SECONDS_PER_MINUTE:02d}m"
+    days, rest = divmod(seconds, SECONDS_PER_DAY)
+    return f"{days}d {rest // SECONDS_PER_HOUR}h"
+
+
+def format_percent(fraction: float) -> str:
+    return f"{fraction:.0%}"
 
 
 def breakable(name: str) -> Markup:

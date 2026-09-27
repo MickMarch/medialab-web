@@ -7,7 +7,10 @@
           hx-target="#detail" hx-swap="innerHTML show:#detail:top">{% else %}<div class="poster">{% endif %}
     {% if src %}<img src="{{ src }}" alt="{{ item.title }} poster" loading="lazy" onerror="this.closest('.poster-card').classList.add('no-poster')">{% endif %}
     <span class="poster-text">{{ item.title }}{% if item.year %} ({{ item.year }}){% endif %}</span>
-    {% if item.in_library %}<span class="badge ok in-library">In Jellyfin</span>{% endif %}
+    {% if item.in_library or item.on_wishlist %}<span class="poster-badges">
+      {%- if item.in_library %}<span class="badge ok">{{ in_library_label }}</span>{% endif %}
+      {%- if item.on_wishlist %}<span class="badge wishlisted">{{ wishlisted_label }}</span>{% endif -%}
+    </span>{% endif %}
   {% if open_vals %}</button>{% else %}</div>{% endif %}
   {% if caller %}<div class="poster-body">{{ caller() }}</div>{% endif %}
 </article>

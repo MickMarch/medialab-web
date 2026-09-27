@@ -3,7 +3,13 @@
   <td class="release"><code>{{ job.release_name | breakable }}</code></td>
   <td><span class="badge">{{ job.status }}</span>
       {% if job.last_error %}<span class="muted error-text" title="{{ job.last_error }}">!</span>{% endif %}
-      {% if notice %}<span class="notice">{{ notice }}</span>{% endif %}</td>
+      {% if notice %}<span class="notice">{{ notice }}</span>{% endif %}
+      {% if job.progress %}{% set p = job.progress %}
+      <div class="job-progress">
+        <progress max="1" value="{{ p.progress }}">{{ p.progress | percent }}</progress>
+        <span class="muted">{{ p.progress | percent }} - {{ p.download_speed | format_size }}/s - ETA {{ p.eta_seconds | format_eta }}</span>
+      </div>
+      {% endif %}</td>
   <td>{{ job.updated_at | short_date }}</td>
   <td class="actions">
     {% if job.status in ["FAILED", "NEEDS_ATTENTION"] %}
