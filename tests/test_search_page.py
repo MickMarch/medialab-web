@@ -2,7 +2,7 @@ from unittest.mock import AsyncMock
 
 from medialab_contracts import MediaType, PosterSize, poster_url
 
-from medialab_web.constants import IN_LIBRARY_LABEL, WISHLISTED_LABEL
+from medialab_web.constants import IN_LIBRARY_LABEL, REDO_NOTICE, WISHLISTED_LABEL
 from medialab_web.schemas.downloads import DownloadResponse
 from medialab_web.schemas.tmdb import TmdbMediaDetailResponse, TmdbSearchResponse, TmdbSearchResult
 from medialab_web.schemas.torrents import TorrentResult, TorrentSearchResponse
@@ -377,3 +377,20 @@ async def test_tmdb_results_render_poster_and_text_card(logged_in, mock_client):
     assert text.count("<img") == 1
     assert text.count('poster-card no-poster"') == 1
     assert "Find torrents" in text and "Choose season" in text
+
+
+async def test_search_torrents_are_not_in_redo_mode(logged_in, mock_client):
+    mock_client.search_torrents = AsyncMock(
+        return_value=TorrentSearchResponse(
+            status="success", message="", data={"1080p": [_torrent()]}
+        )
+    )
+    text = (
+        await logged_in.get(
+            "/partials/search/torrents",
+            params={"tmdb_id": 1, "title": "Dune", "year": "2021", "media_type": "movie"},
+        )
+    ).text
+    assert REDO_NOTICE not in text
+    assert "/redo" not in text
+    assert '<li class="now">Torrent</li>' in text

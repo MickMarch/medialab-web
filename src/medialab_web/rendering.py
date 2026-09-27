@@ -20,6 +20,9 @@ from medialab_web.constants import (
     MEDIA_TYPE_LABELS,
     NAV_LINKS,
     QUEUED_LABEL,
+    REDO_LABEL,
+    REDO_NOTICE,
+    STATUS_DONE,
     TMDB_ATTRIBUTION,
     UNAIRED_LABEL,
     WHOLE_SERIES,
@@ -44,6 +47,8 @@ templates.env.filters["show_url"] = fmt.show_url
 templates.env.filters["browse_url"] = fmt.browse_url
 templates.env.filters["job_url"] = fmt.job_url
 templates.env.filters["episode_code"] = fmt.episode_code
+templates.env.filters["short_id"] = fmt.short_id
+templates.env.filters["redo_vals"] = fmt.redo_vals
 templates.env.globals["jobs_refresh_seconds"] = JOBS_REFRESH_SECONDS
 templates.env.globals["jobs_poll_id"] = JOBS_POLL_ELEMENT_ID
 templates.env.globals["job_row_id_prefix"] = JOB_ROW_ID_PREFIX
@@ -53,6 +58,9 @@ templates.env.globals["queued_label"] = QUEUED_LABEL
 templates.env.globals["unaired_label"] = UNAIRED_LABEL
 templates.env.globals["browse_label"] = BROWSE_LABEL
 templates.env.globals["find_torrents_label"] = FIND_TORRENTS_LABEL
+templates.env.globals["redo_label"] = REDO_LABEL
+templates.env.globals["redo_notice"] = REDO_NOTICE
+templates.env.globals["status_done"] = STATUS_DONE
 templates.env.globals["media_type_show"] = MediaType.SHOW
 templates.env.globals["discover_path"] = DISCOVER_PATH
 templates.env.globals["whole_series"] = WHOLE_SERIES

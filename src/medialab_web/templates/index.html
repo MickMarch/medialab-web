@@ -21,7 +21,12 @@
     Stop seeding
   </button>
   <div id="notice" aria-live="polite"></div>
+  <span id="busy" class="htmx-indicator muted">Working...</span>
 </section>
+
+{# Redo opens the torrent step here, above the table, like the show page does. #}
+{% include "partials/searching.html" %}
+<section id="stage"></section>
 
 <section id="jobs" hx-get="/partials/jobs{% if status_filter %}?status_filter={{ status_filter }}{% endif %}"
          hx-trigger="load, every {{ jobs_refresh_seconds }}s [!document.getElementById('{{ jobs_poll_id }}')]" hx-swap="innerHTML">

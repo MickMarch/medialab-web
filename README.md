@@ -23,8 +23,9 @@ uv run pytest
 | Page | Gateway calls | Controls |
 |---|---|---|
 | `/login` | none | shared password (`WEB_PASSWORD`); signed cookie for `SESSION_MAX_AGE_SECONDS` |
-| `/` | `GET /jobs`, `GET /storage`, `GET /health` | status filter; Retry (FAILED, NEEDS_ATTENTION); Delete (plan, then confirm); Stop seeding |
+| `/` | `GET /jobs`, `GET /storage`, `GET /health` | status filter; Retry (FAILED, NEEDS_ATTENTION); Delete (plan, then confirm); Redo (DONE); Stop seeding; rows link a replaced job and its replacement |
 | `/jobs/{id}/plan` | `GET /jobs/{id}/deletion-plan` | the plan and the red Delete button; nothing is touched before it |
+| `/partials/jobs/{id}/redo` | `GET /search/torrents`, `POST /jobs/{id}/redo` | the torrent step with the job's scope preset, above the table; Replace per row (confirmed) deletes the original and submits the replacement in one gateway action, then re-renders the table |
 | `/search` | `GET /search/tmdb`, `GET /search/tmdb/show/{id}`, `GET /search/torrents`, `POST /download` | title cards; season/episode scope for shows; torrent table by resolution with languages; Download per row (confirmed), carrying the searched season and episode |
 | `/search/cache` (button on `/search`) | `DELETE /search/cache` | drops the downloader's cached search result sets so the next search runs fresh |
 | `/discover` | `GET /discover/{type}`, `GET /discover/{type}/genres`, `PUT` and `DELETE /wishlist/{type}/{id}` | Movies/Shows toggle; genre select; poster grid with More; detail card with Download (the `/search` torrent or season step) and Add to / Remove from wishlist; "In Jellyfin" badge |

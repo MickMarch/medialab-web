@@ -130,12 +130,32 @@ async def torrents(
     query: str = "",
     client: OrchestratorClient = _CLIENT,
 ) -> HTMLResponse:
+    return await render_torrents(
+        request, client, tmdb_id, title, year, media_type, season, episode, query
+    )
+
+
+async def render_torrents(
+    request: Request,
+    client: OrchestratorClient,
+    tmdb_id: int,
+    title: str,
+    year: str,
+    media_type: MediaType,
+    season: str | None = None,
+    episode: str | None = None,
+    query: str = "",
+    redo_job_id: str | None = None,
+) -> HTMLResponse:
+    """The torrent step: one gateway search rendered as the grouped table.
+    With ``redo_job_id`` every pick replaces that job instead of starting a
+    fresh download."""
     # TMDB's canonical title and release names can differ ("Lee Cronin's The
     # Mummy" vs "The Mummy 2026"); the typed query is searched as well.
     search_query = _torrent_query(title, year, media_type)
     typed = query.strip()
     alt_query = _torrent_query(typed, year, media_type) if typed else None
-    season_number, episode_number = _scope_numbers(season, episode)
+    season_number, episode_number = scope_numbers(season, episode)
     response = await client.search_torrents(
         search_query,
         media_type,
@@ -160,16 +180,18 @@ async def torrents(
             "episode": episode_number,
             "scope": _scope_label(season_number, episode_number),
             "query": query,
+            "redo_job_id": redo_job_id,
         },
     )
 
 
 def _torrent_query(title: str, year: str, media_type: MediaType) -> str:
-    # Movie release names carry the year; show release names do not.
-    return title if media_type is MediaType.SHOW else f"{title} {year}"
+    # Movie release names carry the year; show release names do not. A job
+    # without a resolved year sends a blank one, so the query is trimmed.
+    return title if media_type is MediaType.SHOW else f"{title} {year}".strip()
 
 
-def _scope_numbers(season: str | None, episode: str | None) -> tuple[int | None, int | None]:
+def scope_numbers(season: str | None, episode: str | None) -> tuple[int | None, int | None]:
     """Form values to a scope: the whole series and a blank are no season, and
     an episode only counts with a season."""
     season_number = int(season) if season and season != WHOLE_SERIES else None
@@ -193,6 +215,19 @@ _SEASON = Form(None)
 _EPISODE = Form(None)
 
 
+def is_torrent_link(source_url: str) -> bool:
+    return source_url.startswith(MAGNET_PREFIX) or source_url.startswith(HTTP_PREFIX)
+
+
+def invalid_link(request: Request) -> HTMLResponse:
+    return render(
+        request,
+        _ERROR_FRAGMENT,
+        {"message": "Invalid torrent link."},
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+    )
+
+
 @router.post("/downloads", response_class=HTMLResponse)
 async def start_download(
     request: Request,
@@ -204,14 +239,9 @@ async def start_download(
     episode: str | None = _EPISODE,
     client: OrchestratorClient = _CLIENT,
 ) -> HTMLResponse:
-    if not (source_url.startswith(MAGNET_PREFIX) or source_url.startswith(HTTP_PREFIX)):
-        return render(
-            request,
-            _ERROR_FRAGMENT,
-            {"message": "Invalid torrent link."},
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-        )
-    season_number, episode_number = _scope_numbers(season, episode)
+    if not is_torrent_link(source_url):
+        return invalid_link(request)
+    season_number, episode_number = scope_numbers(season, episode)
     response = await client.download(
         source_url, media_type, tmdb_id, file_name, season=season_number, episode=episode_number
     )

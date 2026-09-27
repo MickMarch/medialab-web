@@ -1,3 +1,8 @@
+{% if redo_job_id %}
+<p class="notice-muted card"><strong>{{ redo_notice }}</strong> (job <code>{{ redo_job_id | short_id }}</code>).
+  <button class="link" onclick="document.getElementById('stage').innerHTML=''">Cancel</button></p>
+<p class="muted">Torrents for <strong>{{ title }}{% if year %} ({{ year }}){% endif %}</strong>{% if scope %} {{ scope }}{% endif %}.</p>
+{% else %}
 {% with step = 4 %}{% include "partials/steps.html" %}{% endwith %}
 <div id="download-notice" aria-live="polite"></div>
 <p class="muted">Step 4 of 4: torrents for <strong>{{ title }} ({{ year }})</strong>{% if scope %} {{ scope }}{% endif %}.
@@ -7,6 +12,7 @@
   <a href="#" hx-get="/partials/search/tmdb" hx-vals='{"query": {{ query | tojson }}}' hx-target="#stage" hx-swap="innerHTML show:#stage:top" hx-indicator="#busy">Back to titles</a>
   {% endif %}
 </p>
+{% endif %}
 {% if not groups %}
 <p class="muted">No torrents found for that scope. Try a wider scope or another title.</p>
 {% else %}
@@ -22,15 +28,21 @@
       <td>{{ t.file_size | format_size }}</td>
       <td>{% for l in t.languages %}<span class="badge">{{ l | upper }}</span> {% endfor %}{% if t.multi_audio %}<span class="badge">MULTi</span>{% endif %}</td>
       <td>
+        {% if redo_job_id %}
+        <form hx-post="/partials/jobs/{{ redo_job_id }}/redo" hx-target="#stage" hx-swap="innerHTML show:#stage:top"
+              hx-include="[name='status_filter']" hx-indicator="#busy"
+              hx-confirm="Replace the original download with {{ t.file_name }}?">
+        {% else %}
         <form hx-post="/downloads" hx-target="#download-notice" hx-swap="innerHTML show:#stage:top"
               hx-confirm="Download {{ t.file_name }}?">
+        {% endif %}
           <input type="hidden" name="source_url" value="{{ t.file_url }}">
           <input type="hidden" name="media_type" value="{{ media_type.value }}">
           <input type="hidden" name="tmdb_id" value="{{ tmdb_id }}">
           <input type="hidden" name="file_name" value="{{ t.file_name }}">
           {% if season is not none %}<input type="hidden" name="season" value="{{ season }}">{% endif %}
           {% if episode is not none %}<input type="hidden" name="episode" value="{{ episode }}">{% endif %}
-          <button class="primary">Download</button>
+          <button class="primary">{{ "Replace" if redo_job_id else "Download" }}</button>
         </form>
       </td>
     </tr>

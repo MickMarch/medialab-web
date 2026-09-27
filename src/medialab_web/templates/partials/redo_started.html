@@ -1,0 +1,4 @@
+{#- Lands in #stage; the jobs table rides along out of band so the replaced
+    and the replacement rows both update in the same response. -#}
+<p class="notice card">Replacing job <code>{{ replaced_id | short_id }}</code> with <code>{{ file_name }}</code>. New job <a href="{{ job.id | job_url }}"><code>{{ job.id | short_id }}</code></a>.</p>
+{% if table %}{% with jobs = table.jobs, status_filter = table.status_filter, retryable = table.retryable, refresh_seconds = table.refresh_seconds, oob = true %}{% include "partials/jobs_table.html" %}{% endwith %}{% endif %}

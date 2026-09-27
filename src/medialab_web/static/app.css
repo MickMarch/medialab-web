@@ -156,3 +156,4 @@ td.title a { color: var(--fg); }
 @media (max-width: 400px) {
   .still { display: none; }
 }
+.redo-link { display: block; font-size: .8rem; }

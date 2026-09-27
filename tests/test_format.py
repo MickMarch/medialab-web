@@ -1,3 +1,6 @@
+from medialab_contracts import MediaType
+
+from medialab_web.constants import SHORT_ID_LENGTH
 from medialab_web.format import (
     breakable,
     format_eta,
@@ -5,9 +8,31 @@ from medialab_web.format import (
     format_size,
     format_speed,
     job_title,
+    redo_vals,
     short_date,
+    short_id,
 )
 from tests.conftest import make_job
+
+
+def test_short_id_truncates():
+    assert short_id("0123456789abcdef") == "0123456789abcdef"[:SHORT_ID_LENGTH]
+    assert short_id("abc") == "abc"
+
+
+def test_redo_vals_carries_the_scope_only_when_set():
+    assert redo_vals(make_job()) == {
+        "tmdb_id": 1,
+        "title": "Dune",
+        "year": "2021",
+        "media_type": "movie",
+    }
+    episode = redo_vals(make_job(media_type=MediaType.SHOW, tmdb_id=2, season=2, episode=5))
+    assert episode["season"] == 2 and episode["episode"] == 5
+    assert "episode" not in redo_vals(make_job(season=2))
+    unresolved = redo_vals(make_job(resolved_title=None, resolved_year=None))
+    assert unresolved["title"] == "Dune.2021.1080p.PORTUGUESE.DUAL-GRP"
+    assert unresolved["year"] == ""
 
 
 def test_job_title_variants():
