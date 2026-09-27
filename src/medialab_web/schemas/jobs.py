@@ -1,6 +1,6 @@
 """Pipeline job views mirrored from the orchestrator gateway."""
 
-from medialab_contracts import MediaType
+from medialab_contracts import JobProgress, MediaType
 from pydantic import BaseModel
 
 
@@ -25,6 +25,7 @@ class JobView(BaseModel):
     deleted_at: str | None = None
     created_at: str
     updated_at: str
+    progress: JobProgress | None = None
 
 
 class JobsResponse(BaseModel):

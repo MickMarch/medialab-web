@@ -11,6 +11,8 @@ class TmdbSearchResult(BaseModel):
     overview: str
     vote_average: float
     poster_path: str | None
+    on_wishlist: bool = False
+    in_library: bool = False
 
 
 class TmdbSearchResponse(BaseModel):

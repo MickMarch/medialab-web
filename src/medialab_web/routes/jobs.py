@@ -6,7 +6,12 @@ from fastapi.responses import HTMLResponse
 
 from medialab_web.auth import require_session
 from medialab_web.client import OrchestratorClient
-from medialab_web.constants import RETRYABLE_STATUSES, TERMINAL_STATUS_DELETED
+from medialab_web.constants import (
+    JOBS_ACTIVE_REFRESH_SECONDS,
+    JOBS_REFRESH_SECONDS,
+    RETRYABLE_STATUSES,
+    TERMINAL_STATUS_DELETED,
+)
 from medialab_web.deps import get_client
 from medialab_web.rendering import render
 from medialab_web.schemas.jobs import JobView
@@ -20,6 +25,13 @@ _ERROR_FRAGMENT = "partials/error.html"
 
 def _row(request: Request, job: JobView, notice: str | None = None) -> HTMLResponse:
     return render(request, "partials/job_row.html", {"job": job, "notice": notice})
+
+
+def _refresh_seconds(jobs: list[JobView]) -> int:
+    """The jobs partial polls fast only while something is downloading."""
+    if any(job.progress is not None for job in jobs):
+        return JOBS_ACTIVE_REFRESH_SECONDS
+    return JOBS_REFRESH_SECONDS
 
 
 def _error(request: Request, message: str) -> HTMLResponse:
@@ -41,7 +53,12 @@ async def jobs_table(
     return render(
         request,
         "partials/jobs_table.html",
-        {"jobs": jobs, "status_filter": status_filter or "", "retryable": RETRYABLE_STATUSES},
+        {
+            "jobs": jobs,
+            "status_filter": status_filter or "",
+            "retryable": RETRYABLE_STATUSES,
+            "refresh_seconds": _refresh_seconds(jobs),
+        },
     )
 
 

@@ -16,7 +16,7 @@ from medialab_contracts import (
     poster_url,
 )
 
-from medialab_web.constants import TMDB_ATTRIBUTION
+from medialab_web.constants import TMDB_ATTRIBUTION, WISHLISTED_LABEL
 
 NOW = datetime(2026, 9, 27, tzinfo=UTC)
 DUNE_POSTER = "/dune.jpg"
@@ -96,6 +96,13 @@ async def test_discover_badge_only_when_in_library(logged_in, discover_client):
     assert "In Jellyfin" not in (await logged_in.get("/discover")).text
     discover_client.discover = AsyncMock(return_value=_page(_item(in_library=True)))
     assert "In Jellyfin" in (await logged_in.get("/discover")).text
+
+
+async def test_discover_wishlisted_badge_only_when_on_wishlist(logged_in, discover_client):
+    discover_client.discover = AsyncMock(return_value=_page(_item()))
+    assert WISHLISTED_LABEL not in (await logged_in.get("/discover")).text
+    discover_client.discover = AsyncMock(return_value=_page(_item(on_wishlist=True)))
+    assert WISHLISTED_LABEL in (await logged_in.get("/discover")).text
 
 
 async def test_discover_genre_select_lists_genres(logged_in, discover_client):
@@ -210,6 +217,7 @@ async def test_wishlist_page_lists_items_with_actions(logged_in, mock_client):
     text = (await logged_in.get("/wishlist")).text
     assert "Breaking Bad" in text and "Heat" in text
     assert "In Jellyfin" in text
+    assert WISHLISTED_LABEL not in text
     assert 'hx-get="/partials/search/scope"' in text
     assert 'hx-get="/partials/search/torrents"' in text
     assert text.count('hx-delete="/partials/wishlist"') == 2

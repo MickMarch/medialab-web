@@ -6,6 +6,23 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Jobs table: downloading jobs show a progress bar under the status badge
+  with percent, speed and ETA (`42% - 3.1 MB/s - ETA 12m`; ETA reads `-` when
+  unknown). The table refreshes every 5 seconds while anything is
+  downloading and every 30 seconds otherwise, and pauses while a deletion
+  plan is open (MickMarch/medialab#86).
+- Poster cards show a "Wishlisted" badge for titles on the wishlist, and
+  title search results now carry both the "Wishlisted" and "In Jellyfin"
+  badges (MickMarch/medialab#88).
+
+### Changed
+
+- medialab-contracts pin bumped to v0.10.0 for `JobProgress`.
+- The jobs table poll keeps the chosen status filter instead of falling
+  back to the filter the page was opened with.
+
 ## [0.9.0] - 2026-09-27
 
 ### Added

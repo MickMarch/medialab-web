@@ -2,6 +2,7 @@ from unittest.mock import AsyncMock
 
 from medialab_contracts import MediaType, PosterSize, poster_url
 
+from medialab_web.constants import IN_LIBRARY_LABEL, WISHLISTED_LABEL
 from medialab_web.schemas.downloads import DownloadResponse
 from medialab_web.schemas.tmdb import TmdbMediaDetailResponse, TmdbSearchResponse, TmdbSearchResult
 from medialab_web.schemas.torrents import TorrentResult, TorrentSearchResponse
@@ -55,6 +56,21 @@ async def test_tmdb_results_show_movie_and_show_buttons(logged_in, mock_client):
     assert "Find torrents" in text and "Choose season" in text
     assert "Someone" not in text
     mock_client.search_tmdb.assert_awaited_once_with("x")
+
+
+async def test_tmdb_results_badge_wishlisted_and_library_titles(logged_in, mock_client):
+    mock_client.search_tmdb = AsyncMock(return_value=_tmdb(_result()))
+    text = (await logged_in.get("/partials/search/tmdb", params={"query": "x"})).text
+    assert WISHLISTED_LABEL not in text and IN_LIBRARY_LABEL not in text
+    mock_client.search_tmdb = AsyncMock(
+        return_value=_tmdb(
+            _result(on_wishlist=True),
+            _result(tmdb_id=2, title="Lost", media_type="tv", in_library=True),
+        )
+    )
+    text = (await logged_in.get("/partials/search/tmdb", params={"query": "x"})).text
+    assert text.count(WISHLISTED_LABEL) == 1
+    assert text.count(IN_LIBRARY_LABEL) == 1
 
 
 async def test_tmdb_no_results(logged_in, mock_client):

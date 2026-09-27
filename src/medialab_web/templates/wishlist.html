@@ -21,7 +21,7 @@
 {% else %}
 <div class="posters">
   {% for item in items %}
-  {% call poster_card(item) %}
+  {% call poster_card(item, show_wishlisted=false) %}
   {% include "partials/download_button.html" %}
   <button class="danger-outline" hx-delete="/partials/wishlist" hx-vals='{{ item | card_vals | tojson }}'
           hx-target="closest .poster-card" hx-swap="delete">Remove</button>

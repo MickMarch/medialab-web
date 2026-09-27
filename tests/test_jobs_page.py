@@ -1,7 +1,27 @@
 from unittest.mock import AsyncMock
 
+from medialab_contracts import JobProgress
+
+from medialab_web.constants import JOBS_ACTIVE_REFRESH_SECONDS, JOBS_REFRESH_SECONDS
 from medialab_web.schemas.deletion import DeletionPlan
+from medialab_web.schemas.jobs import JobsResponse
 from tests.conftest import make_job
+
+_SPEED_3_MB = 3 * 1024**2
+
+
+def _progress(**kw) -> JobProgress:
+    base = {
+        "progress": 0.42,
+        "download_speed": _SPEED_3_MB,
+        "eta_seconds": 720,
+        "state": "downloading",
+    }
+    return JobProgress(**{**base, **kw})
+
+
+def _jobs(*jobs) -> AsyncMock:
+    return AsyncMock(return_value=JobsResponse(status="success", jobs=list(jobs)))
 
 
 def _plan(**kw) -> DeletionPlan:
@@ -112,3 +132,52 @@ async def test_stop_seeding_reports_message(logged_in, mock_client):
     response = await logged_in.post("/transfers/stop-seeding")
     assert response.status_code == 200
     assert "3 stopped" in response.text
+
+
+async def test_active_row_renders_progress_bar_percent_speed_and_eta(logged_in, mock_client):
+    mock_client.list_jobs = _jobs(make_job("DOWNLOADING", "a", progress=_progress()))
+    text = (await logged_in.get("/partials/jobs")).text
+    assert '<progress max="1" value="0.42"' in text
+    assert "42% - 3.0 MB/s - ETA 12m" in text
+
+
+async def test_unknown_eta_renders_dash(logged_in, mock_client):
+    mock_client.list_jobs = _jobs(
+        make_job("DOWNLOAD_SUBMITTED", "a", progress=_progress(eta_seconds=None))
+    )
+    assert "ETA -" in (await logged_in.get("/partials/jobs")).text
+
+
+async def test_row_without_progress_has_no_bar(logged_in, mock_client):
+    mock_client.list_jobs = _jobs(make_job("DOWNLOADING", "a"))
+    text = (await logged_in.get("/partials/jobs")).text
+    assert "<progress" not in text
+    assert "ETA" not in text
+
+
+async def test_partial_polls_fast_while_any_job_has_progress(logged_in, mock_client):
+    mock_client.list_jobs = _jobs(
+        make_job("DONE", "a"), make_job("DOWNLOADING", "b", progress=_progress())
+    )
+    text = (await logged_in.get("/partials/jobs")).text
+    assert f'hx-trigger="every {JOBS_ACTIVE_REFRESH_SECONDS}s' in text
+    assert f"every {JOBS_REFRESH_SECONDS}s" not in text
+
+
+async def test_partial_polls_slow_when_nothing_is_downloading(logged_in):
+    text = (await logged_in.get("/partials/jobs")).text
+    assert f'hx-trigger="every {JOBS_REFRESH_SECONDS}s' in text
+    assert f"every {JOBS_ACTIVE_REFRESH_SECONDS}s" not in text
+
+
+async def test_partial_poll_keeps_the_status_filter(logged_in, mock_client):
+    text = (await logged_in.get("/partials/jobs", params={"status_filter": "DELETED"})).text
+    assert 'hx-get="/partials/jobs?status_filter=DELETED"' in text
+    assert 'hx-swap="outerHTML"' in text
+
+
+async def test_empty_partial_still_polls(logged_in, mock_client):
+    mock_client.list_jobs = _jobs()
+    text = (await logged_in.get("/partials/jobs")).text
+    assert "No jobs" in text
+    assert f'hx-trigger="every {JOBS_REFRESH_SECONDS}s' in text

@@ -24,7 +24,7 @@
 </section>
 
 <section id="jobs" hx-get="/partials/jobs{% if status_filter %}?status_filter={{ status_filter }}{% endif %}"
-         hx-trigger="load, every {{ jobs_refresh_seconds }}s" hx-swap="innerHTML">
+         hx-trigger="load, every {{ jobs_refresh_seconds }}s [!document.getElementById('{{ jobs_poll_id }}')]" hx-swap="innerHTML">
   <p class="muted">Loading jobs...</p>
 </section>
 {% endblock %}
