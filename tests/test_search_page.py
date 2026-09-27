@@ -174,7 +174,9 @@ async def test_download_posts_the_three_fields(logged_in, mock_client):
     )
     assert response.status_code == 200
     assert "j9" in response.text and "Dune.2021-GRP" in response.text
-    mock_client.download.assert_awaited_once_with("magnet:?xt=urn:btih:abc", MediaType.MOVIE, 1)
+    mock_client.download.assert_awaited_once_with(
+        "magnet:?xt=urn:btih:abc", MediaType.MOVIE, 1, "Dune.2021-GRP"
+    )
 
 
 async def test_download_rejects_garbage_link(logged_in, mock_client):

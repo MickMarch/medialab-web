@@ -6,6 +6,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- Download sends the picked torrent's name, so the jobs table shows it while
+  the download runs.
+
 ## [0.5.0] - 2026-09-26
 
 ### Changed

@@ -177,7 +177,7 @@ async def start_download(
             {"message": "Invalid torrent link."},
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
         )
-    response = await client.download(source_url, media_type, tmdb_id)
+    response = await client.download(source_url, media_type, tmdb_id, file_name)
     if response is None:
         return _error(request, "Download request failed; nothing was submitted.")
     return render(

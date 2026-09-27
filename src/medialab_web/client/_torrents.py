@@ -31,7 +31,11 @@ class _TorrentsMixin(_BaseClient):
         return self._parse(TorrentSearchResponse, data)
 
     async def download(
-        self, source_url: str, media_type: MediaType, tmdb_id: int
+        self,
+        source_url: str,
+        media_type: MediaType,
+        tmdb_id: int,
+        release_name: str = "",
     ) -> DownloadResponse | None:
         # source_url is whatever the picked result carried - a magnet or an http
         # .torrent URL. The gateway resolves placement and fans out; it requires
@@ -42,6 +46,7 @@ class _TorrentsMixin(_BaseClient):
                 "source_url": source_url,
                 "media_type": media_type.value,
                 "tmdb_id": tmdb_id,
+                "release_name": release_name,
             },
             expected_status=_DOWNLOAD_ACCEPTED,
         )
