@@ -5,6 +5,7 @@ from medialab_web.client._shows import _ShowsMixin
 from medialab_web.client._status import _StatusMixin
 from medialab_web.client._tmdb import _TmdbMixin
 from medialab_web.client._torrents import _TorrentsMixin
+from medialab_web.client._watchlist import _WatchlistMixin
 
 
 class OrchestratorClient(
@@ -15,5 +16,6 @@ class OrchestratorClient(
     _SettingsMixin,
     _DiscoverMixin,
     _ShowsMixin,
+    _WatchlistMixin,
 ):
     """The web UI's single downstream dependency: the medialab-orchestrator gateway."""

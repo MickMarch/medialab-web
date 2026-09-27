@@ -1,20 +1,20 @@
-{#- poster_card(item, open_vals=none, show_wishlisted=true, browse_href=none): a
+{#- poster_card(item, open_vals=none, show_kind=true, browse_href=none): a
     poster with a text fallback. With open_vals the poster is a button that
-    loads the detail card. show_wishlisted=false hides the Wishlisted badge
-    where every card is on the wishlist. browse_href adds a Browse link to the
-    show page (callers pass item | browse_url, which is none for a movie).
+    loads the detail card. show_kind=false hides the Saved / Following badge
+    where every card is on the watchlist. browse_href adds a Browse link to
+    the show page (callers pass item | browse_url, which is none for a movie).
     Body via call. -#}
-{% macro poster_card(item, open_vals=none, show_wishlisted=true, browse_href=none) -%}
+{% macro poster_card(item, open_vals=none, show_kind=true, browse_href=none) -%}
 {% set src = item.poster_path | poster_url %}
 <article class="card poster-card{% if not src %} no-poster{% endif %}">
   {% if open_vals %}<button class="poster" type="button" title="{{ item.title }}" hx-get="/partials/discover/detail" hx-vals='{{ open_vals | tojson }}'
           hx-target="#detail" hx-swap="innerHTML show:#detail:top">{% else %}<div class="poster">{% endif %}
     {% if src %}<img src="{{ src }}" alt="{{ item.title }} poster" loading="lazy" onerror="this.closest('.poster-card').classList.add('no-poster')">{% endif %}
     <span class="poster-text">{{ item.title }}{% if item.year %} ({{ item.year }}){% endif %}</span>
-    {% set wishlisted = show_wishlisted and item.on_wishlist %}
-    {% if item.in_library or wishlisted %}<span class="poster-badges">
+    {% set kind = item.watchlist_kind if show_kind and item.on_watchlist else none %}
+    {% if item.in_library or kind %}<span class="poster-badges">
       {%- if item.in_library %}<span class="badge ok">{{ in_library_label }}</span>{% endif %}
-      {%- if wishlisted %}<span class="badge wishlisted">{{ wishlisted_label }}</span>{% endif -%}
+      {%- if kind %}<span class="badge {{ kind.value }}">{{ watchlist_kind_labels[kind] }}</span>{% endif -%}
     </span>{% endif %}
   {% if open_vals %}</button>{% else %}</div>{% endif %}
   {% if caller or browse_href %}<div class="poster-body">

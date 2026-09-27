@@ -82,7 +82,9 @@ async def test_show_page_season_rows_have_watch_trailer_buttons(logged_in, video
     assert text.count(f'class="{TRAILER_SLOT_CLASS}"') == 2
     # The button sits in the season body, before the episodes, not in the summary.
     first_button = text.index(TRAILERS_BUTTON)
-    assert text.index("</summary>") < first_button < text.index('class="episodes')
+    first_season = text.index('class="season"')
+    assert text.index("</summary>", first_season) < first_button
+    assert first_button < text.index('class="episodes plain"')
     videos_client.videos.assert_not_awaited()
 
 

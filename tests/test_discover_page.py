@@ -10,13 +10,20 @@ from medialab_contracts import (
     GenresResponse,
     MediaType,
     PosterSize,
-    WishlistAddRequest,
-    WishlistItem,
-    WishlistResponse,
+    WatchlistItem,
+    WatchlistKind,
+    WatchlistResponse,
     poster_url,
 )
 
-from medialab_web.constants import TMDB_ATTRIBUTION, WISHLISTED_LABEL
+from medialab_web.constants import (
+    FOLLOW_LABEL,
+    FOLLOWING_LABEL,
+    SAVE_LABEL,
+    SAVED_LABEL,
+    TMDB_ATTRIBUTION,
+    UNSAVE_LABEL,
+)
 
 NOW = datetime(2026, 9, 27, tzinfo=UTC)
 DUNE_POSTER = "/dune.jpg"
@@ -39,7 +46,7 @@ def _page(*items: DiscoverItem, page: int = 1, total_pages: int = 1) -> Discover
     return DiscoverResponse(items=list(items), page=page, total_pages=total_pages, cached_at=NOW)
 
 
-def _wish(**kw) -> WishlistItem:
+def _saved(**kw) -> WatchlistItem:
     base = {
         "tmdb_id": 1396,
         "media_type": MediaType.SHOW,
@@ -49,7 +56,7 @@ def _wish(**kw) -> WishlistItem:
         "overview": "Chemistry.",
         "added_at": NOW,
     }
-    return WishlistItem(**{**base, **kw})
+    return WatchlistItem(**{**base, **kw})
 
 
 def _vals(html: str, marker: str) -> dict:
@@ -98,11 +105,26 @@ async def test_discover_badge_only_when_in_library(logged_in, discover_client):
     assert "In Jellyfin" in (await logged_in.get("/discover")).text
 
 
-async def test_discover_wishlisted_badge_only_when_on_wishlist(logged_in, discover_client):
+async def test_discover_badge_reads_saved_or_following(logged_in, discover_client):
     discover_client.discover = AsyncMock(return_value=_page(_item()))
-    assert WISHLISTED_LABEL not in (await logged_in.get("/discover")).text
-    discover_client.discover = AsyncMock(return_value=_page(_item(on_wishlist=True)))
-    assert WISHLISTED_LABEL in (await logged_in.get("/discover")).text
+    text = (await logged_in.get("/discover")).text
+    assert SAVED_LABEL not in text and FOLLOWING_LABEL not in text
+    discover_client.discover = AsyncMock(
+        return_value=_page(_item(on_watchlist=True, watchlist_kind=WatchlistKind.SAVED))
+    )
+    text = (await logged_in.get("/discover")).text
+    assert 'class="badge saved"' in text and SAVED_LABEL in text
+    discover_client.discover = AsyncMock(
+        return_value=_page(
+            _item(
+                media_type=MediaType.SHOW,
+                on_watchlist=True,
+                watchlist_kind=WatchlistKind.FOLLOWING,
+            )
+        )
+    )
+    text = (await logged_in.get("/discover")).text
+    assert 'class="badge following"' in text and FOLLOWING_LABEL in text
 
 
 async def test_discover_genre_select_lists_genres(logged_in, discover_client):
@@ -137,12 +159,13 @@ async def test_discover_footer_has_tmdb_attribution(logged_in, discover_client):
     assert TMDB_ATTRIBUTION in (await logged_in.get("/discover")).text
 
 
-async def test_nav_has_discover_and_wishlist_on_every_page(logged_in, discover_client):
-    discover_client.list_wishlist = AsyncMock(return_value=WishlistResponse(items=[]))
-    for path in ("/", "/search", "/settings", "/discover", "/wishlist"):
+async def test_nav_has_discover_and_watchlist_on_every_page(logged_in, discover_client):
+    discover_client.list_watchlist = AsyncMock(return_value=WatchlistResponse(items=[]))
+    for path in ("/", "/search", "/settings", "/discover", "/watchlist"):
         text = (await logged_in.get(path)).text
         assert 'href="/discover"' in text, path
-        assert 'href="/wishlist"' in text, path
+        assert 'href="/watchlist"' in text and ">Watchlist</a>" in text, path
+        assert "wishlist" not in text.lower(), path
 
 
 # --- detail card and actions ---
@@ -169,78 +192,32 @@ async def test_detail_show_download_targets_scope(logged_in):
     assert "/partials/search/torrents" not in text
 
 
-async def test_detail_wishlist_button_reflects_state(logged_in):
+async def test_detail_save_button_reflects_state(logged_in):
     text = (await logged_in.get("/partials/discover/detail", params=_detail_params())).text
-    assert 'hx-put="/partials/wishlist"' in text and "Remove from wishlist" not in text
-    params = _detail_params(on_wishlist=True)
+    assert 'hx-put="/partials/watchlist"' in text and f">{SAVE_LABEL}<" in text
+    assert UNSAVE_LABEL not in text
+    params = _detail_params(on_watchlist=True, watchlist_kind="saved")
     text = (await logged_in.get("/partials/discover/detail", params=params)).text
-    assert 'hx-delete="/partials/wishlist"' in text and "Remove from wishlist" in text
+    assert 'hx-delete="/partials/watchlist"' in text and f">{UNSAVE_LABEL}<" in text
+    assert f">{SAVE_LABEL}<" not in text
 
 
-async def test_wishlist_button_swaps_to_remove_and_back(logged_in, mock_client):
-    mock_client.add_to_wishlist = AsyncMock(return_value=_wish())
-    mock_client.remove_from_wishlist = AsyncMock(return_value=True)
-    form = _item().model_dump(mode="json")
-    text = (await logged_in.put("/partials/wishlist", data=form)).text
-    assert "Remove from wishlist" in text and 'hx-delete="/partials/wishlist"' in text
-    mock_client.add_to_wishlist.assert_awaited_once_with(
-        MediaType.MOVIE,
-        438631,
-        WishlistAddRequest(
-            title="Dune", year="2021", poster_path=DUNE_POSTER, overview="Desert planet."
-        ),
+async def test_detail_follow_button_on_shows_only(logged_in):
+    text = (await logged_in.get("/partials/discover/detail", params=_detail_params())).text
+    assert f">{FOLLOW_LABEL}<" not in text
+    params = _detail_params(media_type="show", tmdb_id=1396, title="Breaking Bad")
+    text = (await logged_in.get("/partials/discover/detail", params=params)).text
+    assert 'hx-get="/partials/watchlist/follow"' in text and f">{FOLLOW_LABEL}<" in text
+    vals = _vals(text, 'hx-get="/partials/watchlist/follow"')
+    assert vals["tmdb_id"] == 1396 and vals["media_type"] == "show" and vals["view"] == "inline"
+
+
+async def test_detail_following_show_offers_unfollow(logged_in):
+    params = _detail_params(
+        media_type="show", tmdb_id=1396, on_watchlist=True, watchlist_kind="following"
     )
-    text = (await logged_in.delete("/partials/wishlist", params=form)).text
-    assert 'hx-put="/partials/wishlist"' in text and "Remove from wishlist" not in text
-    mock_client.remove_from_wishlist.assert_awaited_once_with(MediaType.MOVIE, 438631)
-
-
-async def test_wishlist_add_failure_renders_error(logged_in, mock_client):
-    mock_client.add_to_wishlist = AsyncMock(return_value=None)
-    response = await logged_in.put("/partials/wishlist", data=_item().model_dump(mode="json"))
-    assert response.status_code == 502
-    assert "wishlist" in response.text.lower()
-
-
-# --- wishlist page ---
-
-
-async def test_wishlist_page_lists_items_with_actions(logged_in, mock_client):
-    mock_client.list_wishlist = AsyncMock(
-        return_value=WishlistResponse(
-            items=[
-                _wish(in_library=True),
-                _wish(tmdb_id=5, media_type=MediaType.MOVIE, title="Heat"),
-            ]
-        )
-    )
-    text = (await logged_in.get("/wishlist")).text
-    assert "Breaking Bad" in text and "Heat" in text
-    assert "In Jellyfin" in text
-    assert WISHLISTED_LABEL not in text
-    assert 'hx-get="/partials/search/scope"' in text
-    assert 'hx-get="/partials/search/torrents"' in text
-    assert text.count('hx-delete="/partials/wishlist"') == 2
-    assert TMDB_ATTRIBUTION in text
-    mock_client.list_wishlist.assert_awaited_once_with(None)
-
-
-async def test_wishlist_page_empty_and_unreachable(logged_in, mock_client):
-    mock_client.list_wishlist = AsyncMock(return_value=WishlistResponse(items=[]))
-    assert "wishlist is empty" in (await logged_in.get("/wishlist")).text
-    mock_client.list_wishlist = AsyncMock(return_value=None)
-    assert "Could not load the wishlist" in (await logged_in.get("/wishlist")).text
-
-
-async def test_wishlist_page_remove_calls_delete(logged_in, mock_client):
-    mock_client.remove_from_wishlist = AsyncMock(return_value=True)
-    params = _item(media_type=MediaType.SHOW, tmdb_id=1396).model_dump(mode="json")
-    response = await logged_in.delete("/partials/wishlist", params=params)
-    assert response.status_code == 200
-    mock_client.remove_from_wishlist.assert_awaited_once_with(MediaType.SHOW, 1396)
-
-
-async def test_wishlist_remove_failure_renders_error(logged_in, mock_client):
-    mock_client.remove_from_wishlist = AsyncMock(return_value=False)
-    response = await logged_in.delete("/partials/wishlist", params=_item().model_dump(mode="json"))
-    assert response.status_code == 502
+    text = (await logged_in.get("/partials/discover/detail", params=params)).text
+    assert 'hx-delete="/partials/watchlist/follow"' in text and "Unfollow" in text
+    assert FOLLOWING_LABEL in text
+    assert 'hx-get="/partials/watchlist/follow"' not in text
+    assert UNSAVE_LABEL not in text

@@ -17,7 +17,7 @@
     <p class="muted">
       {% if show.status %}<span class="badge">{{ show.status }}</span>{% endif %}
       {% if show.in_library %}<span class="badge ok">{{ in_library_label }}</span>{% endif %}
-      {% if show.on_wishlist %}<span class="badge wishlisted">{{ wishlisted_label }}</span>{% endif %}
+      {% if show.watchlist_kind %}<span class="badge {{ show.watchlist_kind.value }}">{{ watchlist_kind_labels[show.watchlist_kind] }}</span>{% endif %}
     </p>
     {% if show.overview %}<p class="overview full">{{ show.overview }}</p>{% endif %}
     <p class="show-actions">
@@ -26,50 +26,12 @@
       <span class="muted">whole series</span>
       <span id="busy" class="htmx-indicator muted">Working...</span>
     </p>
+    <div class="{{ watchlist_actions_class }}">{% include "partials/watchlist_actions.html" %}</div>
   </div>
 </section>
 {% include "partials/searching.html" %}
 <section id="stage"></section>
-{% if not seasons %}<p class="muted">TMDB lists no seasons for this show yet.</p>{% endif %}
-{% for season, episodes in seasons %}
-<details{% if season.season == latest_season %} open{% endif %} class="season">
-  <summary>
-    <span class="season-name">{{ season.name or "Season " ~ season.season }}</span>
-    <span class="muted">{{ season.episode_count }} episode{{ "" if season.episode_count == 1 else "s" }}{% if season.air_date %}, from {{ season.air_date }}{% endif %}</span>
-    <button class="find" hx-get="/partials/search/torrents" hx-vals='{{ dict(find, season=season.season) | tojson }}'
-            hx-target="#stage" hx-swap="innerHTML show:#stage:top" hx-indicator="#searching">{{ find_torrents_label }}</button>
-  </summary>
-  <div class="season-extras">
-    {% with trailer_vals = {"media_type": media_type_show.value, "tmdb_id": show.tmdb_id, "season": season.season} %}
-    {% include "partials/trailer_button.html" %}
-    {% endwith %}
-    <div class="{{ trailer_slot_class }}"></div>
-  </div>
-  <ul class="episodes plain">
-    {% for ep in episodes %}
-    {% set still = ep.still_path | still_url %}
-    <li class="episode">
-      <div class="still">{% if still %}<img src="{{ still }}" alt="" loading="lazy">{% endif %}</div>
-      <div class="episode-body">
-        <h3>{{ ep | episode_code }} {{ ep.title }}</h3>
-        <p class="muted">
-          {% if ep.air_date %}<span>{{ ep.air_date }}</span>{% endif %}
-          {% if not ep.aired %}<span class="badge">{{ unaired_label }}</span>{% endif %}
-          {% if ep.in_library %}<span class="badge ok">{{ in_library_label }}</span>{% endif %}
-          {% if ep.queued_job_id %}<a class="badge queued" href="{{ ep.queued_job_id | job_url }}">{{ queued_label }}</a>{% endif %}
-        </p>
-        {% if ep.overview %}<p class="overview clamp">{{ ep.overview }}</p>{% endif %}
-      </div>
-      <div class="episode-actions">
-        <button class="find" hx-get="/partials/search/torrents" hx-vals='{{ dict(find, season=ep.season, episode=ep.episode) | tojson }}'
-                hx-target="#stage" hx-swap="innerHTML show:#stage:top" hx-indicator="#searching">{{ find_torrents_label }}</button>
-      </div>
-    </li>
-    {% endfor %}
-    {% if not episodes %}<li class="muted">No episodes listed.</li>{% endif %}
-  </ul>
-</details>
-{% endfor %}
+<div class="{{ episodes_slot_class }}">{% include "partials/episode_list.html" %}</div>
 {% endif %}
 {% endblock %}
 {% block footer %}{% include "partials/tmdb_footer.html" %}{% endblock %}

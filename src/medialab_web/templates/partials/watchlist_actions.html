@@ -1,0 +1,30 @@
+{#- Save / Unsave and, for a show, Follow / Following + Unfollow. Expects
+    ``item`` (CardItem); ``view`` defaults to inline; ``picker_seasons`` (the
+    show page) renders the picker in place instead of fetching it. Callers
+    wrap this in an element with the watchlist_actions_class; every button
+    re-renders that element. -#}
+{%- set view = view | default(view_inline) -%}
+{%- set vals = dict(item | card_vals, view=view) -%}
+{%- set target = "closest ." ~ watchlist_actions_class -%}
+{% if item.on_watchlist %}
+{% if not item.following %}<button class="danger-outline" hx-delete="{{ watchlist_partial_path }}" hx-vals='{{ vals | tojson }}'
+        hx-target="{{ target }}" hx-swap="innerHTML">{{ unsave_label }}</button>{% endif %}
+{% else %}
+<button hx-put="{{ watchlist_partial_path }}" hx-vals='{{ vals | tojson }}'
+        hx-target="{{ target }}" hx-swap="innerHTML">{{ save_label }}</button>
+{% endif %}
+{% if item.media_type == media_type_show %}
+{% if item.following %}
+<span class="badge following">{{ following_label }}</span>
+<button class="danger-outline" hx-delete="{{ follow_partial_path }}" hx-vals='{{ vals | tojson }}'
+        hx-target="{{ target }}" hx-swap="innerHTML">{{ unfollow_label }}</button>
+{% elif picker_seasons is defined and picker_seasons %}
+<details class="follow-inline">
+  <summary class="button">{{ follow_label }}</summary>
+  {% with seasons = picker_seasons %}{% include "partials/follow_picker.html" %}{% endwith %}
+</details>
+{% else %}
+<button hx-get="{{ follow_partial_path }}" hx-vals='{{ vals | tojson }}'
+        hx-target="{{ target }}" hx-swap="innerHTML" hx-indicator="#busy">{{ follow_label }}</button>
+{% endif %}
+{% endif %}

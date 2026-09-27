@@ -489,7 +489,7 @@ async def test_settings_client_round_trip(client):
         assert await client.set_setting("torrent-downloader", "minimum_seeders", "x") is None
 
 
-# --- discover and wishlist ---
+# --- discover and watchlist ---
 
 _DISCOVER = {
     "items": [{"tmdb_id": 1, "media_type": "movie", "title": "Dune", "poster_path": "/d.jpg"}],
@@ -497,7 +497,7 @@ _DISCOVER = {
     "total_pages": 5,
     "cached_at": "2026-09-27T00:00:00+00:00",
 }
-_WISH = {
+_SAVED = {
     "tmdb_id": 1,
     "media_type": "movie",
     "title": "Dune",
@@ -538,44 +538,139 @@ async def test_discover_genres_calls_path(client):
 
 
 @pytest.mark.asyncio
-async def test_list_wishlist_filters_by_media_type(client):
-    from medialab_contracts import WishlistResponse
+async def test_list_watchlist_filters_by_media_type_and_kind(client):
+    from medialab_contracts import WatchlistKind, WatchlistResponse
 
-    mock_get = AsyncMock(return_value=_mock_response(200, {"items": [_WISH]}))
+    mock_get = AsyncMock(return_value=_mock_response(200, {"items": [_SAVED]}))
     with patch.object(client._http, "get", new=mock_get):
-        result = await client.list_wishlist(MediaType.MOVIE)
-        await client.list_wishlist()
-    assert isinstance(result, WishlistResponse)
-    assert mock_get.call_args_list[0].args[0].endswith("/api/v1/wishlist")
+        result = await client.list_watchlist(MediaType.MOVIE)
+        await client.list_watchlist(kind=WatchlistKind.FOLLOWING)
+        await client.list_watchlist()
+    assert isinstance(result, WatchlistResponse)
+    assert mock_get.call_args_list[0].args[0].endswith("/api/v1/watchlist")
     assert mock_get.call_args_list[0].kwargs["params"] == {"media_type": "movie"}
-    assert mock_get.call_args_list[1].kwargs["params"] == {}
+    assert mock_get.call_args_list[1].kwargs["params"] == {"kind": "following"}
+    assert mock_get.call_args_list[2].kwargs["params"] == {}
 
 
 @pytest.mark.asyncio
-async def test_add_to_wishlist_puts_body(client):
-    from medialab_contracts import WishlistAddRequest, WishlistItem
+async def test_add_to_watchlist_puts_body(client):
+    from medialab_contracts import WatchlistAddRequest, WatchlistItem
 
-    body = WishlistAddRequest(title="Dune", year="2021", poster_path="/d.jpg", overview="o")
-    mock_put = AsyncMock(return_value=_mock_response(200, _WISH))
+    body = WatchlistAddRequest(title="Dune", year="2021", poster_path="/d.jpg", overview="o")
+    mock_put = AsyncMock(return_value=_mock_response(200, _SAVED))
     with patch.object(client._http, "put", new=mock_put):
-        result = await client.add_to_wishlist(MediaType.MOVIE, 1, body)
-    assert isinstance(result, WishlistItem)
-    assert mock_put.call_args.args[0].endswith("/api/v1/wishlist/movie/1")
+        result = await client.add_to_watchlist(MediaType.MOVIE, 1, body)
+    assert isinstance(result, WatchlistItem)
+    assert mock_put.call_args.args[0].endswith("/api/v1/watchlist/movie/1")
     assert mock_put.call_args.kwargs["json"] == body.model_dump(mode="json")
 
 
 @pytest.mark.asyncio
-async def test_remove_from_wishlist_true_on_204(client):
+async def test_remove_from_watchlist_true_on_204(client):
     mock_delete = AsyncMock(return_value=_mock_response(204))
     with patch.object(client._http, "delete", new=mock_delete):
-        assert await client.remove_from_wishlist(MediaType.SHOW, 7) is True
-    assert mock_delete.call_args.args[0].endswith("/api/v1/wishlist/show/7")
+        assert await client.remove_from_watchlist(MediaType.SHOW, 7) is True
+    assert mock_delete.call_args.args[0].endswith("/api/v1/watchlist/show/7")
     with patch.object(client._http, "delete", new=AsyncMock(return_value=_mock_response(500))):
-        assert await client.remove_from_wishlist(MediaType.SHOW, 7) is False
+        assert await client.remove_from_watchlist(MediaType.SHOW, 7) is False
     with patch.object(
         client._http, "delete", new=AsyncMock(side_effect=httpx.ConnectError("refused"))
     ):
-        assert await client.remove_from_wishlist(MediaType.SHOW, 7) is False
+        assert await client.remove_from_watchlist(MediaType.SHOW, 7) is False
+
+
+# --- follow ---
+
+_FOLLOWED = {
+    **_SAVED,
+    "media_type": "show",
+    "kind": "following",
+    "follow": {
+        "start": {"mode": "from", "season": 2, "episode": 3},
+        "resolution": "1080p",
+        "followed_at": "2026-09-27T00:00:00+00:00",
+    },
+}
+
+
+@pytest.mark.asyncio
+async def test_follow_show_puts_the_request(client):
+    from medialab_contracts import FollowRequest, FollowStart, FollowStartMode, WatchlistItem
+
+    body = FollowRequest(start=FollowStart(mode=FollowStartMode.FROM, season=2, episode=3))
+    mock_put = AsyncMock(return_value=_mock_response(200, _FOLLOWED))
+    with patch.object(client._http, "put", new=mock_put):
+        result = await client.follow_show(7, body)
+    assert isinstance(result, WatchlistItem)
+    assert result.follow is not None and result.follow.start.season == 2
+    assert mock_put.call_args.args[0].endswith("/api/v1/watchlist/show/7/follow")
+    assert mock_put.call_args.kwargs["json"] == body.model_dump(mode="json")
+    with patch.object(client._http, "put", new=AsyncMock(return_value=_mock_response(404))):
+        assert await client.follow_show(7, body) is None
+
+
+@pytest.mark.asyncio
+async def test_unfollow_show_true_on_204(client):
+    mock_delete = AsyncMock(return_value=_mock_response(204))
+    with patch.object(client._http, "delete", new=mock_delete):
+        assert await client.unfollow_show(7) is True
+    assert mock_delete.call_args.args[0].endswith("/api/v1/watchlist/show/7/follow")
+
+
+@pytest.mark.asyncio
+async def test_pause_and_resume_post_and_parse(client):
+    from medialab_contracts import WatchlistItem
+
+    mock_post = AsyncMock(return_value=_mock_response(200, _FOLLOWED))
+    with patch.object(client._http, "post", new=mock_post):
+        assert isinstance(await client.pause_follow(7), WatchlistItem)
+        assert isinstance(await client.resume_follow(7), WatchlistItem)
+    assert mock_post.call_args_list[0].args[0].endswith("/api/v1/watchlist/show/7/follow/pause")
+    assert mock_post.call_args_list[1].args[0].endswith("/api/v1/watchlist/show/7/follow/resume")
+
+
+@pytest.mark.asyncio
+async def test_check_follow_posts_with_a_long_timeout(client):
+    from medialab_web.constants import CHECK_TIMEOUT_SECONDS
+    from medialab_web.schemas.watchlist import FollowCheckResponse
+
+    mock_post = AsyncMock(return_value=_mock_response(200, {"submitted": ["S02E05"]}))
+    with patch.object(client._http, "post", new=mock_post):
+        result = await client.check_follow(7)
+    assert isinstance(result, FollowCheckResponse) and result.submitted == ["S02E05"]
+    assert mock_post.call_args.args[0].endswith("/api/v1/watchlist/show/7/follow/check")
+    assert mock_post.call_args.kwargs["timeout"] == CHECK_TIMEOUT_SECONDS
+
+
+@pytest.mark.asyncio
+async def test_watchlist_episodes_parses_the_show_view(client):
+    from medialab_contracts import ShowBrowseResponse
+
+    payload = {
+        "tmdb_id": 7,
+        "title": "BB",
+        "seasons": [],
+        "episodes": [{"season": 1, "episode": 1, "submitted": "ignored", "wanted": False}],
+    }
+    mock_get = AsyncMock(return_value=_mock_response(200, payload))
+    with patch.object(client._http, "get", new=mock_get):
+        result = await client.watchlist_episodes(7)
+    assert isinstance(result, ShowBrowseResponse)
+    assert result.episodes[0].submitted == "ignored"
+    assert mock_get.call_args.args[0].endswith("/api/v1/watchlist/show/7/episodes")
+
+
+@pytest.mark.asyncio
+async def test_retry_episode_deletes_the_submission(client):
+    mock_delete = AsyncMock(return_value=_mock_response(204))
+    with patch.object(client._http, "delete", new=mock_delete):
+        assert await client.retry_episode(7, 2, 5) is True
+    assert mock_delete.call_args.args[0].endswith(
+        "/api/v1/watchlist/show/7/episodes/2/5/submission"
+    )
+    with patch.object(client._http, "delete", new=AsyncMock(return_value=_mock_response(404))):
+        assert await client.retry_episode(7, 2, 5) is False
 
 
 # --- videos ---

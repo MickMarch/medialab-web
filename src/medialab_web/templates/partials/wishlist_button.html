@@ -1,6 +1,0 @@
-{% if item.on_wishlist %}
-<button class="danger-outline" hx-delete="/partials/wishlist" hx-vals='{{ item | card_vals | tojson }}'
-        hx-swap="outerHTML">Remove from wishlist</button>
-{% else %}
-<button hx-put="/partials/wishlist" hx-vals='{{ item | card_vals | tojson }}' hx-swap="outerHTML">Add to wishlist</button>
-{% endif %}

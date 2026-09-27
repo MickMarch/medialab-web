@@ -24,6 +24,7 @@ from medialab_web.constants import (
 from medialab_web.deps import get_client
 from medialab_web.media import from_tmdb_media_type
 from medialab_web.rendering import render
+from medialab_web.schemas.discover import CardItem
 from medialab_web.schemas.torrents import TorrentResult
 
 router = APIRouter(dependencies=[Depends(require_session)])
@@ -71,13 +72,11 @@ async def tmdb_results(
     response = await client.search_tmdb(query)
     if response is None:
         return _error(request, "TMDB search failed at the gateway.")
-    results = [r for r in response.data if from_tmdb_media_type(r.media_type) is not None][
-        :TMDB_RESULTS_MAX
-    ]
+    results = [CardItem.from_search(r) for r in response.data if from_tmdb_media_type(r.media_type)]
     return render(
         request,
         "partials/tmdb_results.html",
-        {"results": results, "query": query, "media_type_of": from_tmdb_media_type},
+        {"results": results[:TMDB_RESULTS_MAX], "query": query},
     )
 
 

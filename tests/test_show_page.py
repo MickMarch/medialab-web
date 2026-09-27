@@ -10,21 +10,28 @@ from medialab_contracts import (
     PosterSize,
     Season,
     ShowBrowseResponse,
-    WishlistResponse,
+    WatchlistKind,
+    WatchlistResponse,
     poster_url,
     still_url,
 )
 
 from medialab_web.constants import (
+    FOLLOW_LABEL,
+    FOLLOWING_LABEL,
+    IGNORED_LABEL,
     IN_LIBRARY_LABEL,
     QUEUED_LABEL,
+    RETRY_LABEL,
+    SAVED_LABEL,
+    SUBMITTED_LABEL,
     UNAIRED_LABEL,
+    WANTED_LABEL,
     WHOLE_SERIES,
-    WISHLISTED_LABEL,
 )
 from medialab_web.schemas.downloads import DownloadResponse
 from tests.conftest import make_job
-from tests.test_discover_page import NOW, _item, _wish
+from tests.test_discover_page import NOW, _item, _saved
 
 SHOW_ID = 1396
 SHOW_PATH = f"/shows/{SHOW_ID}"
@@ -101,7 +108,7 @@ async def test_show_page_renders_header_and_seasons(logged_in, show_client):
 
 async def test_show_page_opens_only_the_latest_season(logged_in, show_client):
     text = (await logged_in.get(SHOW_PATH)).text
-    assert text.count("<details") == 2
+    assert text.count('class="season"') == 2
     assert text.count("<details open") == 1
     latest = text.index("<details open")
     assert "Season 2" in text[latest : text.index("</summary>", latest)]
@@ -134,10 +141,61 @@ async def test_show_page_buttons_target_the_stage_with_the_searching_indicator(
 
 async def test_show_page_series_badges(logged_in, show_client):
     text = (await logged_in.get(SHOW_PATH)).text
-    assert IN_LIBRARY_LABEL not in text and WISHLISTED_LABEL not in text
-    show_client.browse_show = AsyncMock(return_value=_show(in_library=True, on_wishlist=True))
+    assert IN_LIBRARY_LABEL not in text and SAVED_LABEL not in text
+    show_client.browse_show = AsyncMock(
+        return_value=_show(in_library=True, on_watchlist=True, watchlist_kind=WatchlistKind.SAVED)
+    )
     text = (await logged_in.get(SHOW_PATH)).text
-    assert IN_LIBRARY_LABEL in text and WISHLISTED_LABEL in text
+    assert IN_LIBRARY_LABEL in text and 'class="badge saved"' in text
+
+
+async def test_show_page_header_has_save_and_an_inline_follow_picker(logged_in, show_client):
+    show_client.watchlist_episodes = AsyncMock()
+    text = (await logged_in.get(SHOW_PATH)).text
+    assert 'hx-put="/partials/watchlist"' in text
+    assert '<details class="follow-inline">' in text and f">{FOLLOW_LABEL}</summary>" in text
+    assert 'hx-put="/partials/watchlist/follow"' in text
+    # seeded from the page data: no extra gateway call for the seasons
+    assert '<option value="1" data-episodes="2">' in text
+    assert '<option value="2" data-episodes="1">' in text
+    assert 'hx-get="/partials/watchlist/follow"' not in text
+    show_client.browse_show.assert_awaited_once_with(SHOW_ID)
+    show_client.watchlist_episodes.assert_not_awaited()
+
+
+async def test_show_page_following_reads_the_watchlist_episodes(logged_in, show_client):
+    show_client.browse_show = AsyncMock(
+        return_value=_show(on_watchlist=True, watchlist_kind=WatchlistKind.FOLLOWING)
+    )
+    show_client.watchlist_episodes = AsyncMock(
+        return_value=_show(
+            on_watchlist=True,
+            watchlist_kind=WatchlistKind.FOLLOWING,
+            episodes=[
+                _episode(1, 1, submitted="submitted"),
+                _episode(1, 2, submitted="ignored"),
+                _episode(2, 1, wanted=True),
+            ],
+        )
+    )
+    text = (await logged_in.get(SHOW_PATH)).text
+    show_client.watchlist_episodes.assert_awaited_once_with(SHOW_ID)
+    assert 'class="badge following"' in text and FOLLOWING_LABEL in text
+    assert text.count(SUBMITTED_LABEL) == 1 and text.count(IGNORED_LABEL) == 1
+    assert text.count(WANTED_LABEL) == 1
+    assert text.count(f">{RETRY_LABEL}<") == 2
+    assert f'hx-delete="/partials/watchlist/{SHOW_ID}/episodes/1/1/submission"' in text
+    assert 'hx-delete="/partials/watchlist/follow"' in text and "Unfollow" in text
+    assert "follow-inline" not in text
+
+
+async def test_show_page_not_following_hides_follow_badges(logged_in, show_client):
+    show_client.browse_show = AsyncMock(
+        return_value=_show(episodes=[_episode(1, 1, submitted="submitted", wanted=True)])
+    )
+    text = (await logged_in.get(SHOW_PATH)).text
+    assert SUBMITTED_LABEL not in text and WANTED_LABEL not in text
+    assert f">{RETRY_LABEL}<" not in text
 
 
 async def test_show_page_episode_badges(logged_in, show_client):
@@ -195,13 +253,13 @@ async def test_browse_link_on_show_cards_only(logged_in, mock_client):
     assert 'href="/shows/438631"' not in text
 
 
-async def test_browse_link_on_wishlist_show_cards(logged_in, mock_client):
-    mock_client.list_wishlist = AsyncMock(
-        return_value=WishlistResponse(
-            items=[_wish(), _wish(tmdb_id=5, media_type=MediaType.MOVIE, title="Heat")]
+async def test_browse_link_on_watchlist_show_cards(logged_in, mock_client):
+    mock_client.list_watchlist = AsyncMock(
+        return_value=WatchlistResponse(
+            items=[_saved(), _saved(tmdb_id=5, media_type=MediaType.MOVIE, title="Heat")]
         )
     )
-    text = (await logged_in.get("/wishlist")).text
+    text = (await logged_in.get("/watchlist")).text
     assert text.count("Browse") == 1
     assert f'href="{SHOW_PATH}"' in text
 

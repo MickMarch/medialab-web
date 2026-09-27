@@ -1,0 +1,50 @@
+{#- The follow picker: start point, season and episode for a ``from`` start,
+    and resolution. Expects ``item`` (CardItem), ``seasons`` (number and
+    episodes per season, specials excluded) and ``view``. Inline, the form
+    and its Cancel re-render the surrounding watchlist actions; on the
+    watchlist page it sits in #stage and a follow moves to the Following tab. -#}
+{%- set view = view | default(view_inline) -%}
+{%- set inline = view == view_inline -%}
+{%- set target = "closest ." ~ watchlist_actions_class if inline else "#stage" -%}
+{%- set max_episodes = (seasons | map(attribute="episodes") | list or [1]) | max -%}
+<form class="follow-picker" hx-put="{{ follow_partial_path }}" hx-target="{{ target }}" hx-swap="innerHTML" hx-indicator="#busy">
+  {% for name, value in (item | card_vals).items() %}<input type="hidden" name="{{ name }}" value="{{ value }}">
+  {% endfor %}<input type="hidden" name="view" value="{{ view }}">
+  <fieldset>
+    <legend>{{ follow_label }} {{ item.title }}</legend>
+    {% for mode in follow_start_modes %}
+    <label class="radio"><input type="radio" name="mode" value="{{ mode.value }}"{% if loop.first %} checked{% endif %}> {{ follow_start_labels[mode] }}</label>
+    {% if mode == start_mode_from %}
+    <div class="from-scope">
+      <label>Season
+        <select name="season" onchange="const n = +this.selectedOptions[0].dataset.episodes; for (const o of this.form.episode.options) o.hidden = +o.value > n; if (this.form.episode.selectedOptions[0].hidden) this.form.episode.value = 1">
+          {% for s in seasons %}<option value="{{ s.number }}" data-episodes="{{ s.episodes }}">Season {{ s.number }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Episode
+        <select name="episode">
+          {% for n in range(1, max_episodes + 1) %}<option value="{{ n }}"{% if seasons and n > seasons[0].episodes %} hidden{% endif %}>{{ n }}</option>
+          {% endfor %}
+        </select>
+      </label>
+    </div>
+    {% endif %}
+    {% endfor %}
+  </fieldset>
+  <label>Resolution
+    <select name="resolution">
+      {% for r in follow_resolutions %}<option value="{{ r }}"{% if r == default_resolution %} selected{% endif %}>{{ r }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <div class="picker-actions">
+    <button type="submit" class="primary">{{ follow_label }}</button>
+    {% if inline %}
+    <button type="button" class="link" hx-get="{{ follow_button_partial_path }}" hx-vals='{{ dict(item | card_vals, view=view) | tojson }}'
+            hx-target="{{ target }}" hx-swap="innerHTML">{{ cancel_label }}</button>
+    {% else %}
+    <button type="button" class="link" onclick="this.closest('#stage').replaceChildren()">{{ cancel_label }}</button>
+    {% endif %}
+  </div>
+</form>

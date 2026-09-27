@@ -6,7 +6,7 @@
   {% if item.overview %}<p class="overview full">{{ item.overview }}</p>{% endif %}
   <div class="detail-actions">
     {% include "partials/download_button.html" %}
-    {% include "partials/wishlist_button.html" %}
+    <div class="{{ watchlist_actions_class }}">{% include "partials/watchlist_actions.html" %}</div>
     {% with trailer_vals = {"media_type": item.media_type.value, "tmdb_id": item.tmdb_id} %}
     {% include "partials/trailer_button.html" %}
     {% endwith %}

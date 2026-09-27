@@ -2,7 +2,14 @@ from unittest.mock import AsyncMock
 
 from medialab_contracts import MediaType, PosterSize, poster_url
 
-from medialab_web.constants import IN_LIBRARY_LABEL, REDO_NOTICE, WISHLISTED_LABEL
+from medialab_web.constants import (
+    FOLLOW_LABEL,
+    FOLLOWING_LABEL,
+    IN_LIBRARY_LABEL,
+    REDO_NOTICE,
+    SAVE_LABEL,
+    SAVED_LABEL,
+)
 from medialab_web.schemas.downloads import DownloadResponse
 from medialab_web.schemas.tmdb import TmdbMediaDetailResponse, TmdbSearchResponse, TmdbSearchResult
 from medialab_web.schemas.torrents import TorrentResult, TorrentSearchResponse
@@ -58,19 +65,41 @@ async def test_tmdb_results_show_movie_and_show_buttons(logged_in, mock_client):
     mock_client.search_tmdb.assert_awaited_once_with("x")
 
 
-async def test_tmdb_results_badge_wishlisted_and_library_titles(logged_in, mock_client):
+async def test_tmdb_results_badge_from_watchlist_kind_and_library(logged_in, mock_client):
     mock_client.search_tmdb = AsyncMock(return_value=_tmdb(_result()))
     text = (await logged_in.get("/partials/search/tmdb", params={"query": "x"})).text
-    assert WISHLISTED_LABEL not in text and IN_LIBRARY_LABEL not in text
+    assert 'class="badge saved"' not in text and 'class="badge following"' not in text
+    assert IN_LIBRARY_LABEL not in text
     mock_client.search_tmdb = AsyncMock(
         return_value=_tmdb(
-            _result(on_wishlist=True),
-            _result(tmdb_id=2, title="Lost", media_type="tv", in_library=True),
+            _result(on_watchlist=True, watchlist_kind="saved"),
+            _result(
+                tmdb_id=2,
+                title="Lost",
+                media_type="tv",
+                in_library=True,
+                on_watchlist=True,
+                watchlist_kind="following",
+            ),
         )
     )
     text = (await logged_in.get("/partials/search/tmdb", params={"query": "x"})).text
-    assert text.count(WISHLISTED_LABEL) == 1
+    assert text.count(f'class="badge saved">{SAVED_LABEL}<') == 1
+    # the poster badge and the actions block, which carries the state after an inline follow
+    assert text.count(f'class="badge following">{FOLLOWING_LABEL}<') == 2
     assert text.count(IN_LIBRARY_LABEL) == 1
+
+
+async def test_tmdb_results_carry_save_and_follow(logged_in, mock_client):
+    mock_client.search_tmdb = AsyncMock(
+        return_value=_tmdb(_result(), _result(tmdb_id=2, title="Lost", media_type="tv"))
+    )
+    text = (await logged_in.get("/partials/search/tmdb", params={"query": "x"})).text
+    assert text.count('hx-put="/partials/watchlist" hx-vals=') == 2
+    assert text.count(f">{SAVE_LABEL}<") == 2
+    assert text.count('hx-get="/partials/watchlist/follow"') == 1
+    assert text.count(f">{FOLLOW_LABEL}<") == 1
+    assert '"media_type": "show"' in text
 
 
 async def test_tmdb_no_results(logged_in, mock_client):

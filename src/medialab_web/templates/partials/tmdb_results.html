@@ -5,20 +5,20 @@
 {% else %}
 <p class="muted">Step 2 of 4: pick the title.</p>
 <div class="posters wide tmdb">
-  {% for r in results %}
-  {% set mt = media_type_of(r.media_type) %}
-  {% call poster_card(r, browse_href=r | browse_url) %}
-    <h3>{{ r.title }} <span class="muted">({{ r.year }})</span></h3>
-    <p class="muted"><span class="badge">{{ mt.value }}</span> rating {{ "%.1f" | format(r.vote_average) }}</p>
-    {% if r.overview %}<p class="overview">{{ r.overview }}</p>{% endif %}
-    {% if mt.value == "show" %}
-    <button class="primary" hx-get="/partials/search/scope" hx-vals='{"tmdb_id": {{ r.tmdb_id }}, "title": {{ r.title | tojson }}, "year": {{ r.year | tojson }}, "query": {{ query | tojson }}}'
+  {% for item in results %}
+  {% call poster_card(item, browse_href=item | browse_url) %}
+    <h3>{{ item.title }} <span class="muted">({{ item.year }})</span></h3>
+    <p class="muted"><span class="badge">{{ item.media_type.value }}</span> rating {{ "%.1f" | format(item.vote_average) }}</p>
+    {% if item.overview %}<p class="overview">{{ item.overview }}</p>{% endif %}
+    {% if item.media_type == media_type_show %}
+    <button class="primary" hx-get="/partials/search/scope" hx-vals='{"tmdb_id": {{ item.tmdb_id }}, "title": {{ item.title | tojson }}, "year": {{ item.year | tojson }}, "query": {{ query | tojson }}}'
             hx-target="#stage" hx-swap="innerHTML show:#stage:top" hx-indicator="#busy">Choose season</button>
     {% else %}
     <button class="primary" hx-get="/partials/search/torrents"
-            hx-vals='{"tmdb_id": {{ r.tmdb_id }}, "title": {{ r.title | tojson }}, "year": {{ r.year | tojson }}, "media_type": "movie", "query": {{ query | tojson }}}'
+            hx-vals='{"tmdb_id": {{ item.tmdb_id }}, "title": {{ item.title | tojson }}, "year": {{ item.year | tojson }}, "media_type": "movie", "query": {{ query | tojson }}}'
             hx-target="#stage" hx-swap="innerHTML show:#stage:top" hx-indicator="#searching">Find torrents</button>
     {% endif %}
+    <div class="{{ watchlist_actions_class }}">{% include "partials/watchlist_actions.html" %}</div>
   {% endcall %}
   {% endfor %}
 </div>
