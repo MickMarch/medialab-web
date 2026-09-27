@@ -7,7 +7,7 @@
       {% if job.progress %}{% set p = job.progress %}
       <div class="job-progress">
         <progress max="1" value="{{ p.progress }}">{{ p.progress | percent }}</progress>
-        <span class="muted">{{ p.progress | percent }} - {{ p.download_speed | format_size }}/s - ETA {{ p.eta_seconds | format_eta }}</span>
+        <span class="muted">{{ p.progress | percent }} - {{ p.download_speed | format_speed }} - ETA {{ p.eta_seconds | format_eta }}</span>
       </div>
       {% endif %}</td>
   <td>{{ job.updated_at | short_date }}</td>

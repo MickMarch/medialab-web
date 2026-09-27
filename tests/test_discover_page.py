@@ -217,6 +217,7 @@ async def test_wishlist_page_lists_items_with_actions(logged_in, mock_client):
     text = (await logged_in.get("/wishlist")).text
     assert "Breaking Bad" in text and "Heat" in text
     assert "In Jellyfin" in text
+    assert WISHLISTED_LABEL not in text
     assert 'hx-get="/partials/search/scope"' in text
     assert 'hx-get="/partials/search/torrents"' in text
     assert text.count('hx-delete="/partials/wishlist"') == 2

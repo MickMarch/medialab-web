@@ -3,6 +3,7 @@ from medialab_web.format import (
     format_eta,
     format_percent,
     format_size,
+    format_speed,
     job_title,
     short_date,
 )
@@ -64,3 +65,11 @@ def test_format_percent():
     assert format_percent(0.42) == "42%"
     assert format_percent(0.0) == "0%"
     assert format_percent(1.0) == "100%"
+
+
+def test_format_speed():
+    assert format_speed(0) == "0 KB/s"
+    assert format_speed(640 * 1024) == "640 KB/s"
+    assert format_speed(1024**2) == "1.0 MB/s"
+    assert format_speed(int(1.25 * 1024**2)) == "1.2 MB/s"
+    assert format_speed(3 * 1024**2) == "3.0 MB/s"

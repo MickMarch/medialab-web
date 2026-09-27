@@ -26,6 +26,7 @@ templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 templates.env.filters["job_title"] = fmt.job_title
 templates.env.filters["short_date"] = fmt.short_date
 templates.env.filters["format_size"] = fmt.format_size
+templates.env.filters["format_speed"] = fmt.format_speed
 templates.env.filters["format_eta"] = fmt.format_eta
 templates.env.filters["percent"] = fmt.format_percent
 templates.env.filters["breakable"] = fmt.breakable

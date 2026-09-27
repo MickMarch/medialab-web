@@ -1,15 +1,18 @@
-{#- poster_card(item, open_vals=none): a poster with a text fallback. With
-    open_vals the poster is a button that loads the detail card. Body via call. -#}
-{% macro poster_card(item, open_vals=none) -%}
+{#- poster_card(item, open_vals=none, show_wishlisted=true): a poster with a
+    text fallback. With open_vals the poster is a button that loads the detail
+    card. show_wishlisted=false hides the Wishlisted badge where every card is
+    on the wishlist. Body via call. -#}
+{% macro poster_card(item, open_vals=none, show_wishlisted=true) -%}
 {% set src = item.poster_path | poster_url %}
 <article class="card poster-card{% if not src %} no-poster{% endif %}">
   {% if open_vals %}<button class="poster" type="button" title="{{ item.title }}" hx-get="/partials/discover/detail" hx-vals='{{ open_vals | tojson }}'
           hx-target="#detail" hx-swap="innerHTML show:#detail:top">{% else %}<div class="poster">{% endif %}
     {% if src %}<img src="{{ src }}" alt="{{ item.title }} poster" loading="lazy" onerror="this.closest('.poster-card').classList.add('no-poster')">{% endif %}
     <span class="poster-text">{{ item.title }}{% if item.year %} ({{ item.year }}){% endif %}</span>
-    {% if item.in_library or item.on_wishlist %}<span class="poster-badges">
+    {% set wishlisted = show_wishlisted and item.on_wishlist %}
+    {% if item.in_library or wishlisted %}<span class="poster-badges">
       {%- if item.in_library %}<span class="badge ok">{{ in_library_label }}</span>{% endif %}
-      {%- if item.on_wishlist %}<span class="badge wishlisted">{{ wishlisted_label }}</span>{% endif -%}
+      {%- if wishlisted %}<span class="badge wishlisted">{{ wishlisted_label }}</span>{% endif -%}
     </span>{% endif %}
   {% if open_vals %}</button>{% else %}</div>{% endif %}
   {% if caller %}<div class="poster-body">{{ caller() }}</div>{% endif %}

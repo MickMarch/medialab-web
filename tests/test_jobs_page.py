@@ -138,7 +138,7 @@ async def test_active_row_renders_progress_bar_percent_speed_and_eta(logged_in, 
     mock_client.list_jobs = _jobs(make_job("DOWNLOADING", "a", progress=_progress()))
     text = (await logged_in.get("/partials/jobs")).text
     assert '<progress max="1" value="0.42"' in text
-    assert "42% - 3 MB/s - ETA 12m" in text
+    assert "42% - 3.0 MB/s - ETA 12m" in text
 
 
 async def test_unknown_eta_renders_dash(logged_in, mock_client):
