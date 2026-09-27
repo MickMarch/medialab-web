@@ -157,3 +157,13 @@ td.title a { color: var(--fg); }
   .still { display: none; }
 }
 .redo-link { display: block; font-size: .8rem; }
+:root { --trailer-ratio: 16 / 9; }
+.season-extras { padding: 0 1rem .75rem; display: flex; flex-direction: column; gap: .5rem; }
+.trailer-slot:empty { display: none; }
+.detail .trailer-slot { margin-top: .75rem; }
+.trailer { display: flex; flex-direction: column; gap: .25rem; }
+.trailer-head { display: flex; justify-content: space-between; align-items: center; gap: .5rem; margin: 0; }
+.trailer-name { font-weight: 600; overflow-wrap: anywhere; }
+.trailer-frame { display: block; width: 100%; height: auto; aspect-ratio: var(--trailer-ratio); border: 0; border-radius: 6px; background: var(--line); }
+.trailers .trailer-item { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; padding: .25rem 0; }
+.trailer-notice { margin: 0; }

@@ -38,7 +38,8 @@ src/medialab_web/
 │                   search (/search, tmdb/scope/torrents partials, /downloads),
 │                   settings (/settings page, save and reset rows), system (/health),
 │                   discover (/discover, /wishlist, detail and wishlist toggle partials),
-│                   shows (/shows/{tmdb_id}: seasons and episodes, Find torrents per level)
+│                   shows (/shows/{tmdb_id}: seasons and episodes, Find torrents per level),
+│                   trailers (/partials/trailers: player, list or notice; /play; nothing on render)
 ├── media.py        TMDB media type -> contracts MediaType
 ├── templates/      base, login, index, search, discover, wishlist, show, settings, partials/
 │                   (poster_card macro shared by discover, wishlist and search results)

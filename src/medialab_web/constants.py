@@ -52,6 +52,14 @@ NAV_LINKS = (
     (WISHLIST_PATH, "Wishlist"),
     (SETTINGS_PATH, "Settings"),
 )
+TRAILERS_PARTIAL_PATH = "/partials/trailers"
+TRAILER_PLAY_PATH = TRAILERS_PARTIAL_PATH + "/play"
+TRAILER_SLOT_CLASS = "trailer-slot"
+WATCH_TRAILER_LABEL = "Watch trailer"
+TRAILER_CLOSE_LABEL = "Close"
+OFFICIAL_LABEL = "Official"
+NO_TRAILER_NOTICE = "No trailer on TMDB"
+TRAILERS_UNAVAILABLE_MESSAGE = "Could not load trailers. TMDB or the gateway is not reachable."
 FIRST_PAGE = 1
 TMDB_ATTRIBUTION = "This product uses the TMDB API but is not endorsed or certified by TMDB."
 MEDIA_TYPE_LABELS = {MediaType.MOVIE: "Movies", MediaType.SHOW: "Shows"}

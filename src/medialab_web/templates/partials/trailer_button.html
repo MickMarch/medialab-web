@@ -1,0 +1,4 @@
+{# Expects ``trailer_vals``: media_type, tmdb_id and, for a season row, season.
+   The slot is the next ``.trailer-slot`` after the button in document order. #}
+<button type="button" class="trailer-open" hx-get="{{ trailers_path }}" hx-vals='{{ trailer_vals | tojson }}'
+        hx-target="next .{{ trailer_slot_class }}" hx-swap="innerHTML" hx-disabled-elt="this">{{ watch_trailer_label }}</button>

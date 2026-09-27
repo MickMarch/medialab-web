@@ -1,0 +1,11 @@
+{# One player per page: when this one loads, every other slot is emptied, which
+   also stops whatever was playing there. #}
+<div class="trailer" hx-on::load="document.querySelectorAll('.{{ trailer_slot_class }}').forEach(function (slot) { if (!slot.contains(this)) slot.replaceChildren(); }, this)">
+  <p class="trailer-head">
+    <span class="trailer-name">{{ name }}</span>
+    <button class="link trailer-close" type="button" onclick="this.closest('.{{ trailer_slot_class }}').replaceChildren()" aria-label="{{ trailer_close_label }} trailer">{{ trailer_close_label }}</button>
+  </p>
+  <iframe class="trailer-frame" src="{{ youtube_embed_url(key) }}" title="{{ name }}"
+          allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen loading="lazy"
+          referrerpolicy="strict-origin-when-cross-origin"></iframe>
+</div>
