@@ -6,6 +6,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- Error notices (failed delete, retry, redo, download, wishlist toggle) now
+  render: htmx is configured to swap 4xx and 5xx responses.
+
 ### Added
 
 - Redo on a finished job: the jobs page opens the torrent step above the
