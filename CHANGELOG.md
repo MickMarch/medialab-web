@@ -6,6 +6,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.16.0] - 2026-10-02
+
 ### Changed
 
 - The trailer list is a grid of YouTube thumbnails with the name clamped
