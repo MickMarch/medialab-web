@@ -6,6 +6,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Select mode on the Jobs page: a checkbox per row, a sticky bar with the
+  count and Delete selected, one combined deletion plan and one
+  confirmation for every checked job. Jobs the single delete would refuse
+  are listed and skipped; the rest are removed in one gateway call
+  (MickMarch/medialab#105).
+
 ## [0.16.0] - 2026-10-02
 
 ### Changed

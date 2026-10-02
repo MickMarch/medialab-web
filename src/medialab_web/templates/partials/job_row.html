@@ -1,4 +1,5 @@
 <tr id="{{ job_row_id_prefix }}{{ job.id }}" class="status-{{ job.status | lower }}">
+  <td class="select">{% if job.status != "DELETED" %}<input type="checkbox" name="job_ids" value="{{ job.id }}" aria-label="Select {{ job | job_title }}">{% endif %}</td>
   <td class="title">{% if job.media_type == media_type_show %}<a href="{{ job.tmdb_id | show_url }}">{{ job | job_title }}</a>{% else %}{{ job | job_title }}{% endif %}</td>
   <td class="release"><code>{{ job.release_name | breakable }}</code></td>
   <td><span class="badge">{{ job.status }}</span>

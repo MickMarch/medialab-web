@@ -6,7 +6,7 @@
 </section>
 
 <section class="toolbar">
-  <form hx-get="/partials/jobs" hx-target="#jobs" hx-trigger="change">
+  <form hx-get="/partials/jobs" hx-target="#jobs" hx-trigger="change" hx-on::before-request="setSelectMode(false)">
     <label>Status
       <select name="status_filter">
         <option value="" {% if not status_filter %}selected{% endif %}>All active</option>
@@ -20,16 +20,43 @@
           hx-confirm="Pause every completed (seeding) torrent? Downloads are untouched.">
     Stop seeding
   </button>
+  <button type="button" onclick="setSelectMode(!document.getElementById('jobs').classList.contains('{{ select_mode_class }}'))">{{ select_label }}</button>
   <div id="notice" aria-live="polite"></div>
   <span id="busy" class="htmx-indicator muted">Working...</span>
 </section>
+
+{# Select mode: checkboxes per row, a sticky bar with the count, one combined plan. #}
+<div id="{{ bulk_plan_id }}" class="plan-slot"></div>
 
 {# Redo opens the torrent step here, above the table, like the show page does. #}
 {% include "partials/searching.html" %}
 <section id="stage" class="{{ download_slot_class }}"></section>
 
 <section id="jobs" hx-get="/partials/jobs{% if status_filter %}?status_filter={{ status_filter }}{% endif %}"
-         hx-trigger="load, every {{ jobs_refresh_seconds }}s [!document.getElementById('{{ jobs_poll_id }}')]" hx-swap="innerHTML">
+         hx-trigger="load, every {{ jobs_refresh_seconds }}s [!document.getElementById('{{ jobs_poll_id }}')]" hx-swap="innerHTML"
+         hx-on:change="updateSelectedCount()" hx-on::after-swap="updateSelectedCount()">
   <p class="muted">Loading jobs...</p>
 </section>
+<form id="{{ bulk_bar_id }}" class="bulk-bar" hx-post="/partials/jobs/plan" hx-include="#jobs input[name='job_ids']:checked"
+      hx-target="#{{ bulk_plan_id }}" hx-swap="innerHTML show:#{{ bulk_plan_id }}:top" hx-indicator="#busy">
+  <span>{{ jobs_selected_text }} <strong id="selected-count">0</strong></span>
+  <button class="danger" id="delete-selected" disabled>{{ delete_selected_label }}</button>
+  <button type="button" class="link" onclick="setSelectMode(false)">{{ cancel_label }}</button>
+</form>
+<script>
+  function selectedBoxes() { return document.querySelectorAll("#jobs input[name='job_ids']:checked"); }
+  function updateSelectedCount() {
+    var count = selectedBoxes().length;
+    document.getElementById("selected-count").textContent = count;
+    document.getElementById("delete-selected").disabled = count === 0;
+  }
+  function setSelectMode(on) {
+    document.getElementById("jobs").classList.toggle("{{ select_mode_class }}", on);
+    if (!on) {
+      selectedBoxes().forEach(function (box) { box.checked = false; });
+      document.getElementById("{{ bulk_plan_id }}").replaceChildren();
+    }
+    updateSelectedCount();
+  }
+</script>
 {% endblock %}

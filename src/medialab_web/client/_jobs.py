@@ -1,7 +1,7 @@
 from medialab_contracts import API_PREFIX
 
 from medialab_web.client._base import _BaseClient
-from medialab_web.schemas.deletion import DeletionPlan
+from medialab_web.schemas.deletion import BulkDeleteResult, BulkDeletionPlan, DeletionPlan
 from medialab_web.schemas.jobs import JobsResponse, JobView
 
 
@@ -21,6 +21,19 @@ class _JobsMixin(_BaseClient):
         # Read-only: what a delete would remove, shown before confirming.
         data = await self._get(f"{API_PREFIX}/jobs/{job_id}/deletion-plan")
         return self._parse(DeletionPlan, data)
+
+    async def bulk_deletion_plan(self, job_ids: list[str]) -> BulkDeletionPlan | None:
+        data = await self._post(f"{API_PREFIX}/jobs/deletion-plan", json={"job_ids": job_ids})
+        return self._parse(BulkDeletionPlan, data)
+
+    async def bulk_delete(self, job_ids: list[str]) -> BulkDeleteResult | None:
+        # Many deletes in one call; the gateway runs them one after another.
+        data = await self._post(
+            f"{API_PREFIX}/jobs/delete",
+            json={"job_ids": job_ids},
+            timeout=self._torrent_search_timeout,
+        )
+        return self._parse(BulkDeleteResult, data)
 
     async def delete_job(self, job_id: str) -> JobView | None:
         # Deletes may take a while (file removal + Jellyfin); use the search timeout.

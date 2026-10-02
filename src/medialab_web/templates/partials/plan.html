@@ -3,15 +3,7 @@
   <p><strong>Cannot delete automatically:</strong> {{ plan.refused }}</p>
   {% else %}
   <p>Nothing has happened yet. Pressing <strong>Delete</strong> removes:</p>
-  <ul>
-    {% if plan.torrent %}<li>the torrent and its data in qBittorrent</li>{% endif %}
-    {% if plan.download_folder %}<li>download folder <code>{{ plan.download_folder }}</code> (if still present)</li>{% endif %}
-    {% for path in plan.placed_paths %}<li><code>{{ path }}</code></li>{% endfor %}
-    {% if plan.scan_path %}<li>then tells Jellyfin <code>{{ plan.scan_path }}</code> changed</li>{% endif %}
-    {% if not plan.torrent and not plan.download_folder and not plan.placed_paths %}
-    <li>nothing on disk; the job is just marked deleted</li>
-    {% endif %}
-  </ul>
+  {% include "partials/plan_items.html" %}
   <button class="danger" hx-delete="/jobs/{{ job_id }}" hx-target="#{{ job_row_id_prefix }}{{ job_id }}" hx-swap="outerHTML">Delete</button>
   {% endif %}
   <button class="link" onclick="this.closest('.plan-slot').innerHTML=''">Cancel</button>

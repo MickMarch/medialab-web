@@ -37,6 +37,7 @@ _FILE_NAME = Form(...)
 _SEASON = Form(None)
 _EPISODE = Form(None)
 _STATUS_FILTER = Form(None)
+_JOB_IDS = Form(...)
 
 
 def _row(request: Request, job: JobView, notice: str | None = None) -> HTMLResponse:
@@ -119,6 +120,41 @@ async def delete(
     if job is None:
         return _error(request, "Delete failed; nothing was changed.")
     return _row(request, job, notice="Deleted.")
+
+
+@router.post("/partials/jobs/plan", response_class=HTMLResponse)
+async def bulk_deletion_plan(
+    request: Request, job_ids: list[str] = _JOB_IDS, client: OrchestratorClient = _CLIENT
+) -> HTMLResponse:
+    """One combined plan for the checked rows, deletable jobs first."""
+    plans = await client.bulk_deletion_plan(job_ids)
+    if plans is None:
+        return _error(request, "Could not fetch the deletion plan.")
+    deletable = [entry for entry in plans.plans if not entry.plan.refused]
+    refused = [entry for entry in plans.plans if entry.plan.refused]
+    return render(request, "partials/bulk_plan.html", {"deletable": deletable, "refused": refused})
+
+
+@router.post("/jobs/delete", response_class=HTMLResponse)
+async def bulk_delete(
+    request: Request,
+    job_ids: list[str] = _JOB_IDS,
+    status_filter: str | None = _STATUS_FILTER,
+    client: OrchestratorClient = _CLIENT,
+) -> HTMLResponse:
+    """Delete the confirmed jobs in one gateway call, then the whole table
+    again with a notice; refused or failed jobs are named with the reason."""
+    result = await client.bulk_delete(job_ids)
+    if result is None:
+        return _error(request, "Bulk delete failed; nothing was changed.")
+    deleted = [entry for entry in result.results if entry.deleted]
+    failed = [entry for entry in result.results if not entry.deleted]
+    context = await _table_context(client, status_filter)
+    return render(
+        request,
+        "partials/bulk_deleted.html",
+        {"deleted": deleted, "failed": failed, "table": context},
+    )
 
 
 @router.get("/partials/jobs/{job_id}/redo", response_class=HTMLResponse)
