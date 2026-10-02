@@ -419,3 +419,12 @@ async def test_search_torrents_are_not_in_redo_mode(logged_in, mock_client):
     assert REDO_NOTICE not in text
     assert "/redo" not in text
     assert "Torrents for <strong>Dune (2021)</strong>" in text
+
+
+def test_torrent_query_never_wraps_the_year_in_parentheses():
+    # A parenthesised year poisons release-name matching; the pattern is "Title YYYY".
+    from medialab_web.routes.search import _torrent_query
+
+    assert _torrent_query("Dune", "2021", MediaType.MOVIE) == "Dune 2021"
+    assert _torrent_query("Lost", "2004", MediaType.SHOW) == "Lost"
+    assert "(" not in _torrent_query("Dune", "2021", MediaType.MOVIE)
