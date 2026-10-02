@@ -7,7 +7,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Form, Query, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
-from medialab_contracts import WatchlistItem, WatchlistKind
+from medialab_contracts import SeasonFollowMode, WatchlistItem, WatchlistKind
 from pydantic import ValidationError
 
 from medialab_web.auth import require_session
@@ -17,6 +17,7 @@ from medialab_web.constants import (
     FOLLOW_PARTIAL_PATH,
     LEGACY_WISHLIST_PATH,
     NOTHING_SUBMITTED_NOTICE,
+    SEASON_DECISION_PARTIAL_PATH,
     WATCHLIST_PARTIAL_PATH,
     WATCHLIST_PATH,
     WATCHLIST_SHOW_PARTIAL_PATH,
@@ -41,6 +42,7 @@ _HX_REDIRECT_HEADER = "HX-Redirect"
 _FOLLOW_ROUTE = WATCHLIST_SHOW_PARTIAL_PATH + "/follow"
 _EPISODES_ROUTE = WATCHLIST_SHOW_PARTIAL_PATH + "/episodes"
 _SUBMISSION_ROUTE = _EPISODES_ROUTE + "/{season}/{episode}/submission"
+_MODE = Form(...)
 
 CardQuery = Annotated[CardItem, Query()]
 CardForm = Annotated[CardItem, Form()]
@@ -224,6 +226,21 @@ async def _episode_list(request: Request, client: OrchestratorClient, tmdb_id: i
 async def episodes(
     request: Request, tmdb_id: int, client: OrchestratorClient = _CLIENT
 ) -> HTMLResponse:
+    return await _episode_list(request, client, tmdb_id)
+
+
+@router.post(SEASON_DECISION_PARTIAL_PATH, response_class=HTMLResponse)
+async def decide_season(
+    request: Request,
+    tmdb_id: int,
+    season: int,
+    mode: SeasonFollowMode = _MODE,
+    client: OrchestratorClient = _CLIENT,
+) -> HTMLResponse:
+    """How a season whose pack was not found continues; the episode list is
+    re-rendered so the season shows its new state."""
+    if await client.decide_season(tmdb_id, season, mode) is None:
+        return _error(request, "Could not record the choice for that season.")
     return await _episode_list(request, client, tmdb_id)
 
 

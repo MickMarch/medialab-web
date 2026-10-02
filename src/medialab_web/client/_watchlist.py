@@ -2,7 +2,8 @@ from medialab_contracts import (
     API_PREFIX,
     FollowRequest,
     MediaType,
-    ShowBrowseResponse,
+    SeasonFollowMode,
+    SeasonFollowState,
     WatchlistAddRequest,
     WatchlistItem,
     WatchlistKind,
@@ -11,7 +12,7 @@ from medialab_contracts import (
 
 from medialab_web.client._base import _BaseClient
 from medialab_web.constants import CHECK_TIMEOUT_SECONDS
-from medialab_web.schemas.watchlist import FollowCheckResponse
+from medialab_web.schemas.watchlist import FollowCheckResponse, FollowedShowView
 
 _WATCHLIST = f"{API_PREFIX}/watchlist"
 
@@ -68,10 +69,20 @@ class _WatchlistMixin(_BaseClient):
         )
         return self._parse(FollowCheckResponse, data)
 
-    async def watchlist_episodes(self, tmdb_id: int) -> ShowBrowseResponse | None:
-        """The show view with what the follow submitted and still wants per episode."""
+    async def watchlist_episodes(self, tmdb_id: int) -> FollowedShowView | None:
+        """The show view with what the follow submitted and still wants per
+        episode, and the pack state per season."""
         data = await self._get(f"{_show_path(tmdb_id)}/episodes")
-        return self._parse(ShowBrowseResponse, data)
+        return self._parse(FollowedShowView, data)
+
+    async def decide_season(
+        self, tmdb_id: int, season: int, mode: SeasonFollowMode
+    ) -> SeasonFollowState | None:
+        """How a season whose pack was not found continues."""
+        data = await self._post(
+            f"{_show_path(tmdb_id)}/seasons/{season}/decision", json={"mode": mode.value}
+        )
+        return self._parse(SeasonFollowState, data)
 
     async def retry_episode(self, tmdb_id: int, season: int, episode: int) -> bool:
         """Clear a submission so the next follow tick may fetch the episode again."""

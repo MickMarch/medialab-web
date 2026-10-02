@@ -206,6 +206,8 @@ td.title a { color: var(--fg); }
 .badge.submitted { background: var(--ok); color: #062; }
 .badge.ignored { background: var(--line); color: var(--muted); text-decoration: line-through; }
 .badge.wanted { background: var(--warn); color: #320; }
+.badge.pack { background: #8e44ad; color: #fff; }
+.season-decision { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; }
 .follow-picker { display: flex; flex-direction: column; gap: .75rem; max-width: 520px; width: 100%; padding: .75rem; border: 1px solid var(--line); border-radius: 8px; background: var(--card); }
 .follow-picker fieldset { border: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .5rem; min-width: 0; }
 .follow-picker legend { padding: 0; margin-bottom: .5rem; font-weight: 600; }
