@@ -224,7 +224,7 @@ def _pick(**fields) -> dict[str, str]:
 
 async def test_index_has_a_stage_and_the_searching_panel(logged_in):
     text = (await logged_in.get("/")).text
-    assert 'id="stage"' in text
+    assert 'id="stage" class="download-slot"' in text
     assert 'id="searching"' in text
 
 

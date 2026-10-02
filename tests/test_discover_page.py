@@ -95,6 +95,7 @@ async def test_discover_renders_posters_and_text_card(logged_in, discover_client
     assert text.count('poster-card no-poster"') == 1
     assert "Posterless" in text
     assert text.count("<img") == 1
+    assert text.count('hx-target="closest .poster-card" hx-swap="afterend"') == 2
     discover_client.discover.assert_awaited_once_with(MediaType.MOVIE, genre=None, page=1)
 
 

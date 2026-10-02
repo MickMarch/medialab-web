@@ -12,7 +12,7 @@
   <span id="busy" class="htmx-indicator muted">Working...</span>
 </section>
 {% include "partials/searching.html" %}
-<section id="stage"></section>
+<section id="stage" class="{{ download_slot_class }}"></section>
 {% if items is none %}
 <p class="error">Could not load the watchlist from the gateway.</p>
 {% elif not items %}

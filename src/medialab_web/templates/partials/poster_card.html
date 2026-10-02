@@ -1,6 +1,6 @@
 {#- poster_card(item, open_vals=none, show_kind=true, browse_href=none): a
     poster with a text fallback. With open_vals the poster is a button that
-    loads the detail card. show_kind=false hides the Saved / Following badge
+    opens the detail card in place, right after this card in the grid. show_kind=false hides the Saved / Following badge
     where every card is on the watchlist. browse_href adds a Browse link to
     the show page (callers pass item | browse_url, which is none for a movie).
     Body via call. -#}
@@ -8,7 +8,7 @@
 {% set src = item.poster_path | poster_url %}
 <article class="card poster-card{% if not src %} no-poster{% endif %}">
   {% if open_vals %}<button class="poster" type="button" title="{{ item.title }}" hx-get="/partials/discover/detail" hx-vals='{{ open_vals | tojson }}'
-          hx-target="#detail" hx-swap="innerHTML show:#detail:top">{% else %}<div class="poster">{% endif %}
+          hx-target="closest .poster-card" hx-swap="afterend">{% else %}<div class="poster">{% endif %}
     {% if src %}<img src="{{ src }}" alt="{{ item.title }} poster" loading="lazy" onerror="this.closest('.poster-card').classList.add('no-poster')">{% endif %}
     <span class="poster-text">{{ item.title }}{% if item.year %} ({{ item.year }}){% endif %}</span>
     {% set kind = item.watchlist_kind if show_kind and item.on_watchlist else none %}

@@ -21,10 +21,7 @@
   </form>
   <span id="busy" class="htmx-indicator muted">Working...</span>
 </section>
-{% include "partials/searching.html" %}
-<section id="detail" aria-live="polite"></section>
-<section id="stage"></section>
-<div id="grid" class="posters">
+<div id="grid" class="posters" aria-live="polite">
   {% include "partials/discover_items.html" %}
 </div>
 {% endblock %}
