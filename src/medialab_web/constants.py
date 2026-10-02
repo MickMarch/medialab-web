@@ -99,6 +99,8 @@ WATCH_TRAILER_LABEL = "Watch trailer"
 TRAILER_CLOSE_LABEL = "Close"
 OFFICIAL_LABEL = "Official"
 NO_TRAILER_NOTICE = "No trailer on TMDB"
+# YouTube serves thumbnails without an API key; mqdefault is 320x180.
+YOUTUBE_THUMBNAIL_URL_TEMPLATE = "https://img.youtube.com/vi/{key}/mqdefault.jpg"
 TRAILERS_UNAVAILABLE_MESSAGE = "Could not load trailers. TMDB or the gateway is not reachable."
 FIRST_PAGE = 1
 TMDB_ATTRIBUTION = "This product uses the TMDB API but is not endorsed or certified by TMDB."

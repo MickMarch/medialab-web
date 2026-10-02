@@ -30,6 +30,7 @@ from medialab_web.constants import (
     SECONDS_PER_MINUTE,
     SHORT_ID_LENGTH,
     SHOWS_PATH,
+    YOUTUBE_THUMBNAIL_URL_TEMPLATE,
 )
 from medialab_web.media import from_tmdb_media_type
 from medialab_web.schemas.jobs import JobView
@@ -175,3 +176,8 @@ def card_vals(item: DiscoverItem) -> dict[str, object]:
     """``item`` as hx-vals: a missing value is sent as an empty string, since
     htmx would otherwise send the literal text ``null``."""
     return {k: "" if v is None else v for k, v in item.model_dump(mode="json").items()}
+
+
+def youtube_thumbnail_url(key: str) -> str:
+    """The medium thumbnail of a YouTube video, from the keyless image host."""
+    return YOUTUBE_THUMBNAIL_URL_TEMPLATE.format(key=key)
