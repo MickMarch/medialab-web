@@ -7,6 +7,8 @@ from medialab_contracts import (
     FollowRequest,
     FollowStart,
     FollowStartMode,
+    SeasonFollowState,
+    ShowBrowseResponse,
 )
 from pydantic import BaseModel, field_validator
 
@@ -17,6 +19,16 @@ class FollowCheckResponse(BaseModel):
     """Answer of ``POST /watchlist/show/{tmdb_id}/follow/check``: the episode codes submitted."""
 
     submitted: list[str] = []
+
+
+class FollowedShowView(ShowBrowseResponse):
+    """Answer of ``GET /watchlist/show/{tmdb_id}/episodes``: the show view
+    plus the per-season pack state of every season that has one."""
+
+    seasons_follow: list[SeasonFollowState] = []
+
+    def season_states(self) -> dict[int, SeasonFollowState]:
+        return {state.season: state for state in self.seasons_follow}
 
 
 class FollowView(str, Enum):

@@ -15,6 +15,7 @@ from medialab_web.deps import get_client
 from medialab_web.rendering import render
 from medialab_web.routes.search import search_timeout_seconds
 from medialab_web.schemas.discover import CardItem
+from medialab_web.schemas.watchlist import FollowedShowView
 
 router = APIRouter(dependencies=[Depends(require_session)])
 
@@ -63,12 +64,14 @@ def episode_list_context(show: ShowBrowseResponse) -> dict[str, object]:
     """What the episode list partial renders: seasons with episodes, the
     latest season open, and the Find torrents fields shared by every button."""
     seasons = _seasons_with_episodes(show)
+    states = show.season_states() if isinstance(show, FollowedShowView) else {}
     return {
         "show": show,
         "item": show_card(show),
         "seasons": seasons,
         "latest_season": max((season.season for season, _ in seasons), default=None),
         "following": show.watchlist_kind is WatchlistKind.FOLLOWING,
+        "season_states": states,
     }
 
 

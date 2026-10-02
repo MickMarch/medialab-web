@@ -9,6 +9,7 @@ from fastapi.templating import Jinja2Templates
 from medialab_contracts import (
     FollowStartMode,
     MediaType,
+    SeasonFollowMode,
     SubmissionState,
     WatchlistKind,
     still_url,
@@ -27,6 +28,7 @@ from medialab_web.constants import (
     DISCOVER_PATH,
     DOWNLOAD_NOTICE_CLASS,
     DOWNLOAD_SLOT_CLASS,
+    EPISODE_BY_EPISODE_LABEL,
     EPISODES_LABEL,
     EPISODES_SLOT_CLASS,
     FIND_TORRENTS_LABEL,
@@ -47,6 +49,7 @@ from medialab_web.constants import (
     NAV_LINKS,
     NEVER_TEXT,
     OFFICIAL_LABEL,
+    PACK_NOT_FOUND_TEXT,
     PAUSE_LABEL,
     PAUSED_LABEL,
     QUEUED_LABEL,
@@ -54,9 +57,13 @@ from medialab_web.constants import (
     REDO_NOTICE,
     RESUME_LABEL,
     RETRY_LABEL,
+    RETRY_LONGER_LABEL,
+    RETRY_SEEDERS_LABEL,
+    RETRYING_PACK_LABEL,
     SAVE_LABEL,
     SAVED_LABEL,
     SEARCHING_CLASS,
+    SEASON_PACK_LABEL,
     SELECT_LABEL,
     SELECT_MODE_CLASS,
     STATUS_DONE,
@@ -130,6 +137,13 @@ templates.env.globals["follow_partial_path"] = FOLLOW_PARTIAL_PATH
 templates.env.globals["follow_button_partial_path"] = FOLLOW_BUTTON_PARTIAL_PATH
 templates.env.globals["watchlist_actions_class"] = WATCHLIST_ACTIONS_CLASS
 templates.env.globals["episodes_slot_class"] = EPISODES_SLOT_CLASS
+templates.env.globals["season_mode"] = SeasonFollowMode
+templates.env.globals["season_pack_label"] = SEASON_PACK_LABEL
+templates.env.globals["pack_not_found_text"] = PACK_NOT_FOUND_TEXT
+templates.env.globals["retry_longer_label"] = RETRY_LONGER_LABEL
+templates.env.globals["retry_seeders_label"] = RETRY_SEEDERS_LABEL
+templates.env.globals["episode_by_episode_label"] = EPISODE_BY_EPISODE_LABEL
+templates.env.globals["retrying_pack_label"] = RETRYING_PACK_LABEL
 templates.env.globals["follow_notice_class"] = FOLLOW_NOTICE_CLASS
 templates.env.globals["save_label"] = SAVE_LABEL
 templates.env.globals["unsave_label"] = UNSAVE_LABEL

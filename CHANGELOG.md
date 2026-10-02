@@ -6,6 +6,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Season rows on the Following card and the show page show the follow's
+  season-pack state: a Season pack badge linking to the pack job, Retrying
+  pack, Episode by episode, or, when no pack was found, the three choices
+  (retry with a longer search, retry with fewer seeders, episode by
+  episode) that post the decision and re-render the list
+  (MickMarch/medialab#104).
+- medialab-contracts pinned to v1.1.0 for the season follow models.
+
 ## [0.17.0] - 2026-10-02
 
 ### Added

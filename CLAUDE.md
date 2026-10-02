@@ -41,7 +41,8 @@ src/medialab_web/
 │                   settings (/settings page, save and reset rows), system (/health),
 │                   discover (/discover grid and detail partial),
 │                   watchlist (/watchlist tabs, /wishlist redirect, save and unsave, the
-│                   follow picker and follow, pause/resume/check/unfollow, episodes and retry),
+│                   follow picker and follow, pause/resume/check/unfollow, episodes and retry,
+│                   the season pack decision),
 │                   shows (/shows/{tmdb_id}: seasons and episodes, Find torrents per level;
 │                   episode_list_context and picker_seasons shared with watchlist),
 │                   trailers (/partials/trailers: player, list or notice; /play; nothing on render)

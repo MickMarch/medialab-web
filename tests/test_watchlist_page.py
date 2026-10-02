@@ -411,3 +411,92 @@ async def test_follow_failures_render_errors(logged_in, watchlist_client):
 async def test_watchlist_requires_login(client):
     assert (await client.get("/watchlist")).status_code == 303
     assert (await client.put(FOLLOW_PATH, data={})).status_code == 303
+
+
+# --- season packs ---
+
+from medialab_contracts import SeasonFollowMode, SeasonFollowState  # noqa: E402
+
+from medialab_web.constants import (  # noqa: E402
+    EPISODE_BY_EPISODE_LABEL,
+    PACK_NOT_FOUND_TEXT,
+    RETRY_LONGER_LABEL,
+    RETRY_SEEDERS_LABEL,
+    RETRYING_PACK_LABEL,
+    SEASON_PACK_LABEL,
+)
+from medialab_web.schemas.watchlist import FollowedShowView  # noqa: E402
+
+DECISION_PATH = f"/partials/watchlist/{SHOW_ID}/seasons/1/decision"
+
+
+def _followed_view(*states: SeasonFollowState) -> FollowedShowView:
+    show = _show(
+        on_watchlist=True,
+        watchlist_kind=WatchlistKind.FOLLOWING,
+        episodes=[_episode(1, 1, wanted=True), _episode(1, 2, wanted=True), _episode(2, 1)],
+    )
+    return FollowedShowView(**show.model_dump(), seasons_follow=list(states))
+
+
+async def test_season_without_a_state_renders_no_pack_controls(logged_in, watchlist_client):
+    watchlist_client.watchlist_episodes = AsyncMock(return_value=_followed_view())
+    text = (await logged_in.get(f"/partials/watchlist/{SHOW_ID}/episodes")).text
+    assert PACK_NOT_FOUND_TEXT not in text and SEASON_PACK_LABEL not in text
+    assert "seasons/1/decision" not in text
+
+
+async def test_not_found_season_offers_the_three_choices(logged_in, watchlist_client):
+    watchlist_client.watchlist_episodes = AsyncMock(
+        return_value=_followed_view(
+            SeasonFollowState(season=1, mode=SeasonFollowMode.PACK_NOT_FOUND, attempts=1)
+        )
+    )
+    text = (await logged_in.get(f"/partials/watchlist/{SHOW_ID}/episodes")).text
+    assert PACK_NOT_FOUND_TEXT in text
+    for label, mode in (
+        (RETRY_LONGER_LABEL, "pack_retry_timeout"),
+        (RETRY_SEEDERS_LABEL, "pack_retry_seeders"),
+        (EPISODE_BY_EPISODE_LABEL, "episodes"),
+    ):
+        assert f">{label}<" in text, label
+        assert f'hx-post="{DECISION_PATH}" hx-vals=\'{{"mode": "{mode}"}}\'' in text, mode
+    assert text.count('hx-target="closest .episodes-slot"') >= 3
+    assert "seasons/2/decision" not in text
+
+
+async def test_pack_states_render_as_badges(logged_in, watchlist_client):
+    watchlist_client.watchlist_episodes = AsyncMock(
+        return_value=_followed_view(
+            SeasonFollowState(season=1, mode=SeasonFollowMode.PACK, attempts=1, job_id="job-9"),
+            SeasonFollowState(season=2, mode=SeasonFollowMode.PACK_RETRY_SEEDERS, attempts=1),
+        )
+    )
+    text = (await logged_in.get(f"/partials/watchlist/{SHOW_ID}/episodes")).text
+    assert f'href="/#job-job-9">{SEASON_PACK_LABEL}<' in text
+    assert f">{RETRYING_PACK_LABEL}<" in text
+    assert PACK_NOT_FOUND_TEXT not in text
+    watchlist_client.watchlist_episodes = AsyncMock(
+        return_value=_followed_view(
+            SeasonFollowState(season=1, mode=SeasonFollowMode.EPISODES, attempts=2)
+        )
+    )
+    text = (await logged_in.get(f"/partials/watchlist/{SHOW_ID}/episodes")).text
+    assert f'class="badge pack">{EPISODE_BY_EPISODE_LABEL}<' in text
+
+
+async def test_decision_posts_the_mode_and_re_renders_the_episodes(logged_in, watchlist_client):
+    watchlist_client.decide_season = AsyncMock(
+        return_value=SeasonFollowState(season=1, mode=SeasonFollowMode.EPISODES, attempts=1)
+    )
+    watchlist_client.watchlist_episodes = AsyncMock(
+        return_value=_followed_view(
+            SeasonFollowState(season=1, mode=SeasonFollowMode.EPISODES, attempts=1)
+        )
+    )
+    response = await logged_in.post(DECISION_PATH, data={"mode": "episodes"})
+    assert response.status_code == 200
+    watchlist_client.decide_season.assert_awaited_once_with(SHOW_ID, 1, SeasonFollowMode.EPISODES)
+    assert f">{EPISODE_BY_EPISODE_LABEL}<" in response.text
+    watchlist_client.decide_season = AsyncMock(return_value=None)
+    assert (await logged_in.post(DECISION_PATH, data={"mode": "episodes"})).status_code == 502

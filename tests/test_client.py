@@ -703,6 +703,35 @@ async def test_watchlist_episodes_parses_the_show_view(client):
 
 
 @pytest.mark.asyncio
+async def test_watchlist_episodes_keeps_the_season_states(client):
+    payload = {
+        "tmdb_id": 7,
+        "title": "Show",
+        "seasons": [],
+        "episodes": [],
+        "seasons_follow": [{"season": 1, "mode": "pack_not_found", "attempts": 1}],
+    }
+    with patch.object(
+        client._http, "get", new=AsyncMock(return_value=_mock_response(200, payload))
+    ):
+        result = await client.watchlist_episodes(7)
+    assert result is not None and result.seasons_follow[0].mode.value == "pack_not_found"
+
+
+@pytest.mark.asyncio
+async def test_decide_season_posts_the_mode(client):
+    from medialab_contracts import SeasonFollowMode
+
+    payload = {"season": 1, "mode": "episodes", "attempts": 1}
+    mock_post = AsyncMock(return_value=_mock_response(200, payload))
+    with patch.object(client._http, "post", new=mock_post):
+        state = await client.decide_season(7, 1, SeasonFollowMode.EPISODES)
+    assert mock_post.call_args.args[0].endswith("/watchlist/show/7/seasons/1/decision")
+    assert mock_post.call_args.kwargs["json"] == {"mode": "episodes"}
+    assert state is not None and state.mode is SeasonFollowMode.EPISODES
+
+
+@pytest.mark.asyncio
 async def test_retry_episode_deletes_the_submission(client):
     mock_delete = AsyncMock(return_value=_mock_response(204))
     with patch.object(client._http, "delete", new=mock_delete):

@@ -1,6 +1,8 @@
 {#- Seasons as collapsible rows with their episodes. Expects ``show``,
-    ``seasons`` (season, episodes pairs), ``latest_season`` and ``following``,
-    which adds the Submitted / Ignored / Wanted badges and Retry. -#}
+    ``seasons`` (season, episodes pairs), ``latest_season``, ``following``,
+    which adds the Submitted / Ignored / Wanted badges and Retry, and
+    ``season_states`` (season -> SeasonFollowState) for the pack badges and
+    the not-found decision. -#}
 {%- set find = {"tmdb_id": show.tmdb_id, "title": show.title, "year": show.year or "", "media_type": media_type_show.value, "query": show.title} -%}
 {%- set episodes_path = watchlist_partial_path ~ "/" ~ show.tmdb_id ~ "/episodes" -%}
 {% if not seasons %}<p class="muted">TMDB lists no seasons for this show yet.</p>{% endif %}
@@ -9,10 +11,29 @@
   <summary>
     <span class="season-name">{{ season.name or "Season " ~ season.season }}</span>
     <span class="muted">{{ season.episode_count }} episode{{ "" if season.episode_count == 1 else "s" }}{% if season.air_date %}, from {{ season.air_date }}{% endif %}</span>
+    {% set state = season_states.get(season.season) if season_states is defined else none %}
+    {% if state %}
+    {% if state.mode == season_mode.PACK and state.job_id %}<a class="badge pack" href="{{ state.job_id | job_url }}">{{ season_pack_label }}</a>
+    {% elif state.mode in (season_mode.PACK_RETRY_TIMEOUT, season_mode.PACK_RETRY_SEEDERS) %}<span class="badge pack">{{ retrying_pack_label }}</span>
+    {% elif state.mode == season_mode.EPISODES %}<span class="badge pack">{{ episode_by_episode_label }}</span>
+    {% endif %}
+    {% endif %}
     <button class="find" hx-get="/partials/search/torrents" hx-vals='{{ dict(find, season=season.season) | tojson }}'
             hx-target="#stage" hx-swap="innerHTML show:#stage:top" hx-indicator="#searching">{{ find_torrents_label }}</button>
   </summary>
   <div class="season-extras">
+    {% if state and state.mode == season_mode.PACK_NOT_FOUND %}
+    {%- set decision_path = watchlist_partial_path ~ "/" ~ show.tmdb_id ~ "/seasons/" ~ season.season ~ "/decision" -%}
+    <div class="season-decision">
+      <span class="notice-muted">{{ pack_not_found_text }}</span>
+      <button hx-post="{{ decision_path }}" hx-vals='{{ {"mode": season_mode.PACK_RETRY_TIMEOUT.value} | tojson }}'
+              hx-target="closest .{{ episodes_slot_class }}" hx-swap="innerHTML" hx-indicator="#busy">{{ retry_longer_label }}</button>
+      <button hx-post="{{ decision_path }}" hx-vals='{{ {"mode": season_mode.PACK_RETRY_SEEDERS.value} | tojson }}'
+              hx-target="closest .{{ episodes_slot_class }}" hx-swap="innerHTML" hx-indicator="#busy">{{ retry_seeders_label }}</button>
+      <button hx-post="{{ decision_path }}" hx-vals='{{ {"mode": season_mode.EPISODES.value} | tojson }}'
+              hx-target="closest .{{ episodes_slot_class }}" hx-swap="innerHTML" hx-indicator="#busy">{{ episode_by_episode_label }}</button>
+    </div>
+    {% endif %}
     {% with trailer_vals = {"media_type": media_type_show.value, "tmdb_id": show.tmdb_id, "season": season.season} %}
     {% include "partials/trailer_button.html" %}
     {% endwith %}
