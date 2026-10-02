@@ -6,6 +6,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.17.0] - 2026-10-02
+
 ### Added
 
 - Select mode on the Jobs page: a checkbox per row, a sticky bar with the
