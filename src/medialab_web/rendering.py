@@ -87,6 +87,7 @@ templates.env.filters["percent"] = fmt.format_percent
 templates.env.filters["breakable"] = fmt.breakable
 templates.env.filters["poster_url"] = fmt.poster_src
 templates.env.filters["card_vals"] = fmt.card_vals
+templates.env.filters["youtube_thumbnail_url"] = fmt.youtube_thumbnail_url
 templates.env.filters["still_url"] = still_url
 templates.env.filters["show_url"] = fmt.show_url
 templates.env.filters["browse_url"] = fmt.browse_url

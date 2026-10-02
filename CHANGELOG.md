@@ -6,6 +6,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- The trailer list is a grid of YouTube thumbnails with the name clamped
+  to two lines, so a title with many videos fits a phone
+  (MickMarch/medialab#102).
+
 ## [0.15.0] - 2026-10-02
 
 ### Changed

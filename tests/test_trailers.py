@@ -13,6 +13,7 @@ from medialab_web.constants import (
     TRAILERS_PARTIAL_PATH,
     WATCH_TRAILER_LABEL,
 )
+from medialab_web.format import youtube_thumbnail_url
 from tests.test_discover_page import _detail_params, _vals
 from tests.test_show_page import SHOW_ID, SHOW_PATH, _show
 
@@ -116,7 +117,7 @@ async def test_season_is_forwarded_to_the_client(logged_in, videos_client):
     videos_client.videos.assert_awaited_once_with(MediaType.SHOW, SHOW_ID, season=2)
 
 
-async def test_several_videos_render_a_list(logged_in, videos_client):
+async def test_several_videos_render_a_thumbnail_grid(logged_in, videos_client):
     videos_client.videos = AsyncMock(
         return_value=VideosResponse(
             videos=[
@@ -135,6 +136,25 @@ async def test_several_videos_render_a_list(logged_in, videos_client):
     vals = _all_vals(text, PLAY_BUTTON)
     assert vals == [{"key": "aaa", "name": "Main Trailer"}, {"key": "bbb", "name": "Teaser"}]
     assert text.count(f'hx-target="closest .{TRAILER_SLOT_CLASS}"') == 2
+    # one lazy thumbnail per video, from YouTube's keyless image host
+    assert f'src="{youtube_thumbnail_url("aaa")}"' in text
+    assert f'src="{youtube_thumbnail_url("bbb")}"' in text
+    assert text.count('loading="lazy"') == 2
+    assert text.count('class="trailer-title"') == 2
+    assert '<ul class="trailers' in text
+
+
+async def test_untitled_video_falls_back_to_its_type(logged_in, videos_client):
+    videos_client.videos = AsyncMock(
+        return_value=VideosResponse(
+            videos=[_video("aaa", name=""), _video("bbb", name="", type=VideoType.TEASER)]
+        )
+    )
+    text = (
+        await logged_in.get(TRAILERS_PARTIAL_PATH, params={"media_type": "movie", "tmdb_id": 1})
+    ).text
+    assert '<span class="trailer-title">trailer</span>' in text
+    assert '<span class="trailer-title">teaser</span>' in text
 
 
 async def test_no_videos_renders_the_notice(logged_in, videos_client):

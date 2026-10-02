@@ -1,10 +1,18 @@
+{#- Several videos: a grid of thumbnail tiles. The whole tile is the play
+    button; the name is clamped to two lines so long YouTube titles do not
+    wrap a phone into a wall of text. -#}
 <ul class="trailers plain">
   {% for video in videos %}
   <li class="trailer-item">
-    <button type="button" class="link" hx-get="{{ trailer_play_path }}" hx-vals='{{ {"key": video.key, "name": video.name} | tojson }}'
-            hx-target="closest .{{ trailer_slot_class }}" hx-swap="innerHTML">{{ video.name or video.type.value }}</button>
-    <span class="badge">{{ video.type.value }}</span>
-    {% if video.official %}<span class="badge ok">{{ official_label }}</span>{% endif %}
+    <button type="button" class="trailer-tile" hx-get="{{ trailer_play_path }}" hx-vals='{{ {"key": video.key, "name": video.name} | tojson }}'
+            hx-target="closest .{{ trailer_slot_class }}" hx-swap="innerHTML" title="{{ video.name or video.type.value }}">
+      <img class="trailer-thumb" src="{{ video.key | youtube_thumbnail_url }}" alt="" loading="lazy">
+      <span class="poster-badges">
+        <span class="badge">{{ video.type.value }}</span>
+        {% if video.official %}<span class="badge ok">{{ official_label }}</span>{% endif %}
+      </span>
+      <span class="trailer-title">{{ video.name or video.type.value }}</span>
+    </button>
   </li>
   {% endfor %}
 </ul>
