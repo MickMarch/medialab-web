@@ -1,0 +1,4 @@
+{#- Lands in #notice; the jobs table rides along out of band. -#}
+<span class="notice">Deleted {{ deleted | length }} job{{ "s" if deleted | length != 1 }}{% if failed %}, {{ failed | length }} could not be deleted:
+  {% for entry in failed %}{{ entry.job | job_title if entry.job else entry.job_id }} ({{ entry.error }}){{ "; " if not loop.last }}{% endfor %}{% endif %}.</span>
+{% if table %}{% with jobs = table.jobs, status_filter = table.status_filter, retryable = table.retryable, refresh_seconds = table.refresh_seconds, oob = true %}{% include "partials/jobs_table.html" %}{% endwith %}{% endif %}

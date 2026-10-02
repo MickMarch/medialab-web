@@ -18,9 +18,12 @@ from medialab_contracts import (
 from medialab_web import format as fmt
 from medialab_web.constants import (
     BROWSE_LABEL,
+    BULK_BAR_ID,
+    BULK_PLAN_ID,
     CANCEL_LABEL,
     CHECK_NOW_LABEL,
     DEFAULT_RESOLUTION,
+    DELETE_SELECTED_LABEL,
     DISCOVER_PATH,
     DOWNLOAD_NOTICE_CLASS,
     DOWNLOAD_SLOT_CLASS,
@@ -39,6 +42,7 @@ from medialab_web.constants import (
     JOB_ROW_ID_PREFIX,
     JOBS_POLL_ELEMENT_ID,
     JOBS_REFRESH_SECONDS,
+    JOBS_SELECTED_TEXT,
     MEDIA_TYPE_LABELS,
     NAV_LINKS,
     NEVER_TEXT,
@@ -53,6 +57,8 @@ from medialab_web.constants import (
     SAVE_LABEL,
     SAVED_LABEL,
     SEARCHING_CLASS,
+    SELECT_LABEL,
+    SELECT_MODE_CLASS,
     STATUS_DONE,
     SUBMITTED_LABEL,
     TMDB_ATTRIBUTION,
@@ -101,6 +107,12 @@ templates.env.filters["watchlist_card"] = CardItem.from_watchlist
 templates.env.globals["jobs_refresh_seconds"] = JOBS_REFRESH_SECONDS
 templates.env.globals["jobs_poll_id"] = JOBS_POLL_ELEMENT_ID
 templates.env.globals["job_row_id_prefix"] = JOB_ROW_ID_PREFIX
+templates.env.globals["select_mode_class"] = SELECT_MODE_CLASS
+templates.env.globals["bulk_bar_id"] = BULK_BAR_ID
+templates.env.globals["bulk_plan_id"] = BULK_PLAN_ID
+templates.env.globals["select_label"] = SELECT_LABEL
+templates.env.globals["delete_selected_label"] = DELETE_SELECTED_LABEL
+templates.env.globals["jobs_selected_text"] = JOBS_SELECTED_TEXT
 templates.env.globals["in_library_label"] = IN_LIBRARY_LABEL
 templates.env.globals["watchlist_kind_labels"] = WATCHLIST_KIND_LABELS
 templates.env.globals["saved_label"] = SAVED_LABEL

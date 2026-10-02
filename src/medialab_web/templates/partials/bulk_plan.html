@@ -1,0 +1,35 @@
+{#- The combined plan for the checked rows. Lands in the bulk plan slot above
+    the table; the red button posts only the deletable ids, and the result
+    swaps the table out of band while the notice lands in #notice. -#}
+<div class="plan bulk-plan card">
+  {% if deletable %}
+  <p>Nothing has happened yet. Pressing <strong>Delete</strong> removes:</p>
+  {% for entry in deletable %}
+  <section class="plan-job">
+    <h3>{{ entry.job | job_title }} <code class="release">{{ entry.job.release_name | breakable }}</code></h3>
+    {% with plan = entry.plan %}{% include "partials/plan_items.html" %}{% endwith %}
+  </section>
+  {% endfor %}
+  {% endif %}
+  {% if refused %}
+  <section class="plan-job refused">
+    <p><strong>Cannot delete automatically:</strong></p>
+    <ul>
+      {% for entry in refused %}
+      <li>{% if entry.job %}{{ entry.job | job_title }} <code class="release">{{ entry.job.release_name | breakable }}</code>{% else %}<code>{{ entry.plan.job_id }}</code>{% endif %}: {{ entry.plan.refused }}</li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+  <p class="plan-actions">
+    {% if deletable %}
+    <form hx-post="/jobs/delete" hx-target="#notice" hx-swap="innerHTML" hx-include="[name='status_filter']"
+          hx-indicator="#busy"
+          hx-on::after-request="document.getElementById('{{ bulk_plan_id }}').replaceChildren(); setSelectMode(false)">
+      {% for entry in deletable %}<input type="hidden" name="job_ids" value="{{ entry.job.id }}">{% endfor %}
+      <button class="danger">Delete {{ deletable | length }} job{{ "s" if deletable | length != 1 }}</button>
+    </form>
+    {% endif %}
+    <button class="link" onclick="this.closest('.plan-slot').replaceChildren()">Cancel</button>
+  </p>
+</div>

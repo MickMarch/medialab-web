@@ -373,6 +373,47 @@ async def test_delete_job_deletes_and_parses(client):
 
 
 @pytest.mark.asyncio
+async def test_bulk_deletion_plan_posts_the_ids(client):
+    payload = {
+        "status": "success",
+        "plans": [
+            {
+                "job": _JOB,
+                "plan": {
+                    "status": "success",
+                    "job_id": "job-abc",
+                    "torrent": True,
+                    "download_folder": None,
+                    "placed_paths": [],
+                    "scan_path": None,
+                    "refused": None,
+                },
+            }
+        ],
+    }
+    mock_post = AsyncMock(return_value=_mock_response(200, payload))
+    with patch.object(client._http, "post", new=mock_post):
+        plans = await client.bulk_deletion_plan(["job-abc"])
+    assert mock_post.call_args.args[0].endswith("/jobs/deletion-plan")
+    assert mock_post.call_args.kwargs["json"] == {"job_ids": ["job-abc"]}
+    assert plans is not None and plans.plans[0].job.id == "job-abc"
+
+
+@pytest.mark.asyncio
+async def test_bulk_delete_posts_the_ids_and_parses_results(client):
+    payload = {
+        "status": "success",
+        "results": [{"job_id": "job-abc", "job": {**_JOB, "status": "DELETED"}, "error": None}],
+    }
+    mock_post = AsyncMock(return_value=_mock_response(200, payload))
+    with patch.object(client._http, "post", new=mock_post):
+        result = await client.bulk_delete(["job-abc"])
+    assert mock_post.call_args.args[0].endswith("/jobs/delete")
+    assert mock_post.call_args.kwargs["json"] == {"job_ids": ["job-abc"]}
+    assert result is not None and result.results[0].job.status == "DELETED"
+
+
+@pytest.mark.asyncio
 async def test_delete_job_returns_none_on_409(client):
     with patch.object(client._http, "delete", new=AsyncMock(return_value=_mock_response(409))):
         assert await client.delete_job("job-abc") is None
