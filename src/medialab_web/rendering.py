@@ -22,6 +22,8 @@ from medialab_web.constants import (
     CHECK_NOW_LABEL,
     DEFAULT_RESOLUTION,
     DISCOVER_PATH,
+    DOWNLOAD_NOTICE_CLASS,
+    DOWNLOAD_SLOT_CLASS,
     EPISODES_LABEL,
     EPISODES_SLOT_CLASS,
     FIND_TORRENTS_LABEL,
@@ -50,6 +52,7 @@ from medialab_web.constants import (
     RETRY_LABEL,
     SAVE_LABEL,
     SAVED_LABEL,
+    SEARCHING_CLASS,
     STATUS_DONE,
     SUBMITTED_LABEL,
     TMDB_ATTRIBUTION,
@@ -151,6 +154,9 @@ templates.env.globals["youtube_embed_url"] = youtube_embed_url
 templates.env.globals["trailers_path"] = TRAILERS_PARTIAL_PATH
 templates.env.globals["trailer_play_path"] = TRAILER_PLAY_PATH
 templates.env.globals["trailer_slot_class"] = TRAILER_SLOT_CLASS
+templates.env.globals["download_slot_class"] = DOWNLOAD_SLOT_CLASS
+templates.env.globals["download_notice_class"] = DOWNLOAD_NOTICE_CLASS
+templates.env.globals["searching_class"] = SEARCHING_CLASS
 templates.env.globals["watch_trailer_label"] = WATCH_TRAILER_LABEL
 templates.env.globals["trailer_close_label"] = TRAILER_CLOSE_LABEL
 templates.env.globals["official_label"] = OFFICIAL_LABEL

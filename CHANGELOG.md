@@ -6,6 +6,18 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- Search results are poster cards that open the same detail card as
+  Discover, so a title found by either page has the same Download, Save /
+  Follow and Watch trailer actions (MickMarch/medialab#101).
+- The detail card opens in place, spanning the grid under the poster that
+  opened it, and the download flow (season scope, torrent table, started
+  notice) renders in a slot inside the card instead of at the top of the
+  page. The show, jobs and watchlist pages keep their page-level stage
+  (MickMarch/medialab#103).
+- The step strip on the Search page is gone; the card is the flow.
+
 ## [0.14.0] - 2026-09-27
 
 ### Changed

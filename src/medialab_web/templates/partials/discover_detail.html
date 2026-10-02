@@ -1,5 +1,8 @@
-<article class="card detail">
-  <button class="link close" type="button" onclick="this.closest('#detail').replaceChildren()" aria-label="Close">Close</button>
+{#- The one title card: Download, Save / Follow and Watch trailer, with the
+    download flow and the trailer each in a slot inside the card. Opening a
+    card closes any other open card, so the grid holds at most one. -#}
+<article class="card detail" hx-on::load="document.querySelectorAll('.detail').forEach(function (card) { if (card !== this) card.remove(); }, this)">
+  <button class="link close" type="button" onclick="this.closest('.detail').remove()" aria-label="Close">Close</button>
   <h3>{{ item.title }}{% if item.year %} <span class="muted">({{ item.year }})</span>{% endif %}</h3>
   <p class="muted"><span class="badge">{{ item.media_type.value }}</span> rating {{ "%.1f" | format(item.vote_average) }}
     {% if item.in_library %}<span class="badge ok">{{ in_library_label }}</span>{% endif %}</p>
@@ -11,5 +14,7 @@
     {% include "partials/trailer_button.html" %}
     {% endwith %}
   </div>
+  {% with in_card = true %}{% include "partials/searching.html" %}{% endwith %}
+  <div class="{{ download_slot_class }}"></div>
   <div class="{{ trailer_slot_class }}"></div>
 </article>

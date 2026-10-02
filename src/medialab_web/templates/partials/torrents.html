@@ -1,15 +1,14 @@
+{#- Lands in a download slot (a title card's, or the page-level #stage on
+    the show and jobs pages); every control targets that slot. -#}
 {% if redo_job_id %}
 <p class="notice-muted card"><strong>{{ redo_notice }}</strong> (job <code>{{ redo_job_id | short_id }}</code>).
-  <button class="link" onclick="document.getElementById('stage').innerHTML=''">Cancel</button></p>
+  <button class="link" onclick="this.closest('.{{ download_slot_class }}').replaceChildren()">Cancel</button></p>
 <p class="muted">Torrents for <strong>{{ title }}{% if year %} ({{ year }}){% endif %}</strong>{% if scope %} {{ scope }}{% endif %}.</p>
 {% else %}
-{% with step = 4 %}{% include "partials/steps.html" %}{% endwith %}
-<div id="download-notice" aria-live="polite"></div>
-<p class="muted">Step 4 of 4: torrents for <strong>{{ title }} ({{ year }})</strong>{% if scope %} {{ scope }}{% endif %}.
+<div class="{{ download_notice_class }}" aria-live="polite"></div>
+<p class="muted">Torrents for <strong>{{ title }} ({{ year }})</strong>{% if scope %} {{ scope }}{% endif %}.
   {% if media_type.value == "show" %}
-  <a href="#" hx-get="/partials/search/scope" hx-vals='{"tmdb_id": {{ tmdb_id }}, "title": {{ title | tojson }}, "year": {{ year | tojson }}, "query": {{ query | tojson }}}' hx-target="#stage" hx-swap="innerHTML show:#stage:top" hx-indicator="#busy">Change scope</a>
-  {% else %}
-  <a href="#" hx-get="/partials/search/tmdb" hx-vals='{"query": {{ query | tojson }}}' hx-target="#stage" hx-swap="innerHTML show:#stage:top" hx-indicator="#busy">Back to titles</a>
+  <a href="#" hx-get="/partials/search/scope" hx-vals='{"tmdb_id": {{ tmdb_id }}, "title": {{ title | tojson }}, "year": {{ year | tojson }}, "query": {{ query | tojson }}}' hx-target="closest .{{ download_slot_class }}" hx-swap="innerHTML" hx-indicator="previous .{{ searching_class }}">Change scope</a>
   {% endif %}
 </p>
 {% endif %}
@@ -29,11 +28,11 @@
       <td>{% for l in t.languages %}<span class="badge">{{ l | upper }}</span> {% endfor %}{% if t.multi_audio %}<span class="badge">MULTi</span>{% endif %}</td>
       <td>
         {% if redo_job_id %}
-        <form hx-post="/partials/jobs/{{ redo_job_id }}/redo" hx-target="#stage" hx-swap="innerHTML show:#stage:top"
+        <form hx-post="/partials/jobs/{{ redo_job_id }}/redo" hx-target="closest .{{ download_slot_class }}" hx-swap="innerHTML"
               hx-include="[name='status_filter']" hx-indicator="#busy"
               hx-confirm="Replace the original download with {{ t.file_name }}?">
         {% else %}
-        <form hx-post="/downloads" hx-target="#download-notice" hx-swap="innerHTML show:#stage:top"
+        <form hx-post="/downloads" hx-target="previous .{{ download_notice_class }}" hx-swap="innerHTML"
               hx-confirm="Download {{ t.file_name }}?">
         {% endif %}
           <input type="hidden" name="source_url" value="{{ t.file_url }}">

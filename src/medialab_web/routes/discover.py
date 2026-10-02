@@ -27,6 +27,20 @@ OptionalGenre = Annotated[int | None, BeforeValidator(lambda value: value or Non
 CardQuery = Annotated[CardItem, Query()]
 
 
+class DetailRequest(CardItem):
+    """A card's fields plus the text typed on the Search page, if any. The
+    query rides along to the torrent search as the alternate query; Discover
+    sends none and the title stands in."""
+
+    query: str = ""
+
+    def card(self) -> CardItem:
+        return CardItem.model_validate(self.model_dump(exclude={"query"}))
+
+
+DetailQuery = Annotated[DetailRequest, Query()]
+
+
 def _items_context(
     response: DiscoverResponse | None, media_type: MediaType, genre: int | None
 ) -> dict[str, object]:
@@ -49,7 +63,6 @@ async def discover_page(
             **_items_context(response, media_type, genre),
             "genres": genres.genres if genres else [],
             "media_types": list(MediaType),
-            "search_timeout": await search_timeout_seconds(client),
         },
     )
 
@@ -68,5 +81,15 @@ async def discover_items(
 
 
 @router.get("/partials/discover/detail", response_class=HTMLResponse)
-async def detail(request: Request, item: CardQuery) -> HTMLResponse:
-    return render(request, "partials/discover_detail.html", {"item": item})
+async def detail(
+    request: Request, detail: DetailQuery, client: OrchestratorClient = _CLIENT
+) -> HTMLResponse:
+    return render(
+        request,
+        "partials/discover_detail.html",
+        {
+            "item": detail.card(),
+            "query": detail.query,
+            "search_timeout": await search_timeout_seconds(client),
+        },
+    )

@@ -47,7 +47,10 @@ src/medialab_web/
 │                   trailers (/partials/trailers: player, list or notice; /play; nothing on render)
 ├── media.py        TMDB media type -> contracts MediaType
 ├── templates/      base, login, index, search, discover, watchlist, show, settings, partials/
-│                   (poster_card macro shared by discover, watchlist and search results;
+│                   (poster_card macro shared by discover, watchlist and search results, opening
+│                   discover_detail in place; the card hosts the download flow in a .download-slot
+│                   and the trailer in a .trailer-slot; scope and torrents target
+│                   "closest .download-slot", which the show, jobs and watchlist pages put on #stage;
 │                   watchlist_actions is wrapped in a .watchlist-actions element that its
 │                   buttons re-render; episode_list is shared by the show page and the
 │                   Following card; follow_picker, follow_card)

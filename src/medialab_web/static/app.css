@@ -42,10 +42,6 @@ form.login { max-width: 360px; margin: 3rem auto; display: flex; flex-direction:
 form.login h1 { margin: 0; font-size: 1.3rem; }
 ul.plain { list-style: none; padding: 0; margin: 0; }
 nav { display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: center; }
-.steps { display: flex; gap: .25rem; list-style: none; padding: 0; margin: 0 0 .75rem; font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; }
-.steps li { padding: .2rem .6rem; border-radius: 999px; background: var(--line); color: var(--muted); }
-.steps li.done { background: var(--ok); color: #062; }
-.steps li.now { background: var(--accent); color: #fff; }
 .notice.card { margin-bottom: .75rem; }
 .tools { margin: -.5rem 0 1rem; font-size: .85rem; }
 section.settings { margin-bottom: 1rem; }
@@ -71,7 +67,6 @@ nav a { color: var(--fg); }
 @keyframes search-fill { from { width: 0; } to { width: 100%; } }
 .htmx-request .htmx-indicator, .htmx-request.htmx-indicator { display: inline; }
 .htmx-request .searching, .htmx-request.searching { display: block; }
-.tmdb .card h3 { margin: 0 0 .25rem; font-size: 1.05rem; }
 .overview { font-size: .85rem; color: var(--muted); max-height: 4.5em; overflow: hidden; }
 .scope { max-width: 520px; margin-bottom: 1rem; display: flex; flex-direction: column; gap: .75rem; }
 table.torrents { width: 100%; border-collapse: collapse; }
@@ -107,13 +102,24 @@ button.poster:hover { border: none; outline: 2px solid var(--accent); }
 .poster-body { padding: .6rem; display: flex; flex-direction: column; gap: .4rem; }
 .poster-body h3 { margin: 0; font-size: 1rem; }
 .poster-body p { margin: 0; }
-.posters.tmdb .poster-card .poster { max-height: 330px; }
 .detail { position: relative; margin-bottom: 1rem; }
+/* A detail card opens in place: it spans the grid under the poster that opened it. */
+.posters > .detail { grid-column: 1 / -1; margin-bottom: 0; }
+.detail .download-slot:empty { display: none; }
+.detail .download-slot { margin-top: .75rem; }
+.detail .searching { margin: .75rem 0 0; }
+.detail .scope { max-width: none; margin-bottom: 0; }
+/* Inside a card the torrent table is never wide enough for columns; always stack. */
+.detail table.torrents thead { display: none; }
+.detail table.torrents tr { display: block; padding: .5rem 0; border-bottom: 1px solid var(--line); }
+.detail table.torrents td, .detail table.torrents td:not(.release) { display: inline-block; width: auto; border: none; padding: .15rem .25rem; vertical-align: middle; }
+.detail table.torrents td.release { display: block; }
 .detail h3 { margin: 0 0 .25rem; }
 .detail .close { position: absolute; top: .5rem; right: .5rem; }
 .overview.full { max-height: none; }
 .detail-actions { display: flex; gap: .5rem; flex-wrap: wrap; }
 #stage:not(:empty) { margin-bottom: 1rem; }
+.download-notice:empty { display: none; }
 .more { justify-self: center; }
 .notice-muted { color: var(--warn); }
 footer.attribution { max-width: 1100px; margin: 0 auto; padding: 1rem; font-size: .8rem; border-top: 1px solid var(--line); }

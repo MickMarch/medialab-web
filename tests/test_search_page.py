@@ -15,6 +15,8 @@ from medialab_web.schemas.tmdb import TmdbMediaDetailResponse, TmdbSearchRespons
 from medialab_web.schemas.torrents import TorrentResult, TorrentSearchResponse
 from tests.conftest import make_job
 
+_DETAIL = {"tmdb_id": 1, "media_type": "movie", "title": "Dune", "year": "2021"}
+
 
 def _tmdb(*results):
     return TmdbSearchResponse(status="success", message="", data=list(results))
@@ -51,7 +53,7 @@ async def test_search_page_renders(logged_in):
     assert 'hx-get="/partials/search/tmdb"' in response.text
 
 
-async def test_tmdb_results_show_movie_and_show_buttons(logged_in, mock_client):
+async def test_tmdb_results_are_cards_for_movies_and_shows_only(logged_in, mock_client):
     mock_client.search_tmdb = AsyncMock(
         return_value=_tmdb(
             _result(),
@@ -60,7 +62,7 @@ async def test_tmdb_results_show_movie_and_show_buttons(logged_in, mock_client):
         )
     )
     text = (await logged_in.get("/partials/search/tmdb", params={"query": "x"})).text
-    assert "Find torrents" in text and "Choose season" in text
+    assert text.count('hx-get="/partials/discover/detail"') == 2
     assert "Someone" not in text
     mock_client.search_tmdb.assert_awaited_once_with("x")
 
@@ -85,21 +87,18 @@ async def test_tmdb_results_badge_from_watchlist_kind_and_library(logged_in, moc
     )
     text = (await logged_in.get("/partials/search/tmdb", params={"query": "x"})).text
     assert text.count(f'class="badge saved">{SAVED_LABEL}<') == 1
-    # the poster badge and the actions block, which carries the state after an inline follow
-    assert text.count(f'class="badge following">{FOLLOWING_LABEL}<') == 2
+    assert text.count(f'class="badge following">{FOLLOWING_LABEL}<') == 1
     assert text.count(IN_LIBRARY_LABEL) == 1
 
 
-async def test_tmdb_results_carry_save_and_follow(logged_in, mock_client):
+async def test_tmdb_results_carry_the_card_fields_and_a_browse_link(logged_in, mock_client):
     mock_client.search_tmdb = AsyncMock(
         return_value=_tmdb(_result(), _result(tmdb_id=2, title="Lost", media_type="tv"))
     )
     text = (await logged_in.get("/partials/search/tmdb", params={"query": "x"})).text
-    assert text.count('hx-put="/partials/watchlist" hx-vals=') == 2
-    assert text.count(f">{SAVE_LABEL}<") == 2
-    assert text.count('hx-get="/partials/watchlist/follow"') == 1
-    assert text.count(f">{FOLLOW_LABEL}<") == 1
-    assert '"media_type": "show"' in text
+    assert '"media_type": "show"' in text and '"media_type": "movie"' in text
+    assert text.count('class="browse"') == 1 and 'href="/shows/2"' in text
+    assert SAVE_LABEL not in text and FOLLOW_LABEL not in text
 
 
 async def test_tmdb_no_results(logged_in, mock_client):
@@ -274,7 +273,7 @@ async def test_search_requires_login(client):
     assert (await client.post("/downloads", data={})).status_code == 303
 
 
-async def test_every_step_targets_the_single_stage(logged_in, mock_client):
+async def test_results_land_in_the_stage_and_torrents_keep_the_query(logged_in, mock_client):
     mock_client.search_tmdb = AsyncMock(return_value=_tmdb(_result()))
     mock_client.search_torrents = AsyncMock(
         return_value=TorrentSearchResponse(status="success", message="", data={})
@@ -282,8 +281,7 @@ async def test_every_step_targets_the_single_stage(logged_in, mock_client):
     page = (await logged_in.get("/search")).text
     assert 'id="stage"' in page and page.count('hx-target="#stage"') == 1
     cards = (await logged_in.get("/partials/search/tmdb", params={"query": "dune"})).text
-    assert 'hx-target="#stage"' in cards and "show:#stage:top" in cards
-    assert '<li class="now">Title</li>' in cards
+    assert "#stage" not in cards
     torrents = (
         await logged_in.get(
             "/partials/search/torrents",
@@ -296,8 +294,7 @@ async def test_every_step_targets_the_single_stage(logged_in, mock_client):
             },
         )
     ).text
-    assert '<li class="now">Torrent</li>' in torrents
-    assert "Back to titles" in torrents and '"query": "dune"' in torrents
+    assert "No torrents found" in torrents
 
 
 async def test_clear_cache_button_and_action(logged_in, mock_client):
@@ -342,7 +339,7 @@ async def test_typed_query_becomes_alt_query(logged_in, mock_client):
     )
 
 
-async def test_search_page_carries_the_downloader_timeout_into_the_bar(logged_in, mock_client):
+async def test_detail_card_carries_the_downloader_timeout_into_the_bar(logged_in, mock_client):
     from medialab_contracts import SettingView, SuiteSettingsResponse
 
     mock_client.get_settings = AsyncMock(
@@ -365,14 +362,13 @@ async def test_search_page_carries_the_downloader_timeout_into_the_bar(logged_in
             },
         )
     )
-    page = (await logged_in.get("/search")).text
-    assert 'id="searching"' in page
+    page = (await logged_in.get("/partials/discover/detail", params=_DETAIL)).text
     assert "--search-seconds: 42s" in page and "Up to 42 s" in page
 
 
-async def test_search_page_falls_back_to_the_default_timeout(logged_in, mock_client):
+async def test_detail_card_falls_back_to_the_default_timeout(logged_in, mock_client):
     mock_client.get_settings = AsyncMock(return_value=None)
-    page = (await logged_in.get("/search")).text
+    page = (await logged_in.get("/partials/discover/detail", params=_DETAIL)).text
     assert "--search-seconds: 15s" in page
 
 
@@ -384,13 +380,13 @@ async def test_torrent_searches_use_the_searching_indicator(logged_in, mock_clie
         return_value=TmdbMediaDetailResponse(status="success", message="", data={"seasons": []})
     )
     cards = (await logged_in.get("/partials/search/tmdb", params={"query": "x"})).text
-    assert 'hx-indicator="#searching">Find torrents' in cards
+    assert "#searching" not in cards
     scope = (
         await logged_in.get(
             "/partials/search/scope", params={"tmdb_id": 2, "title": "Lost", "year": "2004"}
         )
     ).text
-    assert 'hx-indicator="#searching"' in scope
+    assert 'hx-indicator="previous .searching"' in scope
 
 
 async def test_tmdb_results_render_poster_and_text_card(logged_in, mock_client):
@@ -405,7 +401,7 @@ async def test_tmdb_results_render_poster_and_text_card(logged_in, mock_client):
     assert 'loading="lazy"' in text
     assert text.count("<img") == 1
     assert text.count('poster-card no-poster"') == 1
-    assert "Find torrents" in text and "Choose season" in text
+    assert text.count('class="poster"') == 2
 
 
 async def test_search_torrents_are_not_in_redo_mode(logged_in, mock_client):
@@ -422,4 +418,4 @@ async def test_search_torrents_are_not_in_redo_mode(logged_in, mock_client):
     ).text
     assert REDO_NOTICE not in text
     assert "/redo" not in text
-    assert '<li class="now">Torrent</li>' in text
+    assert "Torrents for <strong>Dune (2021)</strong>" in text

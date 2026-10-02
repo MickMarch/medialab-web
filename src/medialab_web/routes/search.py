@@ -55,14 +55,8 @@ async def search_timeout_seconds(client: OrchestratorClient) -> int:
 
 
 @router.get(SEARCH_PATH, response_class=HTMLResponse)
-async def search_page(
-    request: Request, query: str | None = None, client: OrchestratorClient = _CLIENT
-) -> HTMLResponse:
-    return render(
-        request,
-        "search.html",
-        {"query": query or "", "search_timeout": await search_timeout_seconds(client)},
-    )
+async def search_page(request: Request, query: str | None = None) -> HTMLResponse:
+    return render(request, "search.html", {"query": query or ""})
 
 
 @router.get("/partials/search/tmdb", response_class=HTMLResponse)

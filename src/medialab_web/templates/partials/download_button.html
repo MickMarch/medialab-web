@@ -1,8 +1,10 @@
-{%- set dl = {"tmdb_id": item.tmdb_id, "title": item.title, "year": item.year or "", "query": item.title} -%}
+{#- Opens the download flow in the card's download slot. ``query`` is the
+    typed search text when there is one; the title stands in otherwise. -#}
+{%- set dl = {"tmdb_id": item.tmdb_id, "title": item.title, "year": item.year or "", "query": query if query else item.title} -%}
 {% if item.media_type.value == "show" %}
 <button class="primary" hx-get="/partials/search/scope" hx-vals='{{ dl | tojson }}'
-        hx-target="#stage" hx-swap="innerHTML show:#stage:top" hx-indicator="#busy">Download</button>
+        hx-target="next .{{ download_slot_class }}" hx-swap="innerHTML" hx-indicator="#busy">Download</button>
 {% else %}
 <button class="primary" hx-get="/partials/search/torrents" hx-vals='{{ dict(dl, media_type="movie") | tojson }}'
-        hx-target="#stage" hx-swap="innerHTML show:#stage:top" hx-indicator="#searching">Download</button>
+        hx-target="next .{{ download_slot_class }}" hx-swap="innerHTML" hx-indicator="next .{{ searching_class }}">Download</button>
 {% endif %}

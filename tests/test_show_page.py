@@ -102,7 +102,8 @@ async def test_show_page_renders_header_and_seasons(logged_in, show_client):
     assert "Season 1" in text and "Season 2" in text
     assert "S01E01" in text and "S01E02" in text and "S02E01" in text
     assert "Episode 1.1" in text
-    assert 'id="stage"' in text and 'id="searching"' in text and 'id="busy"' in text
+    assert 'id="stage" class="download-slot"' in text
+    assert 'id="searching"' in text and 'id="busy"' in text
     show_client.browse_show.assert_awaited_once_with(SHOW_ID)
 
 
