@@ -6,6 +6,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- The Services card shows whether qBittorrent is bound to an accepted VPN
+  interface, from the gateway's `vpn_interface_bound` health flag
+  (MickMarch/medialab#114).
+
 ## [0.18.0] - 2026-10-02
 
 ### Added

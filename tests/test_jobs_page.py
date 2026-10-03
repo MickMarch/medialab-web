@@ -377,3 +377,18 @@ async def test_pages_tell_htmx_to_swap_error_responses(logged_in, mock_client):
     text = (await logged_in.get("/")).text
     assert 'name="htmx-config"' in text
     assert '"code": "[45]..", "swap": true' in text
+
+
+async def test_storage_panel_shows_vpn_bound(logged_in, mock_client):
+    text = (await logged_in.get("/partials/storage")).text
+    assert "VPN" in text
+    assert 'class="badge ok">bound<' in text
+
+
+async def test_storage_panel_flags_vpn_not_bound(logged_in, mock_client):
+    health = mock_client.health.return_value
+    mock_client.health = AsyncMock(
+        return_value=health.model_copy(update={"vpn_interface_bound": False})
+    )
+    text = (await logged_in.get("/partials/storage")).text
+    assert 'class="badge bad">not bound<' in text

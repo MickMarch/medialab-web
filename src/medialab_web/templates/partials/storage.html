@@ -16,6 +16,7 @@
       <li>gateway: <span class="badge ok">online</span></li>
       <li>torrent-downloader: <span class="badge {{ 'ok' if health.downstream.torrent_downloader else 'bad' }}">{{ 'up' if health.downstream.torrent_downloader else 'down' }}</span></li>
       <li>medialab-jellyfin: <span class="badge {{ 'ok' if health.downstream.medialab_jellyfin else 'bad' }}">{{ 'up' if health.downstream.medialab_jellyfin else 'down' }}</span></li>
+      <li>VPN: <span class="badge {{ 'ok' if health.vpn_interface_bound else 'bad' }}">{{ 'bound' if health.vpn_interface_bound else 'not bound' }}</span></li>
       {% if health.needs_attention %}<li class="error">{{ health.needs_attention }} job(s) need attention</li>{% endif %}
     </ul>
     {% else %}

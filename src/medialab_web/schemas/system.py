@@ -7,13 +7,16 @@ class DownstreamHealth(BaseModel):
 
 
 class HealthResponse(BaseModel):
-    """Aggregated gateway health: the orchestrator's own status plus the
-    reachability of both downstream worker services."""
+    """Aggregated gateway health: the orchestrator's own status, the
+    reachability of both downstream worker services, and whether
+    torrent-downloader reports qBittorrent bound to an accepted VPN interface.
+    The flag is informational here; the downloader enforces it."""
 
     status: str
     uptime_seconds: float
     downstream: DownstreamHealth
     needs_attention: int = 0
+    vpn_interface_bound: bool = False
 
 
 class DiskUsageResponse(BaseModel):
