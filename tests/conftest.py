@@ -39,6 +39,7 @@ def mock_client():
             status="online",
             uptime_seconds=42.0,
             downstream=DownstreamHealth(torrent_downloader=True, medialab_jellyfin=True),
+            vpn_interface_bound=True,
         )
     )
     client.get_storage = AsyncMock(
