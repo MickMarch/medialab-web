@@ -61,8 +61,17 @@ LOGIN_RATE_LIMIT = "10/minute"
 RETRYABLE_STATUSES = frozenset({"FAILED", "NEEDS_ATTENTION"})
 TERMINAL_STATUS_DELETED = "DELETED"
 STATUS_DONE = "DONE"
+STATUS_DISMISSED = "DISMISSED"
+# The gateway's attention_cause for a flagged job whose torrent vanished with
+# nothing placed: Redo is the one action that resolves it.
+CAUSE_TORRENT_GONE = "TORRENT_GONE"
 REDO_LABEL = "Redo"
 REDO_NOTICE = "Picking a torrent replaces the original download"
+REDO_FAILED_NOTICE = "Picking a torrent replaces the failed download"
+DISMISS_LABEL = "Dismiss"
+DISMISS_SELECTED_LABEL = "Dismiss selected"
+DISMISS_SELECTED_ID = "dismiss-selected"
+DELETE_SELECTED_ID = "delete-selected"
 SHORT_ID_LENGTH = 8
 DATE_LENGTH = len("YYYY-MM-DD")
 SEARCH_PATH = "/search"

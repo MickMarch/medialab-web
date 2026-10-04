@@ -15,11 +15,19 @@
       {% endif %}</td>
   <td>{{ job.updated_at | short_date }}</td>
   <td class="actions">
-    {% if job.status in ["FAILED", "NEEDS_ATTENTION"] %}
-    <button hx-post="/jobs/{{ job.id }}/retry" hx-target="#job-{{ job.id }}" hx-swap="outerHTML">Retry</button>
+    {#- A flagged row offers the one action that can end its attention state:
+        Redo when the torrent vanished with nothing placed, Retry otherwise,
+        and Dismiss either way. -#}
+    {% set flagged = job.status in retryable %}
+    {% set redoable = job.status == status_done or (flagged and job.attention_cause == cause_torrent_gone) %}
+    {% if flagged and not redoable %}
+    <button hx-post="/jobs/{{ job.id }}/retry" hx-target="#job-{{ job.id }}" hx-swap="outerHTML">{{ retry_label }}</button>
     {% endif %}
-    {% if job.status == status_done %}
+    {% if redoable %}
     <button hx-get="/partials/jobs/{{ job.id }}/redo" hx-vals='{{ job | redo_vals | tojson }}' hx-target="#stage" hx-swap="innerHTML show:#stage:top" hx-indicator="#searching">{{ redo_label }}</button>
+    {% endif %}
+    {% if flagged %}
+    <button hx-post="/jobs/{{ job.id }}/dismiss" hx-target="#job-{{ job.id }}" hx-swap="outerHTML">{{ dismiss_label }}</button>
     {% endif %}
     {% if job.status != "DELETED" %}
     <button class="danger-outline" hx-get="/jobs/{{ job.id }}/plan" hx-target="#plan-{{ job.id }}" hx-swap="innerHTML">Delete...</button>

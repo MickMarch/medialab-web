@@ -6,6 +6,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Dismiss on flagged job rows and `Dismiss selected` in the bulk bar: close a
+  `FAILED` or `NEEDS_ATTENTION` job without touching files. Dismissed rows stay
+  listed, muted, and the status filter offers `DISMISSED`.
+- Flagged rows offer the action that resolves them from the gateway's
+  `attention_cause`: Redo when the torrent vanished with nothing placed, Retry
+  otherwise.
+
 ## [0.19.0] - 2026-10-03
 
 ### Added

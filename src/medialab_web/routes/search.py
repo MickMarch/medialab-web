@@ -16,6 +16,7 @@ from medialab_web.constants import (
     HTTP_PREFIX,
     MAGNET_PREFIX,
     MIN_TARGETABLE_SEASON,
+    REDO_NOTICE,
     SEARCH_PATH,
     SEARCH_TIMEOUT_SETTING,
     TMDB_RESULTS_MAX,
@@ -139,10 +140,11 @@ async def render_torrents(
     episode: str | None = None,
     query: str = "",
     redo_job_id: str | None = None,
+    redo_notice: str = REDO_NOTICE,
 ) -> HTMLResponse:
     """The torrent step: one gateway search rendered as the grouped table.
     With ``redo_job_id`` every pick replaces that job instead of starting a
-    fresh download."""
+    fresh download; ``redo_notice`` says which kind of job is being replaced."""
     # TMDB's canonical title and release names can differ ("Lee Cronin's The
     # Mummy" vs "The Mummy 2026"); the typed query is searched as well.
     search_query = _torrent_query(title, year, media_type)
@@ -174,6 +176,7 @@ async def render_torrents(
             "scope": _scope_label(season_number, episode_number),
             "query": query,
             "redo_job_id": redo_job_id,
+            "redo_notice": redo_notice,
         },
     )
 

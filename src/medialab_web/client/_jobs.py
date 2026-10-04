@@ -2,6 +2,7 @@ from medialab_contracts import API_PREFIX
 
 from medialab_web.client._base import _BaseClient
 from medialab_web.schemas.deletion import BulkDeleteResult, BulkDeletionPlan, DeletionPlan
+from medialab_web.schemas.dismiss import BulkDismissResult
 from medialab_web.schemas.jobs import JobsResponse, JobView
 
 
@@ -16,6 +17,15 @@ class _JobsMixin(_BaseClient):
         # the updated job (not wrapped in a status envelope).
         data = await self._post(f"{API_PREFIX}/jobs/{job_id}/retry")
         return self._parse(JobView, data)
+
+    async def dismiss_job(self, job_id: str) -> JobView | None:
+        # Closes a flagged job without touching files; returns the updated job.
+        data = await self._post(f"{API_PREFIX}/jobs/{job_id}/dismiss")
+        return self._parse(JobView, data)
+
+    async def bulk_dismiss(self, job_ids: list[str]) -> BulkDismissResult | None:
+        data = await self._post(f"{API_PREFIX}/jobs/dismiss", json={"job_ids": job_ids})
+        return self._parse(BulkDismissResult, data)
 
     async def deletion_plan(self, job_id: str) -> DeletionPlan | None:
         # Read-only: what a delete would remove, shown before confirming.

@@ -10,6 +10,8 @@ from medialab_web.client import OrchestratorClient
 from medialab_web.constants import (
     JOBS_ACTIVE_REFRESH_SECONDS,
     JOBS_REFRESH_SECONDS,
+    REDO_FAILED_NOTICE,
+    REDO_NOTICE,
     RETRYABLE_STATUSES,
     TERMINAL_STATUS_DELETED,
 )
@@ -102,6 +104,39 @@ async def retry(
     return _row(request, job, notice="Retry queued.")
 
 
+@router.post("/jobs/{job_id}/dismiss", response_class=HTMLResponse)
+async def dismiss(
+    request: Request, job_id: str, client: OrchestratorClient = _CLIENT
+) -> HTMLResponse:
+    job = await client.dismiss_job(job_id)
+    if job is None:
+        return _error(request, "Dismiss failed; the job is unchanged.")
+    return _row(request, job, notice="Dismissed.")
+
+
+@router.post("/jobs/dismiss", response_class=HTMLResponse)
+async def bulk_dismiss(
+    request: Request,
+    job_ids: list[str] = _JOB_IDS,
+    status_filter: str | None = _STATUS_FILTER,
+    client: OrchestratorClient = _CLIENT,
+) -> HTMLResponse:
+    """Dismiss the checked jobs in one gateway call, then the whole table
+    again with a notice; refused jobs are named with the reason. No plan step:
+    dismiss touches no files."""
+    result = await client.bulk_dismiss(job_ids)
+    if result is None:
+        return _error(request, "Bulk dismiss failed; nothing was changed.")
+    dismissed = [entry for entry in result.results if entry.dismissed]
+    failed = [entry for entry in result.results if not entry.dismissed]
+    context = await _table_context(client, status_filter)
+    return render(
+        request,
+        "partials/bulk_dismissed.html",
+        {"dismissed": dismissed, "failed": failed, "table": context},
+    )
+
+
 @router.get("/jobs/{job_id}/plan", response_class=HTMLResponse)
 async def deletion_plan(
     request: Request, job_id: str, client: OrchestratorClient = _CLIENT
@@ -167,10 +202,12 @@ async def redo_torrents(
     media_type: MediaType,
     season: str | None = None,
     episode: str | None = None,
+    failed: bool = False,
     client: OrchestratorClient = _CLIENT,
 ) -> HTMLResponse:
     # The row sends the job's own scope (see ``redo_vals``); a job with neither
-    # season nor episode searches the whole series.
+    # season nor episode searches the whole series. ``failed`` marks a redo of
+    # a flagged job, which replaces nothing in the library.
     return await render_torrents(
         request,
         client,
@@ -181,6 +218,7 @@ async def redo_torrents(
         season,
         episode,
         redo_job_id=job_id,
+        redo_notice=REDO_FAILED_NOTICE if failed else REDO_NOTICE,
     )
 
 
