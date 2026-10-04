@@ -22,10 +22,15 @@ from medialab_web.constants import (
     BULK_BAR_ID,
     BULK_PLAN_ID,
     CANCEL_LABEL,
+    CAUSE_TORRENT_GONE,
     CHECK_NOW_LABEL,
     DEFAULT_RESOLUTION,
+    DELETE_SELECTED_ID,
     DELETE_SELECTED_LABEL,
     DISCOVER_PATH,
+    DISMISS_LABEL,
+    DISMISS_SELECTED_ID,
+    DISMISS_SELECTED_LABEL,
     DOWNLOAD_NOTICE_CLASS,
     DOWNLOAD_SLOT_CLASS,
     EPISODE_BY_EPISODE_LABEL,
@@ -66,6 +71,7 @@ from medialab_web.constants import (
     SEASON_PACK_LABEL,
     SELECT_LABEL,
     SELECT_MODE_CLASS,
+    STATUS_DISMISSED,
     STATUS_DONE,
     SUBMITTED_LABEL,
     TMDB_ATTRIBUTION,
@@ -171,6 +177,12 @@ templates.env.globals["find_torrents_label"] = FIND_TORRENTS_LABEL
 templates.env.globals["redo_label"] = REDO_LABEL
 templates.env.globals["redo_notice"] = REDO_NOTICE
 templates.env.globals["status_done"] = STATUS_DONE
+templates.env.globals["status_dismissed"] = STATUS_DISMISSED
+templates.env.globals["cause_torrent_gone"] = CAUSE_TORRENT_GONE
+templates.env.globals["dismiss_label"] = DISMISS_LABEL
+templates.env.globals["dismiss_selected_label"] = DISMISS_SELECTED_LABEL
+templates.env.globals["dismiss_selected_id"] = DISMISS_SELECTED_ID
+templates.env.globals["delete_selected_id"] = DELETE_SELECTED_ID
 templates.env.globals["media_type_show"] = MediaType.SHOW
 templates.env.globals["discover_path"] = DISCOVER_PATH
 templates.env.globals["whole_series"] = WHOLE_SERIES

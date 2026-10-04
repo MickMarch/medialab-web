@@ -23,7 +23,8 @@ uv run pytest
 | Page | Gateway calls | Controls |
 |---|---|---|
 | `/login` | none | shared password (`WEB_PASSWORD`); signed cookie for `SESSION_MAX_AGE_SECONDS` |
-| `/` | `GET /jobs`, `GET /storage`, `GET /health` | status filter; Retry (FAILED, NEEDS_ATTENTION); Delete (plan, then confirm); Redo (DONE); Stop seeding; rows link a replaced job and its replacement |
+| `/` | `GET /jobs`, `GET /storage`, `GET /health` | status filter; on a flagged row (FAILED, NEEDS_ATTENTION) the action its `attention_cause` calls for: Redo when the torrent vanished with nothing placed, Retry otherwise, and Dismiss either way (`POST /jobs/{id}/dismiss`); Delete (plan, then confirm); Redo (DONE); Stop seeding; rows link a replaced job and its replacement; DISMISSED rows stay listed, muted |
+| `/jobs/dismiss` (Dismiss selected in the bulk bar) | `POST /jobs/dismiss` | dismisses the checked rows in one gateway call with no plan step (nothing on disk changes), then re-renders the table with a notice naming any refused row and why |
 | `/jobs/{id}/plan` | `GET /jobs/{id}/deletion-plan` | the plan and the red Delete button; nothing is touched before it |
 | `/partials/jobs/{id}/redo` | `GET /search/torrents`, `POST /jobs/{id}/redo` | the torrent step with the job's scope preset, above the table; Replace per row (confirmed) deletes the original and submits the replacement in one gateway action, then re-renders the table |
 | `/search` | `GET /search/tmdb`, `GET /search/tmdb/show/{id}`, `GET /search/torrents`, `POST /download` | title cards with Save and Follow (shows); season/episode scope for shows; torrent table by resolution with languages; Download per row (confirmed), carrying the searched season and episode |

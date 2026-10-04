@@ -25,6 +25,10 @@ class JobView(BaseModel):
     seeding_removed_at: str | None = None
     placed_paths: list[str] = []
     deleted_at: str | None = None
+    dismissed_at: str | None = None
+    # Why a FAILED or NEEDS_ATTENTION job waits on a human, as the gateway
+    # derives it; None for every other status.
+    attention_cause: str | None = None
     created_at: str
     updated_at: str
     progress: JobProgress | None = None

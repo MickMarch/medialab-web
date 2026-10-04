@@ -36,7 +36,9 @@ src/medialab_web/
 │                   _watchlist.py (save, follow, pause, check, episodes, retry) are web-only
 ├── schemas/        gateway response models; CardItem (a poster card's hx-vals);
 │                   watchlist.py (FollowCard / FollowForm: the picker's fields, FollowView)
-├── routes/         pages (/, /login, /logout), jobs (partials + actions; select mode posts the checked ids to the combined plan and bulk delete),
+├── routes/         pages (/, /login, /logout), jobs (partials + actions; a flagged row's actions follow
+│                   attention_cause; select mode posts the checked ids to the combined plan, bulk delete
+│                   and bulk dismiss),
 │                   search (/search, tmdb/scope/torrents partials, /downloads),
 │                   settings (/settings page, save and reset rows), system (/health),
 │                   discover (/discover grid and detail partial),

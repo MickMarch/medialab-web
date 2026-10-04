@@ -10,7 +10,7 @@
     <label>Status
       <select name="status_filter">
         <option value="" {% if not status_filter %}selected{% endif %}>All active</option>
-        {% for s in ["DOWNLOAD_SUBMITTED", "DOWNLOADING", "STOP_SEEDING", "RESOLVE_META", "RENAME", "SCAN", "DONE", "FAILED", "NEEDS_ATTENTION", "DELETED"] %}
+        {% for s in ["DOWNLOAD_SUBMITTED", "DOWNLOADING", "STOP_SEEDING", "RESOLVE_META", "RENAME", "SCAN", "DONE", "FAILED", "NEEDS_ATTENTION", "DISMISSED", "DELETED"] %}
         <option value="{{ s }}" {% if status_filter == s %}selected{% endif %}>{{ s }}</option>
         {% endfor %}
       </select>
@@ -40,7 +40,14 @@
 <form id="{{ bulk_bar_id }}" class="bulk-bar" hx-post="/partials/jobs/plan" hx-include="#jobs input[name='job_ids']:checked"
       hx-target="#{{ bulk_plan_id }}" hx-swap="innerHTML show:#{{ bulk_plan_id }}:top" hx-indicator="#busy">
   <span>{{ jobs_selected_text }} <strong id="selected-count">0</strong></span>
-  <button class="danger" id="delete-selected" disabled>{{ delete_selected_label }}</button>
+  <button class="danger" id="{{ delete_selected_id }}" disabled>{{ delete_selected_label }}</button>
+  {#- Dismiss needs no plan: it touches no files. The gateway refuses rows
+      that are not flagged and the notice names them. -#}
+  <button type="button" id="{{ dismiss_selected_id }}" disabled
+          hx-post="/jobs/dismiss" hx-include="#jobs input[name='job_ids']:checked, [name='status_filter']"
+          hx-target="#notice" hx-swap="innerHTML" hx-indicator="#busy"
+          hx-confirm="Dismiss the selected jobs? Files are untouched; the jobs stay listed as DISMISSED."
+          hx-on::after-request="setSelectMode(false)">{{ dismiss_selected_label }}</button>
   <button type="button" class="link" onclick="setSelectMode(false)">{{ cancel_label }}</button>
 </form>
 <script>
@@ -48,7 +55,8 @@
   function updateSelectedCount() {
     var count = selectedBoxes().length;
     document.getElementById("selected-count").textContent = count;
-    document.getElementById("delete-selected").disabled = count === 0;
+    document.getElementById("{{ delete_selected_id }}").disabled = count === 0;
+    document.getElementById("{{ dismiss_selected_id }}").disabled = count === 0;
   }
   function setSelectMode(on) {
     document.getElementById("jobs").classList.toggle("{{ select_mode_class }}", on);

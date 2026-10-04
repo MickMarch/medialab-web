@@ -30,6 +30,7 @@ from medialab_web.constants import (
     SECONDS_PER_MINUTE,
     SHORT_ID_LENGTH,
     SHOWS_PATH,
+    STATUS_DONE,
     YOUTUBE_THUMBNAIL_URL_TEMPLATE,
 )
 from medialab_web.media import from_tmdb_media_type
@@ -131,7 +132,8 @@ def short_id(job_id: str) -> str:
 
 def redo_vals(job: JobView) -> dict[str, object]:
     """``job`` as the hx-vals of its Redo button: the torrent step's query
-    fields, with season and episode present only when the job has them."""
+    fields, with season and episode present only when the job has them, and
+    ``failed`` when the job is flagged rather than done."""
     vals: dict[str, object] = {
         "tmdb_id": job.tmdb_id,
         "title": job.resolved_title or job.release_name,
@@ -142,6 +144,8 @@ def redo_vals(job: JobView) -> dict[str, object]:
         vals["season"] = job.season
     if job.episode is not None:
         vals["episode"] = job.episode
+    if job.status != STATUS_DONE:
+        vals["failed"] = 1
     return vals
 
 
