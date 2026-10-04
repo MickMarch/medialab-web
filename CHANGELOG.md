@@ -6,6 +6,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.20.0] - 2026-10-04
+
 ### Added
 
 - Dismiss on flagged job rows and `Dismiss selected` in the bulk bar: close a
