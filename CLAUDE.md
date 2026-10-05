@@ -39,7 +39,8 @@ src/medialab_web/
 ├── routes/         pages (/, /login, /logout), jobs (partials + actions; a flagged row's actions follow
 │                   attention_cause; select mode posts the checked ids to the combined plan, bulk delete
 │                   and bulk dismiss),
-│                   search (/search, tmdb/scope/torrents partials, /downloads),
+│                   search (/search, tmdb/scope/torrents partials, /downloads, the progress
+│                   partial the searching bar polls while a search runs),
 │                   settings (/settings page, save and reset rows), system (/health),
 │                   discover (/discover grid and detail partial),
 │                   watchlist (/watchlist tabs, /wishlist redirect, save and unsave, the

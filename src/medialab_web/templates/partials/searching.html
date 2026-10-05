@@ -1,7 +1,10 @@
 {#- The torrent-search progress bar. Page-level copies carry the id the
     show and jobs pages point at; the copy inside a title card (in_card) is
-    addressed by class from the controls in its slot. -#}
+    addressed by class from the controls in its slot. The inner block polls
+    real progress while the bar is shown; the base page's listener hands it
+    the in-flight search's parameters as hx-vals. -#}
 <div{% if not in_card %} id="searching"{% endif %} class="htmx-indicator card {{ searching_class }}" style="--search-seconds: {{ search_timeout }}s">
-  <p><strong>Searching torrents</strong> across every tracker plugin. Up to {{ search_timeout }} s; results appear as soon as the slowest pattern finishes.</p>
-  <div class="bar"><div class="fill"></div></div>
+  <div {{ search_progress_attr }} hx-get="{{ search_progress_path }}" hx-trigger="every {{ search_progress_poll_seconds }}s [this.closest('.{{ searching_class }}').classList.contains('htmx-request')]" hx-swap="innerHTML">
+    {% include "partials/search_progress.html" %}
+  </div>
 </div>

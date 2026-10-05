@@ -6,6 +6,17 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- The searching bar shows real progress: patterns done out of total and
+  results so far, polled once a second from the gateway while a search runs.
+  The fill advances with those numbers; the timed fill stays as the fallback
+  when progress cannot be read.
+
+### Changed
+
+- medialab-contracts pinned to the tag that carries `TorrentSearchProgress`.
+
 ## [0.21.0] - 2026-10-05
 
 ### Changed

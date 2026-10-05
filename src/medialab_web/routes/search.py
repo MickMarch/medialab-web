@@ -6,7 +6,7 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, Form, Request, status
 from fastapi.responses import HTMLResponse
-from medialab_contracts import MediaType
+from medialab_contracts import MediaType, SearchProgressState
 
 from medialab_web.auth import require_session
 from medialab_web.client import OrchestratorClient
@@ -15,11 +15,14 @@ from medialab_web.constants import (
     DOWNLOAD_FAILED_MESSAGE,
     DOWNLOADER_SERVICE_NAME,
     HTTP_PREFIX,
+    LIVE_FILL_CLASS,
     MAGNET_PREFIX,
     MIN_TARGETABLE_SEASON,
+    PERCENT_MAX,
     REDO_NOTICE,
     RETRYABLE_ERROR_CODES,
     SEARCH_PATH,
+    SEARCH_PROGRESS_PARTIAL_PATH,
     SEARCH_TIMEOUT_SETTING,
     TMDB_RESULTS_MAX,
     WHOLE_SERIES,
@@ -140,6 +143,53 @@ async def torrents(
     )
 
 
+@router.get(SEARCH_PROGRESS_PARTIAL_PATH, response_class=HTMLResponse)
+async def search_progress(
+    request: Request,
+    title: str,
+    year: str,
+    media_type: MediaType,
+    season: str | None = None,
+    episode: str | None = None,
+    query: str = "",
+    client: OrchestratorClient = _CLIENT,
+) -> HTMLResponse:
+    """The searching bar's inner block for the search the torrents step runs
+    with the same fields. Idle, or unreadable, renders the fallback text and
+    leaves the timed fill alone; otherwise the fill carries a live width."""
+    search_query, alt_query = _search_queries(title, year, media_type, query)
+    season_number, episode_number = scope_numbers(season, episode)
+    progress = await client.search_progress(
+        search_query,
+        media_type,
+        season=season_number,
+        episode=episode_number,
+        alt_query=alt_query,
+    )
+    live = progress is not None and progress.state is not SearchProgressState.IDLE
+    return render(
+        request,
+        "partials/search_progress.html",
+        {
+            "progress": progress if live else None,
+            "percent": round(progress.fraction * PERCENT_MAX) if live and progress else 0,
+            "live_class": LIVE_FILL_CLASS,
+            "search_timeout": await search_timeout_seconds(client),
+        },
+    )
+
+
+def _search_queries(
+    title: str, year: str, media_type: MediaType, query: str
+) -> tuple[str, str | None]:
+    """The gateway query and, when the user typed something else, the typed
+    spelling as the alternate. TMDB's canonical title and release names can
+    differ ("Lee Cronin's The Mummy" vs "The Mummy 2026")."""
+    typed = query.strip()
+    alt_query = _torrent_query(typed, year, media_type) if typed else None
+    return _torrent_query(title, year, media_type), alt_query
+
+
 async def render_torrents(
     request: Request,
     client: OrchestratorClient,
@@ -156,11 +206,7 @@ async def render_torrents(
     """The torrent step: one gateway search rendered as the grouped table.
     With ``redo_job_id`` every pick replaces that job instead of starting a
     fresh download; ``redo_notice`` says which kind of job is being replaced."""
-    # TMDB's canonical title and release names can differ ("Lee Cronin's The
-    # Mummy" vs "The Mummy 2026"); the typed query is searched as well.
-    search_query = _torrent_query(title, year, media_type)
-    typed = query.strip()
-    alt_query = _torrent_query(typed, year, media_type) if typed else None
+    search_query, alt_query = _search_queries(title, year, media_type, query)
     season_number, episode_number = scope_numbers(season, episode)
     response = await client.search_torrents(
         search_query,
