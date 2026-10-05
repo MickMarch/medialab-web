@@ -10,6 +10,7 @@ from medialab_web.client import OrchestratorClient
 from medialab_web.constants import (
     JOBS_ACTIVE_REFRESH_SECONDS,
     JOBS_REFRESH_SECONDS,
+    REDO_FAILED_MESSAGE,
     REDO_FAILED_NOTICE,
     REDO_NOTICE,
     RETRYABLE_STATUSES,
@@ -18,11 +19,13 @@ from medialab_web.constants import (
 from medialab_web.deps import get_client
 from medialab_web.rendering import render
 from medialab_web.routes.search import (
+    failure_message,
     invalid_link,
     is_torrent_link,
     render_torrents,
     scope_numbers,
 )
+from medialab_web.schemas.downloads import DownloadResponse
 from medialab_web.schemas.jobs import JobView
 
 router = APIRouter(dependencies=[Depends(require_session)])
@@ -249,8 +252,8 @@ async def redo(
         season=season_number,
         episode=episode_number,
     )
-    if response is None:
-        return _error(request, "Redo failed; the original download is untouched.")
+    if not isinstance(response, DownloadResponse):
+        return _error(request, failure_message(response, REDO_FAILED_MESSAGE))
     context = await _table_context(client, status_filter)
     return render(
         request,

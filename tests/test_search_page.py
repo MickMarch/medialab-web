@@ -11,6 +11,7 @@ from medialab_web.constants import (
     SAVED_LABEL,
 )
 from medialab_web.schemas.downloads import DownloadResponse
+from medialab_web.schemas.errors import GatewayError
 from medialab_web.schemas.tmdb import TmdbMediaDetailResponse, TmdbSearchResponse, TmdbSearchResult
 from medialab_web.schemas.torrents import TorrentResult, TorrentSearchResponse
 from tests.conftest import make_job
@@ -266,6 +267,46 @@ async def test_download_failure_is_reported(logged_in, mock_client):
     )
     assert response.status_code == 502
     assert "nothing was submitted" in response.text
+
+
+async def test_download_shows_the_detail_for_a_retryable_code(logged_in, mock_client):
+    mock_client.download = AsyncMock(
+        return_value=GatewayError(
+            status_code=503,
+            code="SOURCE_UNREACHABLE",
+            detail="The source page could not be reached; the request can be retried.",
+        )
+    )
+    response = await logged_in.post(
+        "/downloads",
+        data={
+            "source_url": "magnet:?xt=urn:btih:abc",
+            "media_type": "movie",
+            "tmdb_id": "1",
+            "file_name": "x",
+        },
+    )
+    assert response.status_code == 502
+    assert "could not be reached" in response.text
+    assert "nothing was submitted" not in response.text
+
+
+async def test_download_keeps_the_generic_message_for_an_unknown_code(logged_in, mock_client):
+    mock_client.download = AsyncMock(
+        return_value=GatewayError(status_code=500, code="INTERNAL_ERROR", detail="/srv/secret")
+    )
+    response = await logged_in.post(
+        "/downloads",
+        data={
+            "source_url": "magnet:?xt=urn:btih:abc",
+            "media_type": "movie",
+            "tmdb_id": "1",
+            "file_name": "x",
+        },
+    )
+    assert response.status_code == 502
+    assert "nothing was submitted" in response.text
+    assert "/srv/secret" not in response.text
 
 
 async def test_search_requires_login(client):

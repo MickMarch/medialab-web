@@ -12,11 +12,13 @@ from medialab_web.auth import require_session
 from medialab_web.client import OrchestratorClient
 from medialab_web.constants import (
     DEFAULT_SEARCH_TIMEOUT_SECONDS,
+    DOWNLOAD_FAILED_MESSAGE,
     DOWNLOADER_SERVICE_NAME,
     HTTP_PREFIX,
     MAGNET_PREFIX,
     MIN_TARGETABLE_SEASON,
     REDO_NOTICE,
+    RETRYABLE_ERROR_CODES,
     SEARCH_PATH,
     SEARCH_TIMEOUT_SETTING,
     TMDB_RESULTS_MAX,
@@ -26,6 +28,8 @@ from medialab_web.deps import get_client
 from medialab_web.media import from_tmdb_media_type
 from medialab_web.rendering import render
 from medialab_web.schemas.discover import CardItem
+from medialab_web.schemas.downloads import DownloadResponse
+from medialab_web.schemas.errors import GatewayError
 from medialab_web.schemas.torrents import TorrentResult
 
 router = APIRouter(dependencies=[Depends(require_session)])
@@ -41,6 +45,13 @@ def _error(request: Request, message: str) -> HTMLResponse:
     return render(
         request, _ERROR_FRAGMENT, {"message": message}, status_code=status.HTTP_502_BAD_GATEWAY
     )
+
+
+def failure_message(result: GatewayError | None, generic: str) -> str:
+    """The gateway's own detail for a retryable refusal, ``generic`` otherwise."""
+    if isinstance(result, GatewayError) and result.code in RETRYABLE_ERROR_CODES:
+        return result.detail
+    return generic
 
 
 async def search_timeout_seconds(client: OrchestratorClient) -> int:
@@ -241,8 +252,8 @@ async def start_download(
     response = await client.download(
         source_url, media_type, tmdb_id, file_name, season=season_number, episode=episode_number
     )
-    if response is None:
-        return _error(request, "Download request failed; nothing was submitted.")
+    if not isinstance(response, DownloadResponse):
+        return _error(request, failure_message(response, DOWNLOAD_FAILED_MESSAGE))
     return render(
         request, "partials/download_started.html", {"job": response.job, "file_name": file_name}
     )

@@ -5,6 +5,8 @@ import httpx
 from medialab_contracts import API_KEY_HEADER
 from pydantic import BaseModel, ValidationError
 
+from medialab_web.schemas.errors import GatewayError
+
 logger = logging.getLogger(__name__)
 
 ModelT = TypeVar("ModelT", bound=BaseModel)
@@ -63,6 +65,42 @@ class _BaseClient:
             return None
         except ValueError:
             logger.error("POST %s returned non-JSON response", path)
+            return None
+
+    async def _post_or_error(
+        self,
+        path: str,
+        json: dict | None = None,
+        expected_status: int = 200,
+        timeout: float | None = None,
+    ) -> dict | GatewayError | None:
+        """``_post`` that keeps a refusal: a non-expected status whose body is
+        the error envelope comes back as ``GatewayError``. Transport failure,
+        non-JSON and an envelope that does not parse are still ``None``."""
+        try:
+            response = await self._http.post(path, json=json or {}, timeout=timeout)
+            body = response.json()
+        except httpx.TimeoutException:
+            logger.warning("POST %s timed out", path)
+            return None
+        except (httpx.ConnectError, httpx.HTTPError):
+            logger.warning("POST %s failed with network error", path)
+            return None
+        except ValueError:
+            logger.error("POST %s returned non-JSON response", path)
+            return None
+        if response.status_code == expected_status:
+            return body
+        logger.warning("POST %s returned %d", path, response.status_code)
+        return self._parse_error(response.status_code, body)
+
+    @staticmethod
+    def _parse_error(status_code: int, body: object) -> GatewayError | None:
+        if not isinstance(body, dict):
+            return None
+        try:
+            return GatewayError.model_validate({**body, "status_code": status_code})
+        except ValidationError:
             return None
 
     async def _put(self, path: str, json: dict | None = None) -> dict | None:

@@ -81,6 +81,13 @@ TMDB_RESULTS_MAX = 12
 MAGNET_PREFIX = "magnet:"
 HTTP_PREFIX = "http"
 DOWNLOADER_SERVICE_NAME = "torrent-downloader"
+# Gateway error codes whose detail is shown as-is: the request was fine and a
+# retry may succeed. Every other code keeps the generic message.
+SOURCE_UNREACHABLE_CODE = "SOURCE_UNREACHABLE"
+TMDB_UNAVAILABLE_CODE = "TMDB_UNAVAILABLE"
+RETRYABLE_ERROR_CODES = frozenset({SOURCE_UNREACHABLE_CODE, TMDB_UNAVAILABLE_CODE})
+DOWNLOAD_FAILED_MESSAGE = "Download request failed; nothing was submitted."
+REDO_FAILED_MESSAGE = "Redo failed; the original download is untouched."
 SEARCH_TIMEOUT_SETTING = "search_timeout_seconds"
 DEFAULT_SEARCH_TIMEOUT_SECONDS = 15
 RELEASE_NAME_SEPARATORS = "._- "
