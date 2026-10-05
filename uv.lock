@@ -448,8 +448,8 @@ wheels = [
 
 [[package]]
 name = "medialab-contracts"
-version = "1.1.0"
-source = { git = "https://github.com/MickMarch/medialab-contracts?rev=v1.1.0#78912582b1dfca71403abb37d0d5b3583793e0f6" }
+version = "1.2.0"
+source = { git = "https://github.com/MickMarch/medialab-contracts?rev=v1.2.0#416dcf424fd10b6cd11e81794a23dca9ff927534" }
 dependencies = [
     { name = "pydantic" },
 ]
@@ -486,7 +486,7 @@ requires-dist = [
     { name = "httpx", specifier = ">=0.28.0" },
     { name = "itsdangerous", specifier = ">=2.2.0" },
     { name = "jinja2", specifier = ">=3.1.6" },
-    { name = "medialab-contracts", git = "https://github.com/MickMarch/medialab-contracts?rev=v1.1.0" },
+    { name = "medialab-contracts", git = "https://github.com/MickMarch/medialab-contracts?rev=v1.2.0" },
     { name = "pydantic", specifier = ">=2.0" },
     { name = "pydantic-settings", specifier = ">=2.14.2" },
     { name = "python-multipart", specifier = ">=0.0.20" },

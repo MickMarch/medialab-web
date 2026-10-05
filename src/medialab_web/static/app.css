@@ -77,6 +77,7 @@ nav a { color: var(--fg); }
 .searching .bar { height: 8px; background: var(--line); border-radius: 999px; overflow: hidden; }
 .searching .fill { height: 100%; width: 0; background: var(--accent); animation: search-fill var(--search-seconds, 15s) linear forwards; }
 .htmx-request .searching .fill, .htmx-request.searching .fill { animation-name: search-fill; }
+.searching .fill.live { animation: none; transition: width .4s linear; }
 @keyframes search-fill { from { width: 0; } to { width: 100%; } }
 .htmx-request .htmx-indicator, .htmx-request.htmx-indicator { display: inline; }
 .htmx-request .searching, .htmx-request.searching { display: block; }

@@ -1,4 +1,4 @@
-from medialab_contracts import API_PREFIX, MediaType
+from medialab_contracts import API_PREFIX, MediaType, TorrentSearchProgress
 
 from medialab_web.client._base import _BaseClient
 from medialab_web.schemas.downloads import DownloadResponse
@@ -17,19 +17,28 @@ class _TorrentsMixin(_BaseClient):
         episode: int | None = None,
         alt_query: str | None = None,
     ) -> TorrentSearchResponse | None:
-        params: dict[str, str | int] = {"query": query, "media_type": media_type.value}
-        if alt_query:
-            params["alt_query"] = alt_query
-        if season is not None:
-            params["season"] = season
-        if episode is not None:
-            params["episode"] = episode
         data = await self._get(
             f"{API_PREFIX}/search/torrents",
-            params=params,
+            params=_search_params(query, media_type, season, episode, alt_query),
             timeout=self._torrent_search_timeout,
         )
         return self._parse(TorrentSearchResponse, data)
+
+    async def search_progress(
+        self,
+        query: str,
+        media_type: MediaType,
+        season: int | None = None,
+        episode: int | None = None,
+        alt_query: str | None = None,
+    ) -> TorrentSearchProgress | None:
+        # Same parameters as search_torrents: the downloader reports on the
+        # patterns that search runs. Cheap at the gateway; polled once a second.
+        data = await self._get(
+            f"{API_PREFIX}/search/torrents/progress",
+            params=_search_params(query, media_type, season, episode, alt_query),
+        )
+        return self._parse(TorrentSearchProgress, data)
 
     async def download(
         self,
@@ -76,6 +85,23 @@ def _parse_download(data: dict | GatewayError | None) -> DownloadResponse | Gate
     if isinstance(data, GatewayError):
         return data
     return _BaseClient._parse(DownloadResponse, data)
+
+
+def _search_params(
+    query: str,
+    media_type: MediaType,
+    season: int | None,
+    episode: int | None,
+    alt_query: str | None,
+) -> dict[str, str | int]:
+    params: dict[str, str | int] = {"query": query, "media_type": media_type.value}
+    if alt_query:
+        params["alt_query"] = alt_query
+    if season is not None:
+        params["season"] = season
+    if episode is not None:
+        params["episode"] = episode
+    return params
 
 
 def _download_body(

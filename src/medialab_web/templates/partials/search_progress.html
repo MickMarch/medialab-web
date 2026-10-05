@@ -1,0 +1,10 @@
+{#- The inside of the searching bar: a line of text and the fill. With live
+    progress the fill carries an inline width and the "live" class that turns
+    the timed animation off; without it the CSS timer runs as before. -#}
+{% if progress %}
+<p><strong>Searching torrents</strong>: {{ progress.patterns_done }} of {{ progress.patterns_total }} patterns done, {{ progress.results_so_far }} results so far.</p>
+<div class="bar"><div class="fill {{ live_class }}" style="width: {{ percent }}%"></div></div>
+{% else %}
+<p><strong>Searching torrents</strong> {{ searching_fallback_text }}. Up to {{ search_timeout }} s; results appear as soon as the slowest pattern finishes.</p>
+<div class="bar"><div class="fill"></div></div>
+{% endif %}

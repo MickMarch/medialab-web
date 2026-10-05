@@ -8,6 +8,20 @@
   {# Error fragments arrive with 4xx/5xx; htmx 2 skips those swaps by default. #}
   <meta name="htmx-config" content='{"responseHandling": [{"code": "204", "swap": false}, {"code": "[23]..", "swap": true}, {"code": "[45]..", "swap": true, "error": true}, {"code": "...", "swap": true}]}'>
   <script src="https://unpkg.com/htmx.org@2.0.4" crossorigin="anonymous"></script>
+  {# The searching bar polls progress for the search in flight. A page-level
+     bar serves many buttons, so it learns the search's parameters from the
+     request that starts it rather than at render time. #}
+  <script>
+    document.addEventListener("htmx:configRequest", function (event) {
+      var path = event.detail.path || "";
+      if (!(path.endsWith("/partials/search/torrents") || path.endsWith("/redo"))) { return; }
+      var params = {};
+      event.detail.formData.forEach(function (value, key) { params[key] = value; });
+      document.querySelectorAll("[{{ search_progress_attr }}]").forEach(function (poller) {
+        poller.setAttribute("hx-vals", JSON.stringify(params));
+      });
+    });
+  </script>
 </head>
 <body>
   <header class="top">

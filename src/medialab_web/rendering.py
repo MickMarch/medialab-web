@@ -67,7 +67,11 @@ from medialab_web.constants import (
     RETRYING_PACK_LABEL,
     SAVE_LABEL,
     SAVED_LABEL,
+    SEARCH_PROGRESS_ATTR,
+    SEARCH_PROGRESS_PARTIAL_PATH,
+    SEARCH_PROGRESS_POLL_SECONDS,
     SEARCHING_CLASS,
+    SEARCHING_FALLBACK_TEXT,
     SEASON_PACK_LABEL,
     SELECT_LABEL,
     SELECT_MODE_CLASS,
@@ -196,6 +200,10 @@ templates.env.globals["trailer_slot_class"] = TRAILER_SLOT_CLASS
 templates.env.globals["download_slot_class"] = DOWNLOAD_SLOT_CLASS
 templates.env.globals["download_notice_class"] = DOWNLOAD_NOTICE_CLASS
 templates.env.globals["searching_class"] = SEARCHING_CLASS
+templates.env.globals["search_progress_path"] = SEARCH_PROGRESS_PARTIAL_PATH
+templates.env.globals["search_progress_attr"] = SEARCH_PROGRESS_ATTR
+templates.env.globals["search_progress_poll_seconds"] = SEARCH_PROGRESS_POLL_SECONDS
+templates.env.globals["searching_fallback_text"] = SEARCHING_FALLBACK_TEXT
 templates.env.globals["watch_trailer_label"] = WATCH_TRAILER_LABEL
 templates.env.globals["trailer_close_label"] = TRAILER_CLOSE_LABEL
 templates.env.globals["official_label"] = OFFICIAL_LABEL

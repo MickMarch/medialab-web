@@ -124,6 +124,14 @@ TRAILER_SLOT_CLASS = "trailer-slot"
 DOWNLOAD_SLOT_CLASS = "download-slot"
 DOWNLOAD_NOTICE_CLASS = "download-notice"
 SEARCHING_CLASS = "searching"
+SEARCH_PROGRESS_PARTIAL_PATH = "/partials/search/progress"
+# Marks the element that polls progress; the base page's listener copies the
+# in-flight search's parameters onto it.
+SEARCH_PROGRESS_ATTR = "data-search-progress"
+SEARCH_PROGRESS_POLL_SECONDS = 1
+SEARCHING_FALLBACK_TEXT = "across every tracker plugin"
+LIVE_FILL_CLASS = "live"
+PERCENT_MAX = 100
 WATCH_TRAILER_LABEL = "Watch trailer"
 TRAILER_CLOSE_LABEL = "Close"
 OFFICIAL_LABEL = "Official"
