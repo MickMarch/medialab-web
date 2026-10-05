@@ -13,5 +13,4 @@ class GatewayError(ErrorResponse):
     """
 
     status: str = "error"
-    status: str = "error"
     status_code: int
