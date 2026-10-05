@@ -10,6 +10,7 @@ from medialab_web.constants import (
 )
 from medialab_web.schemas.deletion import DeletionPlan
 from medialab_web.schemas.downloads import DownloadResponse
+from medialab_web.schemas.errors import GatewayError
 from medialab_web.schemas.jobs import JobsResponse
 from medialab_web.schemas.torrents import TorrentResult, TorrentSearchResponse
 from tests.conftest import make_job
@@ -335,6 +336,27 @@ async def test_redo_whole_series_sends_no_scope(logged_in, mock_client):
     mock_client.redo.assert_awaited_once_with(
         "a", "http://x/t.torrent", MediaType.SHOW, 2, "x", season=None, episode=None
     )
+
+
+async def test_redo_shows_the_detail_for_a_retryable_code(logged_in, mock_client):
+    mock_client.redo = AsyncMock(
+        return_value=GatewayError(
+            status_code=503, code="SOURCE_UNREACHABLE", detail="Source page unreachable; retry."
+        )
+    )
+    response = await logged_in.post("/partials/jobs/a/redo", data=_pick())
+    assert response.status_code == 502
+    assert "unreachable" in response.text
+    assert "Redo failed" not in response.text
+
+
+async def test_redo_keeps_the_generic_message_for_an_unknown_code(logged_in, mock_client):
+    mock_client.redo = AsyncMock(
+        return_value=GatewayError(status_code=409, code="JOB_NOT_DONE", detail="not done")
+    )
+    response = await logged_in.post("/partials/jobs/a/redo", data=_pick())
+    assert response.status_code == 502
+    assert "Redo failed" in response.text
 
 
 async def test_redo_rejects_garbage_link(logged_in, mock_client):

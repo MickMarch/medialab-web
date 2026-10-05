@@ -2,6 +2,7 @@ from medialab_contracts import API_PREFIX, MediaType
 
 from medialab_web.client._base import _BaseClient
 from medialab_web.schemas.downloads import DownloadResponse
+from medialab_web.schemas.errors import GatewayError
 from medialab_web.schemas.torrents import TorrentSearchResponse
 
 _DOWNLOAD_ACCEPTED = 202
@@ -38,16 +39,16 @@ class _TorrentsMixin(_BaseClient):
         release_name: str = "",
         season: int | None = None,
         episode: int | None = None,
-    ) -> DownloadResponse | None:
+    ) -> DownloadResponse | GatewayError | None:
         # source_url is whatever the picked result carried - a magnet or an http
         # .torrent URL. The gateway resolves placement and fans out; it requires
         # media_type + tmdb_id (no title guessing). season and episode record
         # the scope the torrent was searched with; a whole-series job sends neither.
         body = _download_body(source_url, media_type, tmdb_id, release_name, season, episode)
-        data = await self._post(
+        data = await self._post_or_error(
             f"{API_PREFIX}/download", json=body, expected_status=_DOWNLOAD_ACCEPTED
         )
-        return self._parse(DownloadResponse, data)
+        return _parse_download(data)
 
     async def redo(
         self,
@@ -59,16 +60,22 @@ class _TorrentsMixin(_BaseClient):
         *,
         season: int | None = None,
         episode: int | None = None,
-    ) -> DownloadResponse | None:
+    ) -> DownloadResponse | GatewayError | None:
         # Same body as download, posted to the finished job: the gateway deletes
         # the original and submits the replacement as one action. It refuses a
         # job that is not DONE or whose deletion plan is refused (409), so None
         # means nothing was changed.
         body = _download_body(source_url, media_type, tmdb_id, release_name, season, episode)
-        data = await self._post(
+        data = await self._post_or_error(
             f"{API_PREFIX}/jobs/{job_id}/redo", json=body, expected_status=_DOWNLOAD_ACCEPTED
         )
-        return self._parse(DownloadResponse, data)
+        return _parse_download(data)
+
+
+def _parse_download(data: dict | GatewayError | None) -> DownloadResponse | GatewayError | None:
+    if isinstance(data, GatewayError):
+        return data
+    return _BaseClient._parse(DownloadResponse, data)
 
 
 def _download_body(

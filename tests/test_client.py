@@ -7,6 +7,7 @@ from medialab_contracts import MediaType, ShowBrowseResponse, VideosResponse
 from medialab_web.client import OrchestratorClient
 from medialab_web.schemas.actions import ActionResponse
 from medialab_web.schemas.downloads import DownloadResponse
+from medialab_web.schemas.errors import GatewayError
 from medialab_web.schemas.jobs import JobsResponse, JobView
 from medialab_web.schemas.system import DiskUsageResponse, HealthResponse
 from medialab_web.schemas.tmdb import TmdbMediaDetailResponse, TmdbSearchResponse
@@ -197,9 +198,45 @@ async def test_download_sends_torrent_file_url_as_source_url(client):
 
 
 @pytest.mark.asyncio
-async def test_download_returns_none_on_non_202(client):
-    with patch.object(client._http, "post", new=AsyncMock(return_value=_mock_response(503))):
+async def test_download_returns_the_gateway_error_on_an_error_envelope(client):
+    body = {"status": "error", "code": "SOURCE_UNREACHABLE", "detail": "Source down; retry."}
+    with patch.object(client._http, "post", new=AsyncMock(return_value=_mock_response(503, body))):
+        result = await client.download("magnet:?xt=urn:btih:abc", MediaType.MOVIE, 1)
+    assert isinstance(result, GatewayError)
+    assert result.status_code == 503
+    assert result.code == "SOURCE_UNREACHABLE"
+    assert result.detail == "Source down; retry."
+
+
+@pytest.mark.asyncio
+async def test_download_returns_none_on_a_non_json_error(client):
+    response = _mock_response(503)
+    response.json.side_effect = ValueError("not json")
+    with patch.object(client._http, "post", new=AsyncMock(return_value=response)):
         assert await client.download("magnet:?xt=urn:btih:abc", MediaType.MOVIE, 1) is None
+
+
+@pytest.mark.asyncio
+async def test_download_returns_none_on_an_unparseable_error_body(client):
+    with patch.object(
+        client._http, "post", new=AsyncMock(return_value=_mock_response(503, {"oops": 1}))
+    ):
+        assert await client.download("magnet:?xt=urn:btih:abc", MediaType.MOVIE, 1) is None
+
+
+@pytest.mark.asyncio
+async def test_download_returns_none_on_a_transport_error(client):
+    with patch.object(client._http, "post", new=AsyncMock(side_effect=httpx.ConnectError("x"))):
+        assert await client.download("magnet:?xt=urn:btih:abc", MediaType.MOVIE, 1) is None
+
+
+@pytest.mark.asyncio
+async def test_redo_returns_the_gateway_error_on_an_error_envelope(client):
+    body = {"status": "error", "code": "JOB_NOT_DONE", "detail": "Job is not DONE."}
+    with patch.object(client._http, "post", new=AsyncMock(return_value=_mock_response(409, body))):
+        result = await client.redo("old", "magnet:?xt=urn:btih:abc", MediaType.MOVIE, 1, "x")
+    assert isinstance(result, GatewayError)
+    assert result.code == "JOB_NOT_DONE"
 
 
 # --- redo (same body as download, posted to the finished job) ---
