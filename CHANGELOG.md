@@ -6,6 +6,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.21.0] - 2026-10-05
+
 ### Changed
 
 - A download or redo the gateway refuses with a retryable code
