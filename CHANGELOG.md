@@ -6,6 +6,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.23.0] - 2026-10-07
+
 ### Added
 
 - Credential banner on every signed-in page: each key the gateway reports as
