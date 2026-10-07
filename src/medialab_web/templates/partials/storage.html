@@ -18,6 +18,9 @@
       <li>medialab-jellyfin: <span class="badge {{ 'ok' if health.downstream.medialab_jellyfin else 'bad' }}">{{ 'up' if health.downstream.medialab_jellyfin else 'down' }}</span></li>
       <li>VPN: <span class="badge {{ 'ok' if health.vpn_interface_bound else 'bad' }}">{{ 'bound' if health.vpn_interface_bound else 'not bound' }}</span></li>
       {% if health.needs_attention %}<li class="error">{{ health.needs_attention }} job(s) need attention</li>{% endif %}
+      {% for name, state in health.credentials.items() %}
+      <li>{{ credential_titles.get(name, name) }}: <span class="badge {{ 'ok' if state.status.value == 'ok' else ('bad' if state.status.value == 'invalid' else '') }}">{{ state.status.value }}</span></li>
+      {% endfor %}
     </ul>
     {% else %}
     <p class="error">Gateway unreachable.</p>

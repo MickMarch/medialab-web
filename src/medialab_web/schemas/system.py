@@ -1,3 +1,4 @@
+from medialab_contracts import CredentialState
 from pydantic import BaseModel
 
 
@@ -17,6 +18,8 @@ class HealthResponse(BaseModel):
     downstream: DownstreamHealth
     needs_attention: int = 0
     vpn_interface_bound: bool = False
+    credentials: dict[str, CredentialState] = {}
+    """Per-credential health across the stack; only ``invalid`` needs a human."""
 
 
 class DiskUsageResponse(BaseModel):
