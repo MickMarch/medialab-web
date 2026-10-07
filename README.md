@@ -38,6 +38,7 @@ uv run pytest
 | `/partials/trailers` (Watch trailer on the detail card and on each season row of `/shows/{tmdb_id}`) | `GET /search/tmdb/{type}/{id}/videos` | nothing loads before the click; one trailer plays at once in an embedded youtube-nocookie player, several are listed (official first) to pick from, none shows a notice; Close stops playback and one player is open at a time |
 | `/settings` | `GET /settings`, `PUT` and `DELETE /settings/{service}/{key}` | one row per runtime setting per service: value, source, when it applies; Save and Reset per row |
 | `/health` | none | liveness for the doctor and compose |
+| `/partials/credentials` | `GET /health` | banner polled on every signed-in page: credentials the gateway reports `invalid`, with the fix command |
 
 Every control is an HTMX request that swaps the affected row or panel. The
 jobs table refreshes itself every 30 seconds.

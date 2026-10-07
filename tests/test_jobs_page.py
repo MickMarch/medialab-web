@@ -414,3 +414,54 @@ async def test_storage_panel_flags_vpn_not_bound(logged_in, mock_client):
     )
     text = (await logged_in.get("/partials/storage")).text
     assert 'class="badge bad">not bound<' in text
+
+
+async def test_credentials_banner_is_empty_when_everything_is_ok(logged_in):
+    text = (await logged_in.get("/partials/credentials")).text
+    assert "Credential problem" not in text
+
+
+async def test_credentials_banner_lists_invalid_keys_with_the_fix(logged_in, mock_client):
+    from medialab_contracts import CREDENTIAL_TMDB_API_KEY, CredentialState, CredentialStatus
+
+    health = mock_client.health.return_value
+    mock_client.health = AsyncMock(
+        return_value=health.model_copy(
+            update={
+                "credentials": {
+                    CREDENTIAL_TMDB_API_KEY: CredentialState(
+                        status=CredentialStatus.INVALID, detail="HTTP 401"
+                    )
+                }
+            }
+        )
+    )
+    text = (await logged_in.get("/partials/credentials")).text
+    assert "Credential problem" in text
+    assert "TMDB API key" in text and "HTTP 401" in text
+    assert f"setup.cmd --fix {CREDENTIAL_TMDB_API_KEY}" in text
+
+
+async def test_pages_poll_the_banner_but_login_does_not(client, logged_in):
+    home = (await logged_in.get("/")).text
+    assert 'hx-get="/partials/credentials"' in home
+    login = (await client.get("/login")).text
+    assert 'hx-get="/partials/credentials"' not in login
+
+
+async def test_storage_panel_lists_credential_states(logged_in, mock_client):
+    from medialab_contracts import CREDENTIAL_JELLYFIN_API_KEY, CredentialState, CredentialStatus
+
+    health = mock_client.health.return_value
+    mock_client.health = AsyncMock(
+        return_value=health.model_copy(
+            update={
+                "credentials": {
+                    CREDENTIAL_JELLYFIN_API_KEY: CredentialState(status=CredentialStatus.OK)
+                }
+            }
+        )
+    )
+    text = (await logged_in.get("/partials/storage")).text
+    assert "Jellyfin API key" in text
+    assert 'class="badge ok">ok<' in text

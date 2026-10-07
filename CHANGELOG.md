@@ -6,6 +6,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Credential banner on every signed-in page: each key the gateway reports as
+  `invalid`, with its detail and the `setup.cmd --fix` command; the Services
+  card lists every credential's state (MickMarch/medialab#136).
+
+### Changed
+
+- medialab-contracts pin moved to the release carrying the credential models.
+
 ## [0.22.0] - 2026-10-05
 
 ### Added

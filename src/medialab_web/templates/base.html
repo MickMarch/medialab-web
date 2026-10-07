@@ -28,6 +28,9 @@
     <a class="brand" href="/">medialab</a>
     {% block nav %}{% endblock %}
   </header>
+  {% block banner %}
+  <div id="credentials-banner" hx-get="/partials/credentials" hx-trigger="load, every {{ credential_banner_refresh_seconds }}s" hx-swap="innerHTML"></div>
+  {% endblock %}
   <main>
     {% block content %}{% endblock %}
   </main>

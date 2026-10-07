@@ -1,6 +1,15 @@
 """Named values shared across the web UI."""
 
-from medialab_contracts import DEFAULT_FOLLOW_RESOLUTION, FollowStartMode, MediaType, WatchlistKind
+from medialab_contracts import (
+    CREDENTIAL_DISCORD_TOKEN,
+    CREDENTIAL_JELLYFIN_API_KEY,
+    CREDENTIAL_QB_API_KEY,
+    CREDENTIAL_TMDB_API_KEY,
+    DEFAULT_FOLLOW_RESOLUTION,
+    FollowStartMode,
+    MediaType,
+    WatchlistKind,
+)
 
 SESSION_COOKIE_NAME = "medialab_session"
 SESSION_VALUE = "ok"
@@ -142,3 +151,14 @@ TRAILERS_UNAVAILABLE_MESSAGE = "Could not load trailers. TMDB or the gateway is 
 FIRST_PAGE = 1
 TMDB_ATTRIBUTION = "This product uses the TMDB API but is not endorsed or certified by TMDB."
 MEDIA_TYPE_LABELS = {MediaType.MOVIE: "Movies", MediaType.SHOW: "Shows"}
+
+# Credential health as the operator reads it. Titles mirror the setup tool's guides.
+CREDENTIAL_TITLES = {
+    CREDENTIAL_TMDB_API_KEY: "TMDB API key",
+    CREDENTIAL_QB_API_KEY: "qBittorrent WebUI key",
+    CREDENTIAL_JELLYFIN_API_KEY: "Jellyfin API key",
+    CREDENTIAL_DISCORD_TOKEN: "Discord bot token",
+}
+CREDENTIAL_BANNER_REFRESH_SECONDS = 60
+CREDENTIAL_FIX_COMMAND = "setup.cmd --fix {name}"
+CREDENTIAL_INVALID_STATUS = "invalid"

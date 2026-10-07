@@ -8,6 +8,9 @@ from medialab_contracts import MediaType
 from medialab_web.auth import require_session
 from medialab_web.client import OrchestratorClient
 from medialab_web.constants import (
+    CREDENTIAL_FIX_COMMAND,
+    CREDENTIAL_INVALID_STATUS,
+    CREDENTIAL_TITLES,
     JOBS_ACTIVE_REFRESH_SECONDS,
     JOBS_REFRESH_SECONDS,
     REDO_FAILED_MESSAGE,
@@ -90,11 +93,34 @@ async def jobs_table(
     return render(request, _JOBS_TABLE, context)
 
 
+@router.get("/partials/credentials", response_class=HTMLResponse)
+async def credentials_banner(
+    request: Request, client: OrchestratorClient = _CLIENT
+) -> HTMLResponse:
+    """Every credential the gateway reports as invalid, with how to fix it; empty when none."""
+    health = await client.health()
+    invalid = [
+        {
+            "name": name,
+            "title": CREDENTIAL_TITLES.get(name, name),
+            "detail": state.detail,
+            "fix_command": CREDENTIAL_FIX_COMMAND.format(name=name),
+        }
+        for name, state in (health.credentials.items() if health else [])
+        if state.status.value == CREDENTIAL_INVALID_STATUS
+    ]
+    return render(request, "partials/credentials_banner.html", {"invalid": invalid})
+
+
 @router.get("/partials/storage", response_class=HTMLResponse)
 async def storage_panel(request: Request, client: OrchestratorClient = _CLIENT) -> HTMLResponse:
     usage = await client.get_storage()
     health = await client.health()
-    return render(request, "partials/storage.html", {"usage": usage, "health": health})
+    return render(
+        request,
+        "partials/storage.html",
+        {"usage": usage, "health": health, "credential_titles": CREDENTIAL_TITLES},
+    )
 
 
 @router.post("/jobs/{job_id}/retry", response_class=HTMLResponse)

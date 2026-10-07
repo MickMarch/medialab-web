@@ -24,6 +24,7 @@ from medialab_web.constants import (
     CANCEL_LABEL,
     CAUSE_TORRENT_GONE,
     CHECK_NOW_LABEL,
+    CREDENTIAL_BANNER_REFRESH_SECONDS,
     DEFAULT_RESOLUTION,
     DELETE_SELECTED_ID,
     DELETE_SELECTED_LABEL,
@@ -202,6 +203,7 @@ templates.env.globals["download_notice_class"] = DOWNLOAD_NOTICE_CLASS
 templates.env.globals["searching_class"] = SEARCHING_CLASS
 templates.env.globals["search_progress_path"] = SEARCH_PROGRESS_PARTIAL_PATH
 templates.env.globals["search_progress_attr"] = SEARCH_PROGRESS_ATTR
+templates.env.globals["credential_banner_refresh_seconds"] = CREDENTIAL_BANNER_REFRESH_SECONDS
 templates.env.globals["search_progress_poll_seconds"] = SEARCH_PROGRESS_POLL_SECONDS
 templates.env.globals["searching_fallback_text"] = SEARCHING_FALLBACK_TEXT
 templates.env.globals["watch_trailer_label"] = WATCH_TRAILER_LABEL

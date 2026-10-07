@@ -30,6 +30,9 @@ td.release code { font-size: .8rem; color: var(--muted); overflow-wrap: anywhere
 .badge { display: inline-block; padding: .1rem .5rem; border-radius: 999px; font-size: .75rem; background: var(--line); }
 .badge.ok { background: var(--ok); color: #062; }
 .badge.bad { background: var(--bad); color: #fff; }
+.banner { margin: 0 1rem; padding: .6rem 1rem; border-radius: .5rem; display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: baseline; }
+.banner.bad { background: var(--bad); color: #fff; }
+.banner.bad .muted, .banner.bad code { color: #fff; opacity: .9; }
 tr.status-done .badge { background: var(--ok); color: #062; }
 tr.status-failed .badge, tr.status-needs_attention .badge { background: var(--bad); color: #fff; }
 tr.status-deleted, tr.status-dismissed { opacity: .55; }
