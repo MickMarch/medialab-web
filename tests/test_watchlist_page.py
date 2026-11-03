@@ -500,3 +500,11 @@ async def test_decision_posts_the_mode_and_re_renders_the_episodes(logged_in, wa
     assert f">{EPISODE_BY_EPISODE_LABEL}<" in response.text
     watchlist_client.decide_season = AsyncMock(return_value=None)
     assert (await logged_in.post(DECISION_PATH, data={"mode": "episodes"})).status_code == 502
+
+
+def test_follow_form_resolutions_are_the_pick_resolutions() -> None:
+    from medialab_contracts import PICK_RESOLUTIONS
+
+    from medialab_web.rendering import templates
+
+    assert templates.env.globals["follow_resolutions"] == PICK_RESOLUTIONS

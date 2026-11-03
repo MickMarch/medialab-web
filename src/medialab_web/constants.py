@@ -6,6 +6,7 @@ from medialab_contracts import (
     CREDENTIAL_QB_API_KEY,
     CREDENTIAL_TMDB_API_KEY,
     DEFAULT_FOLLOW_RESOLUTION,
+    PICK_RESOLUTIONS,
     FollowStartMode,
     MediaType,
     WatchlistKind,
@@ -49,7 +50,7 @@ SUBMITTED_LABEL = "Submitted"
 IGNORED_LABEL = "Ignored"
 WANTED_LABEL = "Wanted"
 NEVER_TEXT = "never"
-FOLLOW_RESOLUTIONS = ("4K", "1080p", "720p")
+FOLLOW_RESOLUTIONS = PICK_RESOLUTIONS
 DEFAULT_RESOLUTION = DEFAULT_FOLLOW_RESOLUTION
 FOLLOW_START_LABELS = {
     FollowStartMode.NEW_ONLY: "New episodes only",
