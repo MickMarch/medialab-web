@@ -6,6 +6,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- The follow form's resolutions come from `medialab-contracts`
+  `PICK_RESOLUTIONS` (MickMarch/medialab#153).
+
 ## [0.23.0] - 2026-10-07
 
 ### Added
