@@ -384,3 +384,20 @@ async def test_torrents_partial_carries_scope_into_the_download_form(logged_in, 
         await logged_in.get("/partials/search/torrents", params={**params, "season": WHOLE_SERIES})
     ).text
     assert 'name="season"' not in text and 'name="episode"' not in text
+
+
+async def test_a_mapped_show_is_grouped_by_release_season(logged_in, show_client):
+    show_client.browse_show = AsyncMock(
+        return_value=_show(
+            seasons=[Season(season=1, name="Season 1", episode_count=3)],
+            episodes=[
+                _episode(1, 1, release_season=1, release_episode=1),
+                _episode(1, 2, release_season=2, release_episode=1),
+                _episode(1, 3, release_season=2, release_episode=2),
+            ],
+        )
+    )
+    text = (await logged_in.get(SHOW_PATH)).text
+    assert text.count('class="season-name">Season 2<') == 1
+    assert "S01E02 · S02E01" in text
+    assert '"season": 2' in text

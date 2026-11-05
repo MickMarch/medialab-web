@@ -56,6 +56,8 @@ FOLLOW_RESOLUTIONS = PICK_RESOLUTIONS
 NUMBERING_CHOICE_AUTO = "auto"
 NUMBERING_CHOICE_TMDB = "tmdb"
 NUMBERING_GROUP_PREFIX = "group:"
+RELEASE_SEASON_NAME_PREFIX = "Season "
+"""A release season row on the show page, named by number (TMDB has no name)."""
 RELEASE_CODE_SEPARATOR = " \u00b7 "
 """Between the TMDB code and the release code of a mapped episode."""
 DEFAULT_RESOLUTION = DEFAULT_FOLLOW_RESOLUTION
