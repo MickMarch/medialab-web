@@ -1,6 +1,7 @@
 {#- The follow picker: start point, season and episode for a ``from`` start,
     and resolution. Expects ``item`` (CardItem), ``seasons`` (number and
-    episodes per season, specials excluded) and ``view``. Inline, the form
+    episodes per season, specials excluded), ``view``, and optionally
+    ``episode_groups`` with ``auto_group_id`` for the numbering choice. Inline, the form
     and its Cancel re-render the surrounding watchlist actions; on the
     watchlist page it sits in #stage and a follow moves to the Following tab. -#}
 {%- set view = view | default(view_inline) -%}
@@ -38,6 +39,18 @@
       {% endfor %}
     </select>
   </label>
+  {% if episode_groups %}
+  {%- set auto_group = episode_groups | selectattr("id", "equalto", auto_group_id) | first -%}
+  <label>Numbering
+    <select name="numbering">
+      <option value="{{ numbering_auto }}" selected>Auto ({{ auto_group.name if auto_group else "TMDB" }})</option>
+      <option value="{{ numbering_tmdb }}">TMDB</option>
+      {% for g in episode_groups %}<option value="{{ numbering_group_prefix }}{{ g.id }}">{{ g.name }} ({{ g.group_count }} seasons, {{ g.episode_count }} episodes)</option>
+      {% endfor %}
+    </select>
+  </label>
+  {% endif %}
+  <label class="checkbox"><input type="checkbox" name="prefer_multi_audio" value="true"> Prefer dual audio</label>
   <div class="picker-actions">
     <button type="submit" class="primary">{{ follow_label }}</button>
     {% if inline %}

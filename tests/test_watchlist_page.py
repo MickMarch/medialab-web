@@ -69,6 +69,7 @@ def watchlist_client(mock_client):
     mock_client.resume_follow = AsyncMock(return_value=_following())
     mock_client.check_follow = AsyncMock(return_value=FollowCheckResponse(submitted=["S02E06"]))
     mock_client.browse_show = AsyncMock(return_value=_show())
+    mock_client.episode_groups = AsyncMock(return_value=None)
     mock_client.watchlist_episodes = AsyncMock(
         return_value=_show(
             on_watchlist=True,
@@ -508,3 +509,52 @@ def test_follow_form_resolutions_are_the_pick_resolutions() -> None:
     from medialab_web.rendering import templates
 
     assert templates.env.globals["follow_resolutions"] == PICK_RESOLUTIONS
+
+
+# --- numbering and dual audio ---
+
+
+async def test_follow_picker_lists_numberings_when_the_show_has_groups(logged_in, watchlist_client):
+    from medialab_contracts import EpisodeGroupInfo, EpisodeGroupsResponse
+
+    watchlist_client.episode_groups = AsyncMock(
+        return_value=EpisodeGroupsResponse(
+            tmdb_id=SHOW_ID,
+            groups=[EpisodeGroupInfo(id="g1", name="Seasons", group_count=4, episode_count=64)],
+            auto_group_id="g1",
+        )
+    )
+    text = (await logged_in.get(FOLLOW_PATH, params=SHOW_FORM)).text
+    assert '<option value="auto" selected>Auto (Seasons)</option>' in text
+    assert '<option value="tmdb">TMDB</option>' in text
+    assert '<option value="group:g1">Seasons (4 seasons, 64 episodes)</option>' in text
+    assert 'name="prefer_multi_audio"' in text
+
+
+async def test_follow_picker_without_groups_has_no_numbering_select(logged_in, watchlist_client):
+    text = (await logged_in.get(FOLLOW_PATH, params=SHOW_FORM)).text
+    assert 'name="numbering"' not in text
+    assert 'name="prefer_multi_audio"' in text
+
+
+async def test_follow_posts_group_numbering_and_dual_audio(logged_in, watchlist_client):
+    form = {
+        **SHOW_FORM,
+        "mode": "beginning",
+        "numbering": "group:g1",
+        "prefer_multi_audio": "true",
+    }
+    assert (await logged_in.put(FOLLOW_PATH, data=form)).status_code == 200
+    body = watchlist_client.follow_show.await_args.args[1]
+    assert body.numbering.value == "group" and body.episode_group_id == "g1"
+    assert body.prefer_multi_audio is True
+
+
+async def test_follow_defaults_to_auto_numbering_without_audio_preference(
+    logged_in, watchlist_client
+):
+    form = {**SHOW_FORM, "mode": "beginning"}
+    assert (await logged_in.put(FOLLOW_PATH, data=form)).status_code == 200
+    body = watchlist_client.follow_show.await_args.args[1]
+    assert body.numbering.value == "auto" and body.episode_group_id is None
+    assert body.prefer_multi_audio is False

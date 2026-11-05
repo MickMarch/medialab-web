@@ -10,7 +10,7 @@ from medialab_contracts import EpisodeState, MediaType, Season, ShowBrowseRespon
 
 from medialab_web.auth import require_session
 from medialab_web.client import OrchestratorClient
-from medialab_web.constants import MIN_TARGETABLE_SEASON, SHOW_PATH
+from medialab_web.constants import MIN_TARGETABLE_SEASON, RELEASE_SEASON_NAME_PREFIX, SHOW_PATH
 from medialab_web.deps import get_client
 from medialab_web.rendering import render
 from medialab_web.routes.search import search_timeout_seconds
@@ -25,7 +25,11 @@ _CLIENT = Depends(get_client)
 def _seasons_with_episodes(
     show: ShowBrowseResponse,
 ) -> list[tuple[Season, list[EpisodeState]]]:
-    """Seasons in number order, each paired with its episodes in episode order."""
+    """Seasons in number order, each paired with its episodes in episode order.
+    A show whose numbering maps episodes elsewhere is grouped by release season
+    instead, the split its releases (and its pack states) use."""
+    if any(e.release_season is not None for e in show.episodes):
+        return _release_seasons(show)
     by_season: dict[int, list[EpisodeState]] = defaultdict(list)
     for episode in show.episodes:
         by_season[episode.season].append(episode)
@@ -33,6 +37,29 @@ def _seasons_with_episodes(
         (season, sorted(by_season[season.season], key=lambda e: e.episode))
         for season in sorted(show.seasons, key=lambda s: s.season)
     ]
+
+
+def _release_key(episode: EpisodeState) -> tuple[int, int]:
+    if episode.release_season is None or episode.release_episode is None:
+        return episode.season, episode.episode
+    return episode.release_season, episode.release_episode
+
+
+def _release_seasons(show: ShowBrowseResponse) -> list[tuple[Season, list[EpisodeState]]]:
+    by_season: dict[int, list[EpisodeState]] = defaultdict(list)
+    for episode in show.episodes:
+        by_season[_release_key(episode)[0]].append(episode)
+    grouped: list[tuple[Season, list[EpisodeState]]] = []
+    for number in sorted(by_season):
+        episodes = sorted(by_season[number], key=_release_key)
+        season = Season(
+            season=number,
+            name=f"{RELEASE_SEASON_NAME_PREFIX}{number}",
+            episode_count=len(episodes),
+            air_date=episodes[0].air_date,
+        )
+        grouped.append((season, episodes))
+    return grouped
 
 
 def picker_seasons(show: ShowBrowseResponse) -> list[dict[str, int]]:
