@@ -6,6 +6,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.25.0] - 2026-11-05
+
 ### Added
 
 - Follow form: a Numbering select (Auto, which names the episode group it
