@@ -98,3 +98,15 @@ def test_format_speed():
     assert format_speed(1024**2) == "1.0 MB/s"
     assert format_speed(int(1.25 * 1024**2)) == "1.2 MB/s"
     assert format_speed(3 * 1024**2) == "3.0 MB/s"
+
+
+def test_episode_code_shows_the_release_code_when_mapped() -> None:
+    from medialab_contracts import EpisodeState
+
+    from medialab_web.format import episode_code
+
+    assert episode_code(EpisodeState(season=1, episode=48)) == "S01E48"
+    mapped = EpisodeState(season=1, episode=48, release_season=3, release_episode=1)
+    assert episode_code(mapped) == "S01E48 \u00b7 S03E01"
+    same = EpisodeState(season=1, episode=2, release_season=1, release_episode=2)
+    assert episode_code(same) == "S01E02"

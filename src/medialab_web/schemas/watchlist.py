@@ -7,11 +7,13 @@ from medialab_contracts import (
     FollowRequest,
     FollowStart,
     FollowStartMode,
+    NumberingMode,
     SeasonFollowState,
     ShowBrowseResponse,
 )
 from pydantic import BaseModel, field_validator
 
+from medialab_web.constants import NUMBERING_CHOICE_AUTO, NUMBERING_GROUP_PREFIX
 from medialab_web.schemas.discover import CardItem
 
 
@@ -58,6 +60,9 @@ class FollowForm(FollowCard):
     season: int | None = None
     episode: int | None = None
     resolution: str = DEFAULT_FOLLOW_RESOLUTION
+    numbering: str = NUMBERING_CHOICE_AUTO
+    """``auto``, ``tmdb`` or ``group:<episode group id>``."""
+    prefer_multi_audio: bool = False
 
     @field_validator("season", "episode", mode="before")
     @classmethod
@@ -74,4 +79,14 @@ class FollowForm(FollowCard):
                 episode=self.episode if scoped else None,
             ),
             resolution=self.resolution,
+            **self._numbering_fields(),
+            prefer_multi_audio=self.prefer_multi_audio,
         )
+
+    def _numbering_fields(self) -> dict[str, object]:
+        if self.numbering.startswith(NUMBERING_GROUP_PREFIX):
+            return {
+                "numbering": NumberingMode.GROUP,
+                "episode_group_id": self.numbering.removeprefix(NUMBERING_GROUP_PREFIX),
+            }
+        return {"numbering": NumberingMode(self.numbering)}

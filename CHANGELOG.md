@@ -6,6 +6,18 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Follow form: a Numbering select (Auto, which names the episode group it
+  resolves to, TMDB, or one TMDB episode group) when the show has episode
+  groups, and a "Prefer dual audio" checkbox (MickMarch/medialab#162).
+- Episode lists show the release code beside the TMDB code when the show's
+  numbering maps an episode (`S01E48 \u00b7 S03E01`).
+
+### Changed
+
+- medialab-contracts pinned to v1.7.0.
+
 ## [0.24.0] - 2026-11-03
 
 ### Changed

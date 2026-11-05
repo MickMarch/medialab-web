@@ -129,10 +129,17 @@ async def follow_picker(
     show = await client.browse_show(item.tmdb_id)
     if show is None:
         return _error(request, "Could not load the seasons. TMDB or the gateway is not reachable.")
+    groups = await client.episode_groups(item.tmdb_id)
     return render(
         request,
         _PICKER_FRAGMENT,
-        {"item": item.card, "seasons": picker_seasons(show), "view": item.view.value},
+        {
+            "item": item.card,
+            "seasons": picker_seasons(show),
+            "view": item.view.value,
+            "episode_groups": groups.groups if groups is not None else [],
+            "auto_group_id": groups.auto_group_id if groups is not None else None,
+        },
     )
 
 

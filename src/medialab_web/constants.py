@@ -51,6 +51,13 @@ IGNORED_LABEL = "Ignored"
 WANTED_LABEL = "Wanted"
 NEVER_TEXT = "never"
 FOLLOW_RESOLUTIONS = PICK_RESOLUTIONS
+# The follow form's numbering select: auto, TMDB, or one episode group as
+# ``group:<id>`` (the form carries one value for the mode and the group).
+NUMBERING_CHOICE_AUTO = "auto"
+NUMBERING_CHOICE_TMDB = "tmdb"
+NUMBERING_GROUP_PREFIX = "group:"
+RELEASE_CODE_SEPARATOR = " \u00b7 "
+"""Between the TMDB code and the release code of a mapped episode."""
 DEFAULT_RESOLUTION = DEFAULT_FOLLOW_RESOLUTION
 FOLLOW_START_LABELS = {
     FollowStartMode.NEW_ONLY: "New episodes only",

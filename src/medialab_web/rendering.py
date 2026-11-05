@@ -54,6 +54,9 @@ from medialab_web.constants import (
     MEDIA_TYPE_LABELS,
     NAV_LINKS,
     NEVER_TEXT,
+    NUMBERING_CHOICE_AUTO,
+    NUMBERING_CHOICE_TMDB,
+    NUMBERING_GROUP_PREFIX,
     OFFICIAL_LABEL,
     PACK_NOT_FOUND_TEXT,
     PAUSE_LABEL,
@@ -174,6 +177,9 @@ templates.env.globals["follow_start_labels"] = FOLLOW_START_LABELS
 templates.env.globals["follow_start_modes"] = list(FollowStartMode)
 templates.env.globals["start_mode_from"] = FollowStartMode.FROM
 templates.env.globals["follow_resolutions"] = FOLLOW_RESOLUTIONS
+templates.env.globals["numbering_auto"] = NUMBERING_CHOICE_AUTO
+templates.env.globals["numbering_tmdb"] = NUMBERING_CHOICE_TMDB
+templates.env.globals["numbering_group_prefix"] = NUMBERING_GROUP_PREFIX
 templates.env.globals["default_resolution"] = DEFAULT_RESOLUTION
 templates.env.globals["queued_label"] = QUEUED_LABEL
 templates.env.globals["unaired_label"] = UNAIRED_LABEL

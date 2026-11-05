@@ -24,6 +24,7 @@ from medialab_web.constants import (
     JOB_ROW_ID_PREFIX,
     NEVER_TEXT,
     NEW_EPISODES_TEXT,
+    RELEASE_CODE_SEPARATOR,
     RELEASE_NAME_SEPARATORS,
     SECONDS_PER_DAY,
     SECONDS_PER_HOUR,
@@ -150,7 +151,16 @@ def redo_vals(job: JobView) -> dict[str, object]:
 
 
 def episode_code(episode: Episode) -> str:
-    return scope_code(episode.season, episode.episode)
+    """``S01E48``, or ``S01E48 \u00b7 S03E01`` when the show's numbering maps the
+    episode to a different release code."""
+    code = scope_code(episode.season, episode.episode)
+    release_season = getattr(episode, "release_season", None)
+    release_episode = getattr(episode, "release_episode", None)
+    if release_season is None or release_episode is None:
+        return code
+    if (release_season, release_episode) == (episode.season, episode.episode):
+        return code
+    return f"{code}{RELEASE_CODE_SEPARATOR}{scope_code(release_season, release_episode)}"
 
 
 def scope_code(season: int, episode: int) -> str:
